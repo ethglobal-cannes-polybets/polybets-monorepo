@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%; /* Almost white */
+    --foreground: 222.2 84% 4.9%; /* Almost black */
+    --card: 210 40% 98%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 210 40% 98%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Primary brand color - change this to update all blue colors */
+    --primary-brand: 248 100% 50%; /* Electric Blue - change this value to update all blues */
+    --primary: var(--primary-brand);
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 224 71.4% 4.1%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: var(--primary-brand);
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+}
+
+/* Custom utility classes for brand colors */
+@layer utilities {
+  .text-brand {
+    color: hsl(var(--primary-brand));
+  }
+  .bg-brand {
+    background-color: hsl(var(--primary-brand));
+  }
+  .border-brand {
+    border-color: hsl(var(--primary-brand));
+  }
+  .hover\:bg-brand:hover {
+    background-color: hsl(var(--primary-brand));
+  }
+  .hover\:text-brand:hover {
+    color: hsl(var(--primary-brand));
+  }
+}
