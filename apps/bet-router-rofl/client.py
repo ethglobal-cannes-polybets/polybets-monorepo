@@ -12,6 +12,7 @@ MARKETPLACE_PATHS = {
     3: "terminal-degenerecy-labs",
 }
 
+
 def get_prices(marketplace_id: int, market_id: int):
     """
     Calls the get-prices endpoint for a given marketplace and market.

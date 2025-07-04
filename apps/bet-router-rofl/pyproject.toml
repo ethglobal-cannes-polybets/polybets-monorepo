@@ -1,18 +1,18 @@
-[project]
+[tool.poetry]
 name = "bet-router-rofl"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "ad0ll",email = "20057155+ad0ll@users.noreply.github.com"}
-]
+authors = ["Your Name <you@example.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "requests (>=2.32.4,<3.0.0)",
-    "python-dotenv (>=1.1.1,<2.0.0)"
-]
+packages = [{include = "bet_router_rofl"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+python-dotenv = "^1.0.1"
+web3 = "^7.12.0"
+requests = "^2.32.4"
 
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

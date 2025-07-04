@@ -45,7 +45,7 @@ contract PolyBet is SiweAuth {
     uint256 chainId;
     ChainFamily chainFamily;
     string name;
-    bytes32 marketplaceProxy; //The proxy might be a solana address, so I don't think we can use the "address" type here
+    string marketplaceProxy; // The proxy might be a solana address, so I don't think we can use the "address" type here
     PricingStrategy pricingStrategy; // "orderbook" or "amm" or "lmsr" - Only LMSR planned to be supported at hackathon
   }
 
@@ -102,10 +102,10 @@ contract PolyBet is SiweAuth {
     bytes32[] memory marketIds) external {
     require(marketplaceIds.length == marketIds.length, "Array lengths must match");
 
-    uint256 betId = nextBetId;
+    uint256 betSlipId = nextBetId;
     nextBetId++;
 
-    betSlips[betId] = BetSlip({
+    betSlips[betSlipId] = BetSlip({
         strategy: strategy,
         initialCollateral: totalCollateralAmount,
         finalCollateral: 0,
@@ -114,9 +114,9 @@ contract PolyBet is SiweAuth {
         status: BetSlipStatus.Pending
         // proxiedBets: new SubBet[](0),
     });
-    userActiveBetSlips[msg.sender].push(betId);
+    userActiveBetSlips[msg.sender].push(betSlipId);
     userBalances[msg.sender] += totalCollateralAmount;
-    emit BetSlipCreated(betId, msg.sender);
+    emit BetSlipCreated(betSlipId, msg.sender);
   }
 
   function getUserActiveBetslips() external view returns (uint256[] memory) {
@@ -149,24 +149,24 @@ contract PolyBet is SiweAuth {
     return userBalances[userAddress];
   }
 
-  function getBetSlip(uint256 betId) external view returns (BetSlip memory) {
-    return betSlips[betId];
+  function getBetSlip(uint256 betSlipId) external view returns (BetSlip memory) {
+    return betSlips[betSlipId];
   }
 
   function getProxiedBet(uint256 betId) external view returns (ProxiedBet memory) {
     return proxiedBets[betId];
   }
 
-  function addMarketplace(uint64 chainId, ChainFamily family, string memory name, bytes32 marketplaceProxy) public {
+  function addMarketplace(uint64 chainId, ChainFamily family, string memory name, string memory marketplaceProxy) public {
     uint256 marketplaceId = nextMarketplaceId;
     ++nextMarketplaceId;
-    marketplaces[marketplaceId] = Marketplace({
+    marketplaces.push(Marketplace({
       warpRouterId: 0,
       chainId: chainId,
       chainFamily: family,
       name: name,
       marketplaceProxy: marketplaceProxy,
       pricingStrategy: PricingStrategy.LMSR
-    });
+    }));
   }
 } 

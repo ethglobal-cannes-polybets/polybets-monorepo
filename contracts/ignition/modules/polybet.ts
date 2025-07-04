@@ -1,9 +1,11 @@
 // This setup uses Hardhat Ignition to manage smart contract deployments.
 // Learn more about it at https://hardhat.org/ignition
 
-const { buildModule } = require("@nomicfoundation/hardhat-ignition/modules");
+import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
-module.exports = buildModule("PolyBetModule", (m) => {
+const PolyBetModule = buildModule("PolyBetModule", (m) => {
   const polybet = m.contract("PolyBet");
   return { polybet };
 });
+
+export default PolyBetModule;

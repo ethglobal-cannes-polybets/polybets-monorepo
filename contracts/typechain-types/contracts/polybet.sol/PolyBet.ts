@@ -136,7 +136,7 @@ export interface PolyBetInterface extends Interface {
 
   encodeFunctionData(
     functionFragment: "addMarketplace",
-    values: [BigNumberish, BigNumberish, string, BytesLike]
+    values: [BigNumberish, BigNumberish, string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "betSlips",
@@ -332,7 +332,7 @@ export interface PolyBet extends BaseContract {
       chainId: BigNumberish,
       family: BigNumberish,
       name: string,
-      marketplaceProxy: BytesLike
+      marketplaceProxy: string
     ],
     [void],
     "nonpayable"
@@ -356,7 +356,7 @@ export interface PolyBet extends BaseContract {
   domain: TypedContractMethod<[], [string], "view">;
 
   getBetSlip: TypedContractMethod<
-    [betId: BigNumberish],
+    [betSlipId: BigNumberish],
     [PolyBet.BetSlipStructOutput],
     "view"
   >;
@@ -486,7 +486,7 @@ export interface PolyBet extends BaseContract {
       chainId: BigNumberish,
       family: BigNumberish,
       name: string,
-      marketplaceProxy: BytesLike
+      marketplaceProxy: string
     ],
     [void],
     "nonpayable"
@@ -513,7 +513,7 @@ export interface PolyBet extends BaseContract {
   getFunction(
     nameOrSignature: "getBetSlip"
   ): TypedContractMethod<
-    [betId: BigNumberish],
+    [betSlipId: BigNumberish],
     [PolyBet.BetSlipStructOutput],
     "view"
   >;
