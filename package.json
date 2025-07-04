@@ -1,0 +1,8 @@
+{
+  "name": "polybets-monorepo",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "contracts"
+  ]
+}

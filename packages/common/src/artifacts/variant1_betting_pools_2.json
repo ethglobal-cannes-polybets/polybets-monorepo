@@ -1,0 +1,5660 @@
+{
+  "address": "Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb",
+  "metadata": {
+    "name": "betting_pools_2",
+    "version": "0.1.1",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "admin_withdraw_lmsr_funds",
+      "discriminator": [
+        148,
+        149,
+        156,
+        107,
+        243,
+        14,
+        144,
+        246
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "lmsr_pool",
+          "writable": true
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "lmsr_collateral_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "lmsr_pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "admin_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "admin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "token_type",
+          "type": {
+            "defined": {
+              "name": "TokenType"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "admin_withdraw_original_pool_funds",
+      "discriminator": [
+        134,
+        159,
+        117,
+        231,
+        219,
+        116,
+        176,
+        226
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "original_pool",
+          "writable": true
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "original_pool_collateral_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "original_pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "admin_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "admin"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "token_type",
+          "type": {
+            "defined": {
+              "name": "TokenType"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "buy_lmsr_tokens",
+      "discriminator": [
+        133,
+        115,
+        98,
+        236,
+        21,
+        139,
+        174,
+        231
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "lmsr_pool",
+          "writable": true
+        },
+        {
+          "name": "input_collateral_mint"
+        },
+        {
+          "name": "user_collateral_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "buyer"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "input_collateral_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "lmsr_collateral_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "lmsr_pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "input_collateral_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "lmsr_outcome_token_mint",
+          "writable": true
+        },
+        {
+          "name": "user_lmsr_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "buyer"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "lmsr_outcome_token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "input_collateral_amount",
+          "type": "u64"
+        },
+        {
+          "name": "outcome_index",
+          "type": "u64"
+        },
+        {
+          "name": "collateral_token_type",
+          "type": {
+            "defined": {
+              "name": "TokenType"
+            }
+          }
+        },
+        {
+          "name": "min_outcome_tokens_to_receive",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "claim_lmsr_payout",
+      "discriminator": [
+        129,
+        87,
+        237,
+        173,
+        250,
+        169,
+        179,
+        117
+      ],
+      "accounts": [
+        {
+          "name": "claimant",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "lmsr_pool",
+          "writable": true
+        },
+        {
+          "name": "original_pool",
+          "writable": true
+        },
+        {
+          "name": "collateral_mint"
+        },
+        {
+          "name": "lmsr_collateral_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "lmsr_pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collateral_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "user_collateral_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "claimant"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collateral_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "lmsr_outcome_token_mint",
+          "writable": true
+        },
+        {
+          "name": "user_lmsr_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "claimant"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "lmsr_outcome_token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "original_pool_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "original_pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collateral_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "outcome_index",
+          "type": "u64"
+        },
+        {
+          "name": "collateral_token_type",
+          "type": {
+            "defined": {
+              "name": "TokenType"
+            }
+          }
+        },
+        {
+          "name": "tokens_to_redeem",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "claim_payout",
+      "discriminator": [
+        127,
+        240,
+        132,
+        62,
+        227,
+        198,
+        146,
+        133
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "lmsr_pool",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "lmsr_collateral_vault",
+          "writable": true,
+          "optional": true
+        },
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "bet",
+          "writable": true
+        },
+        {
+          "name": "bettor",
+          "docs": [
+            "The user claiming the payout (and payer for ATA initialization)"
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "user_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "bettor"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "pool_payment_token_account",
+          "docs": [
+            "The pool's token account holding the funds (source of payout)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_mint"
+        },
+        {
+          "name": "yes_usdc_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  121,
+                  101,
+                  115,
+                  95,
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "no_usdc_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  95,
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "yes_points_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  121,
+                  101,
+                  115,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  115,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "no_points_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  115,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bet_lp_token_mint",
+          "writable": true
+        },
+        {
+          "name": "user_bet_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "bettor"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bet_lp_token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_pool",
+      "docs": [
+        "Create a new betting pool.",
+        "Calls the handler in `instructions::create_pool`."
+      ],
+      "discriminator": [
+        233,
+        146,
+        209,
+        142,
+        207,
+        104,
+        64,
+        188
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "betting_pools.next_pool_id",
+                "account": "BettingPoolsState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "yes_usdc",
+          "docs": [
+            "Mint for the first token (Yes USDC)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  121,
+                  101,
+                  115,
+                  95,
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "betting_pools.next_pool_id",
+                "account": "BettingPoolsState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "no_usdc",
+          "docs": [
+            "Mint for the second token (No USDC)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  95,
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "betting_pools.next_pool_id",
+                "account": "BettingPoolsState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "yes_points",
+          "docs": [
+            "Mint for the third token (Yes Points)"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  121,
+                  101,
+                  115,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  115,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "betting_pools.next_pool_id",
+                "account": "BettingPoolsState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "no_points",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  115,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "betting_pools.next_pool_id",
+                "account": "BettingPoolsState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "metadata_yes_usdc",
+          "docs": [
+            "Metadata account for Yes USDC token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "yes_usdc"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          "name": "metadata_no_usdc",
+          "docs": [
+            "Metadata account for No USDC token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "no_usdc"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          "name": "metadata_yes_points",
+          "docs": [
+            "Metadata account for Yes Points token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "yes_points"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          "name": "metadata_no_points",
+          "docs": [
+            "Metadata account for No Points token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "const",
+                "value": [
+                  11,
+                  112,
+                  101,
+                  177,
+                  227,
+                  209,
+                  124,
+                  69,
+                  56,
+                  157,
+                  82,
+                  127,
+                  107,
+                  4,
+                  195,
+                  205,
+                  88,
+                  184,
+                  108,
+                  115,
+                  26,
+                  160,
+                  253,
+                  181,
+                  73,
+                  182,
+                  209,
+                  188,
+                  3,
+                  248,
+                  41,
+                  70
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "no_points"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                11,
+                112,
+                101,
+                177,
+                227,
+                209,
+                124,
+                69,
+                56,
+                157,
+                82,
+                127,
+                107,
+                4,
+                195,
+                205,
+                88,
+                184,
+                108,
+                115,
+                26,
+                160,
+                253,
+                181,
+                73,
+                182,
+                209,
+                188,
+                3,
+                248,
+                41,
+                70
+              ]
+            }
+          }
+        },
+        {
+          "name": "mpl_token_metadata",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "question",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "type": {
+            "array": [
+              "string",
+              2
+            ]
+          }
+        },
+        {
+          "name": "bets_close_at",
+          "type": "i64"
+        },
+        {
+          "name": "media_url",
+          "type": "string"
+        },
+        {
+          "name": "media_type",
+          "type": {
+            "defined": {
+              "name": "MediaType"
+            }
+          }
+        },
+        {
+          "name": "category",
+          "type": "string"
+        },
+        {
+          "name": "creator_name",
+          "type": "string"
+        },
+        {
+          "name": "creator_id",
+          "type": "string"
+        },
+        {
+          "name": "closure_criteria",
+          "type": "string"
+        },
+        {
+          "name": "closure_instructions",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "grade_bet",
+      "discriminator": [
+        163,
+        14,
+        104,
+        39,
+        20,
+        221,
+        88,
+        64
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "betting_pools"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "response_option",
+          "type": "u64"
+        },
+        {
+          "name": "decision_time_override",
+          "type": {
+            "option": "i64"
+          }
+        }
+      ]
+    },
+    {
+      "name": "initialize",
+      "docs": [
+        "Initialize the BettingPools program",
+        "Similar to the constructor in the Solidity version"
+      ],
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "bet_points_mint"
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "payout_fee_bp",
+          "type": "u16"
+        },
+        {
+          "name": "trading_fees",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "migrate_to_lmsr_pool",
+      "docs": [
+        "Migrate a graded pool to an LMSR pool"
+      ],
+      "discriminator": [
+        35,
+        240,
+        77,
+        95,
+        223,
+        4,
+        215,
+        133
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "migrator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "original_pool",
+          "writable": true
+        },
+        {
+          "name": "bet_points"
+        },
+        {
+          "name": "lmsr_pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  109,
+                  115,
+                  114,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "original_pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "yes_lmsr_usdc_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  121,
+                  101,
+                  115,
+                  95,
+                  108,
+                  109,
+                  115,
+                  114,
+                  95,
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "original_pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "no_lmsr_usdc_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  95,
+                  108,
+                  109,
+                  115,
+                  114,
+                  95,
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "original_pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "yes_lmsr_points_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  121,
+                  101,
+                  115,
+                  95,
+                  108,
+                  109,
+                  115,
+                  114,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  115,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "original_pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "no_lmsr_points_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  95,
+                  108,
+                  109,
+                  115,
+                  114,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  115,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "original_pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "migrator_points_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "migrator"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bet_points"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "lmsr_pool_points_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "lmsr_pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bet_points"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "place_bet",
+      "discriminator": [
+        222,
+        62,
+        67,
+        220,
+        63,
+        166,
+        126,
+        33
+      ],
+      "accounts": [
+        {
+          "name": "bettor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "betting_pools",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "docs": [
+            "The authority defined in the betting_pools state (fee recipient)"
+          ]
+        },
+        {
+          "name": "payment_mint",
+          "docs": [
+            "The mint user is paying with (USDC or BetPoints).",
+            "Checked against betting_pools state."
+          ],
+          "writable": true
+        },
+        {
+          "name": "bettor_payment_token_account",
+          "docs": [
+            "Bettor's ATA for the payment token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "bettor"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "pool_payment_token_account",
+          "docs": [
+            "Pool's ATA for the payment token (where payment is sent).",
+            "Needs to be initialized separately (e.g., via frontend or another instruction)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "authority_token_account",
+          "docs": [
+            "Fee destination token account (ATA). Authority is the betting_pools.authority"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "authority"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "target_pool_mint",
+          "docs": [
+            "The specific mint the user will receive (e.g., Yes-USDC).",
+            "Checked against one of the four pool mints below."
+          ],
+          "writable": true
+        },
+        {
+          "name": "bettor_target_token_account",
+          "docs": [
+            "Bettor's ATA for the target pool token."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "bettor"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "target_pool_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "yes_usdc_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  121,
+                  101,
+                  115,
+                  95,
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "no_usdc_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  95,
+                  117,
+                  115,
+                  100,
+                  99,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "yes_points_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  121,
+                  101,
+                  115,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  115,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "no_points_mint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  110,
+                  111,
+                  95,
+                  112,
+                  111,
+                  105,
+                  110,
+                  116,
+                  115,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bet",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.id",
+                "account": "Pool"
+              },
+              {
+                "kind": "account",
+                "path": "betting_pools.next_bet_id",
+                "account": "BettingPoolsState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "option_index",
+          "type": "u64"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "min_output_amount",
+          "type": "u64"
+        },
+        {
+          "name": "token_type",
+          "type": {
+            "defined": {
+              "name": "TokenType"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "sell_lmsr_tokens",
+      "discriminator": [
+        127,
+        184,
+        141,
+        46,
+        36,
+        60,
+        8,
+        110
+      ],
+      "accounts": [
+        {
+          "name": "seller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "lmsr_pool",
+          "writable": true
+        },
+        {
+          "name": "lmsr_outcome_token_mint",
+          "writable": true
+        },
+        {
+          "name": "user_lmsr_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "seller"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "lmsr_outcome_token_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "collateral_payout_mint"
+        },
+        {
+          "name": "user_collateral_token_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "seller"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collateral_payout_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "lmsr_collateral_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "lmsr_pool"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collateral_payout_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "lmsr_tokens_to_sell",
+          "type": "u64"
+        },
+        {
+          "name": "outcome_index",
+          "type": "u64"
+        },
+        {
+          "name": "collateral_token_type",
+          "type": {
+            "defined": {
+              "name": "TokenType"
+            }
+          }
+        },
+        {
+          "name": "min_collateral_to_receive",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "set_media",
+      "docs": [
+        "Update the media URL and type for a pool"
+      ],
+      "discriminator": [
+        10,
+        60,
+        163,
+        255,
+        4,
+        75,
+        82,
+        109
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pool",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "media_url",
+          "type": "string"
+        },
+        {
+          "name": "media_type",
+          "type": {
+            "defined": {
+              "name": "MediaType"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "set_payout_fee",
+      "docs": [
+        "Set the payout fee for the protocol"
+      ],
+      "discriminator": [
+        251,
+        168,
+        154,
+        193,
+        25,
+        67,
+        146,
+        192
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "betting_pools"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "payout_fee_bp",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "set_trading_fees",
+      "docs": [
+        "Set the trading fees for the protocol"
+      ],
+      "discriminator": [
+        219,
+        54,
+        22,
+        94,
+        99,
+        176,
+        235,
+        144
+      ],
+      "accounts": [
+        {
+          "name": "betting_pools",
+          "docs": [
+            "The betting pools state account to update"
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  101,
+                  116,
+                  116,
+                  105,
+                  110,
+                  103,
+                  95,
+                  112,
+                  111,
+                  111,
+                  108,
+                  115
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "docs": [
+            "The authority that can change trading fees"
+          ],
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "betting_pools"
+          ]
+        },
+        {
+          "name": "system_program",
+          "docs": [
+            "System program"
+          ],
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "trading_fees",
+          "type": "u16"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Bet",
+      "discriminator": [
+        147,
+        23,
+        35,
+        59,
+        15,
+        75,
+        155,
+        32
+      ]
+    },
+    {
+      "name": "BettingPoolsState",
+      "discriminator": [
+        136,
+        14,
+        114,
+        28,
+        173,
+        213,
+        192,
+        14
+      ]
+    },
+    {
+      "name": "LmsrPool",
+      "discriminator": [
+        50,
+        134,
+        152,
+        31,
+        220,
+        36,
+        39,
+        10
+      ]
+    },
+    {
+      "name": "Pool",
+      "discriminator": [
+        241,
+        154,
+        109,
+        4,
+        17,
+        177,
+        109,
+        188
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "BetPlaced",
+      "discriminator": [
+        88,
+        88,
+        145,
+        226,
+        126,
+        206,
+        32,
+        0
+      ]
+    },
+    {
+      "name": "LmsrPayoutClaimed",
+      "discriminator": [
+        69,
+        165,
+        28,
+        56,
+        17,
+        133,
+        213,
+        137
+      ]
+    },
+    {
+      "name": "LmsrSharesBought",
+      "discriminator": [
+        218,
+        50,
+        190,
+        138,
+        217,
+        215,
+        66,
+        113
+      ]
+    },
+    {
+      "name": "LmsrSharesSold",
+      "discriminator": [
+        145,
+        58,
+        61,
+        192,
+        84,
+        13,
+        12,
+        67
+      ]
+    },
+    {
+      "name": "PayoutClaimed",
+      "discriminator": [
+        200,
+        39,
+        105,
+        112,
+        116,
+        63,
+        58,
+        149
+      ]
+    },
+    {
+      "name": "PoolClosed",
+      "discriminator": [
+        106,
+        46,
+        29,
+        231,
+        42,
+        44,
+        73,
+        119
+      ]
+    },
+    {
+      "name": "PoolCreated",
+      "discriminator": [
+        202,
+        44,
+        41,
+        88,
+        104,
+        220,
+        157,
+        82
+      ]
+    },
+    {
+      "name": "PoolLockedAndAbleToMigrate",
+      "discriminator": [
+        86,
+        43,
+        152,
+        201,
+        52,
+        69,
+        47,
+        133
+      ]
+    },
+    {
+      "name": "PoolMediaSet",
+      "discriminator": [
+        248,
+        179,
+        164,
+        142,
+        185,
+        80,
+        167,
+        217
+      ]
+    },
+    {
+      "name": "PoolMigratedToLmsr",
+      "discriminator": [
+        253,
+        147,
+        140,
+        76,
+        243,
+        21,
+        70,
+        222
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "BetsCloseTimeInPast",
+      "msg": "Bets close time must be in the future"
+    },
+    {
+      "code": 6001,
+      "name": "BetsCloseAfterDecision",
+      "msg": "Bets close time must be before decision time"
+    },
+    {
+      "code": 6002,
+      "name": "PoolNotOpen",
+      "msg": "Pool is not open"
+    },
+    {
+      "code": 6003,
+      "name": "PoolDoesntExist",
+      "msg": "Pool doesn't exist"
+    },
+    {
+      "code": 6004,
+      "name": "BettingPeriodClosed",
+      "msg": "Betting period is closed"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidOptionIndex",
+      "msg": "Invalid option index"
+    },
+    {
+      "code": 6006,
+      "name": "BetAlreadyExists",
+      "msg": "Bet already exists"
+    },
+    {
+      "code": 6007,
+      "name": "AlreadyInitialized",
+      "msg": "BettingPools is already initialized"
+    },
+    {
+      "code": 6008,
+      "name": "NotInitialized",
+      "msg": "BettingPools is not initialized"
+    },
+    {
+      "code": 6009,
+      "name": "ZeroAmount",
+      "msg": "Zero amount"
+    },
+    {
+      "code": 6010,
+      "name": "MinimumCollateralZero",
+      "msg": "Minimum collateral should be greater than zero"
+    },
+    {
+      "code": 6011,
+      "name": "InsufficientBalance",
+      "msg": "Insufficient balance"
+    },
+    {
+      "code": 6012,
+      "name": "NotAuthorized",
+      "msg": "Not authorized"
+    },
+    {
+      "code": 6013,
+      "name": "TokenTransferFailed",
+      "msg": "Token transfer failed"
+    },
+    {
+      "code": 6014,
+      "name": "PoolNotGraded",
+      "msg": "Pool not graded"
+    },
+    {
+      "code": 6015,
+      "name": "BetAlreadyPaidOut",
+      "msg": "Bet already paid out"
+    },
+    {
+      "code": 6016,
+      "name": "GradingError",
+      "msg": "Grading error"
+    },
+    {
+      "code": 6017,
+      "name": "BettingPeriodNotClosed",
+      "msg": "Betting period not closed"
+    },
+    {
+      "code": 6018,
+      "name": "InvalidPayoutFee",
+      "msg": "Invalid payout fee"
+    },
+    {
+      "code": 6019,
+      "name": "PoolAlreadyGraded",
+      "msg": "Pool already graded"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidResponseOption",
+      "msg": "Invalid response option"
+    },
+    {
+      "code": 6021,
+      "name": "BettingNotInitialized",
+      "msg": "Betting not initialized"
+    },
+    {
+      "code": 6022,
+      "name": "ArithmeticOverflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6023,
+      "name": "InsufficientPaymentForMinimumOutput",
+      "msg": "Payment amount is less than the calculated cost for the minimum desired output."
+    },
+    {
+      "code": 6024,
+      "name": "TokenAccountMismatch",
+      "msg": "The provided token account does not match the expected mint."
+    },
+    {
+      "code": 6025,
+      "name": "SlippageExceeded",
+      "msg": "Slippage limit exceeded"
+    },
+    {
+      "code": 6026,
+      "name": "OraclePriceDeviationExceeded",
+      "msg": "Oracle price is outside the allowed deviation"
+    },
+    {
+      "code": 6027,
+      "name": "SlippageToleranceExceeded",
+      "msg": "Calculated output amount is less than the specified minimum output amount"
+    },
+    {
+      "code": 6028,
+      "name": "WinnerListFull",
+      "msg": "Winner list is full"
+    },
+    {
+      "code": 6029,
+      "name": "BetLost",
+      "msg": "Bet lost and cannot be claimed"
+    },
+    {
+      "code": 6030,
+      "name": "BetPoolMismatch",
+      "msg": "Bet pool mismatch"
+    },
+    {
+      "code": 6031,
+      "name": "NotBetOwner",
+      "msg": "Not the bet owner"
+    },
+    {
+      "code": 6032,
+      "name": "DivisionByZero",
+      "msg": "Division by zero"
+    },
+    {
+      "code": 6033,
+      "name": "CalculationOverflow",
+      "msg": "Calculation overflow"
+    },
+    {
+      "code": 6034,
+      "name": "InvalidVaultAuthority",
+      "msg": "Invalid vault authority"
+    },
+    {
+      "code": 6035,
+      "name": "UserTokenAccountMismatch",
+      "msg": "User token account does not belong to the user"
+    },
+    {
+      "code": 6036,
+      "name": "TokenMintMismatch",
+      "msg": "Token mint mismatch between user and vault accounts"
+    },
+    {
+      "code": 6037,
+      "name": "VaultMintMismatch",
+      "msg": "Vault token mint does not match bet token type"
+    },
+    {
+      "code": 6038,
+      "name": "InvalidAuthority",
+      "msg": "Provided authority does not match the one stored in the betting pools state."
+    },
+    {
+      "code": 6039,
+      "name": "InsufficientVaultBalance",
+      "msg": "Insufficient funds in the vault for payout"
+    },
+    {
+      "code": 6040,
+      "name": "InvalidPaymentMint",
+      "msg": "The provided payment mint is not the configured USDC or BetPoints mint."
+    },
+    {
+      "code": 6041,
+      "name": "PayoutCalculationError",
+      "msg": "Error during payout calculation logic."
+    },
+    {
+      "code": 6042,
+      "name": "Underflow",
+      "msg": "Arithmetic underflow"
+    },
+    {
+      "code": 6043,
+      "name": "CannotMigrateEmptyPool",
+      "msg": "Cannot migrate an empty pool with no initial funding."
+    },
+    {
+      "code": 6044,
+      "name": "PoolNotGradedOrResolved",
+      "msg": "Pool is not graded or resolved, cannot migrate."
+    },
+    {
+      "code": 6045,
+      "name": "PoolAlreadyMigrated",
+      "msg": "Pool has already been migrated to LMSR."
+    },
+    {
+      "code": 6046,
+      "name": "PoolNotMigrated",
+      "msg": "Pool is not migrated, cannot migrate to LMSR."
+    },
+    {
+      "code": 6047,
+      "name": "LmsrPoolMismatch",
+      "msg": "LMSR pool does not match the original pool"
+    },
+    {
+      "code": 6048,
+      "name": "PoolIsDraw",
+      "msg": "Pool resulted in a draw, LMSR payout is not applicable."
+    },
+    {
+      "code": 6049,
+      "name": "InsufficientOriginalPoolVaultBalance",
+      "msg": "Insufficient funds in the original pool vault to cover LMSR payout shortfall."
+    },
+    {
+      "code": 6050,
+      "name": "InvalidVault",
+      "msg": "The provided LMSR collateral vault is invalid."
+    },
+    {
+      "code": 6051,
+      "name": "InvalidMintDecimals",
+      "msg": "LMSR outcome token mint has invalid decimals."
+    },
+    {
+      "code": 6052,
+      "name": "DecimalMismatch",
+      "msg": "Collateral token decimals do not match LMSR token decimals requirement."
+    },
+    {
+      "code": 6053,
+      "name": "LmsrCalculationFailure",
+      "msg": "LMSR calculation failed due to iteration or convergence issue."
+    },
+    {
+      "code": 6054,
+      "name": "LmsrMathError",
+      "msg": "A generic error occurred in an LMSR mathematical computation."
+    },
+    {
+      "code": 6055,
+      "name": "InvalidBParameter",
+      "msg": "The b parameter for LMSR must be positive."
+    },
+    {
+      "code": 6056,
+      "name": "PoolLocked",
+      "msg": "Pool is locked and cannot be used."
+    },
+    {
+      "code": 6057,
+      "name": "PoolNotLocked",
+      "msg": "Pool is not locked and cannot be used."
+    },
+    {
+      "code": 6058,
+      "name": "InsufficientTokens",
+      "msg": "Insufficient tokens to redeem."
+    },
+    {
+      "code": 6059,
+      "name": "InvalidFee",
+      "msg": "Invalid fee value"
+    },
+    {
+      "code": 6060,
+      "name": "InsufficientFundsInPool",
+      "msg": "Insufficient funds in the pool for withdrawal."
+    },
+    {
+      "code": 6061,
+      "name": "InsufficientFundsInSourceAccount",
+      "msg": "Insufficient funds in the source account for the transfer."
+    },
+    {
+      "code": 6062,
+      "name": "InvalidAmount",
+      "msg": "Invalid Amount"
+    },
+    {
+      "code": 6063,
+      "name": "CannotGradePoolBeforeBettingPeriodCloses",
+      "msg": "Cannot grade pool before betting period closes at timestamp"
+    },
+    {
+      "code": 6064,
+      "name": "DecisionTimeOverrideInFuture",
+      "msg": "Decision time override cannot be in the future"
+    },
+    {
+      "code": 6065,
+      "name": "OracleNotFound",
+      "msg": "Oracle not found for the given pool."
+    },
+    {
+      "code": 6066,
+      "name": "InvalidLmsrVaultOwner",
+      "msg": "LMSR collateral vault owner does not match LMSR pool PDA."
+    },
+    {
+      "code": 6067,
+      "name": "InsufficientLmsrVaultBalance",
+      "msg": "Insufficient balance in LMSR collateral vault to cover shortfall."
+    },
+    {
+      "code": 6068,
+      "name": "LmsrVaultNotProvided",
+      "msg": "LMSR vault not provided for fallback when LMSR pool context is present."
+    },
+    {
+      "code": 6069,
+      "name": "LmsrPoolNotProvidedForVault",
+      "msg": "LMSR pool context not provided when LMSR collateral vault is present."
+    },
+    {
+      "code": 6070,
+      "name": "InsufficientPoolVaultBalanceForPayout",
+      "msg": "Insufficient balance in the main pool vault for payout, and LMSR fallback not available or insufficient."
+    },
+    {
+      "code": 6071,
+      "name": "InvalidLmsrPool",
+      "msg": "Invalid LMSR Pool for operation"
+    }
+  ],
+  "types": [
+    {
+      "name": "Bet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "option",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "lp_tokens_minted",
+            "type": "u64"
+          },
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "is_paid_out",
+            "type": "bool"
+          },
+          {
+            "name": "outcome",
+            "type": {
+              "defined": {
+                "name": "BetOutcome"
+              }
+            }
+          },
+          {
+            "name": "token_type",
+            "type": {
+              "defined": {
+                "name": "TokenType"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "BetOutcome",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Won"
+          },
+          {
+            "name": "Lost"
+          },
+          {
+            "name": "Voided"
+          },
+          {
+            "name": "Draw"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BetPlaced",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bet_id",
+            "type": "u64"
+          },
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "option_index",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "minted_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_type",
+            "type": {
+              "defined": {
+                "name": "TokenType"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "fee_paid",
+            "type": "u64"
+          },
+          {
+            "name": "token_mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BettingPoolsState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bet_points_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "next_pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "next_bet_id",
+            "type": "u64"
+          },
+          {
+            "name": "payout_fee_bp",
+            "type": "u16"
+          },
+          {
+            "name": "is_initialized",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "trading_fees",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LmsrPayoutClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "original_pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "lmsr_pool_pda",
+            "type": "pubkey"
+          },
+          {
+            "name": "claimant",
+            "type": "pubkey"
+          },
+          {
+            "name": "lmsr_token_mint_redeemed",
+            "type": "pubkey"
+          },
+          {
+            "name": "collateral_token_type",
+            "type": {
+              "defined": {
+                "name": "TokenType"
+              }
+            }
+          },
+          {
+            "name": "tokens_redeemed",
+            "type": "u64"
+          },
+          {
+            "name": "payout_amount_collateral",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LmsrPool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "original_pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "creator_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "points_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes_lmsr_usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "no_lmsr_usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes_lmsr_points_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "no_lmsr_points_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "initial_liquidity_yes_usdc",
+            "type": "i64"
+          },
+          {
+            "name": "initial_liquidity_no_usdc",
+            "type": "i64"
+          },
+          {
+            "name": "initial_liquidity_yes_points",
+            "type": "i64"
+          },
+          {
+            "name": "initial_liquidity_no_points",
+            "type": "i64"
+          },
+          {
+            "name": "b_usdc",
+            "type": "i64"
+          },
+          {
+            "name": "initial_q_yes_usdc",
+            "type": "i64"
+          },
+          {
+            "name": "initial_q_no_usdc",
+            "type": "i64"
+          },
+          {
+            "name": "initial_price_yes_usdc",
+            "type": "i64"
+          },
+          {
+            "name": "initial_price_no_usdc",
+            "type": "i64"
+          },
+          {
+            "name": "actual_max_loss_usdc",
+            "type": "i64"
+          },
+          {
+            "name": "yes_usdc_current_supply",
+            "type": "u64"
+          },
+          {
+            "name": "no_usdc_current_supply",
+            "type": "u64"
+          },
+          {
+            "name": "yes_points_current_supply",
+            "type": "u64"
+          },
+          {
+            "name": "no_points_current_supply",
+            "type": "u64"
+          },
+          {
+            "name": "b_points",
+            "type": "i64"
+          },
+          {
+            "name": "initial_q_yes_points",
+            "type": "i64"
+          },
+          {
+            "name": "initial_q_no_points",
+            "type": "i64"
+          },
+          {
+            "name": "initial_price_yes_points",
+            "type": "i64"
+          },
+          {
+            "name": "initial_price_no_points",
+            "type": "i64"
+          },
+          {
+            "name": "actual_max_loss_points",
+            "type": "i64"
+          },
+          {
+            "name": "fees_collected_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "fees_collected_points",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "fee_rate_basis_points",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LmsrSharesBought",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "original_pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "lmsr_pool_pda",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "outcome_index",
+            "type": "u64"
+          },
+          {
+            "name": "collateral_token_type",
+            "type": {
+              "defined": {
+                "name": "TokenType"
+              }
+            }
+          },
+          {
+            "name": "input_collateral_amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee_paid",
+            "type": "u64"
+          },
+          {
+            "name": "lmsr_tokens_minted",
+            "type": "u64"
+          },
+          {
+            "name": "lmsr_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LmsrSharesSold",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "original_pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "lmsr_pool_pda",
+            "type": "pubkey"
+          },
+          {
+            "name": "seller",
+            "type": "pubkey"
+          },
+          {
+            "name": "outcome_index",
+            "type": "u64"
+          },
+          {
+            "name": "collateral_token_type",
+            "type": {
+              "defined": {
+                "name": "TokenType"
+              }
+            }
+          },
+          {
+            "name": "collateral_received",
+            "type": "u64"
+          },
+          {
+            "name": "fee_paid",
+            "type": "u64"
+          },
+          {
+            "name": "lmsr_tokens_burned",
+            "type": "u64"
+          },
+          {
+            "name": "lmsr_token_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MediaType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "X"
+          },
+          {
+            "name": "TikTok"
+          },
+          {
+            "name": "Instagram"
+          },
+          {
+            "name": "Facebook"
+          },
+          {
+            "name": "Image"
+          },
+          {
+            "name": "Video"
+          },
+          {
+            "name": "ExternalLink"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PayoutClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bet_id",
+            "type": "u64"
+          },
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_type",
+            "type": {
+              "defined": {
+                "name": "TokenType"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Pool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "question",
+            "type": "string"
+          },
+          {
+            "name": "options",
+            "type": {
+              "array": [
+                "string",
+                2
+              ]
+            }
+          },
+          {
+            "name": "bets_close_at",
+            "type": "i64"
+          },
+          {
+            "name": "decision_time",
+            "type": "i64"
+          },
+          {
+            "name": "usdc_volume_by_option",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "points_volume_by_option",
+            "type": {
+              "array": [
+                "u64",
+                2
+              ]
+            }
+          },
+          {
+            "name": "yes_usdc_supply",
+            "type": "u64"
+          },
+          {
+            "name": "no_usdc_supply",
+            "type": "u64"
+          },
+          {
+            "name": "yes_points_supply",
+            "type": "u64"
+          },
+          {
+            "name": "no_points_supply",
+            "type": "u64"
+          },
+          {
+            "name": "winning_option",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "PoolStatus"
+              }
+            }
+          },
+          {
+            "name": "is_draw",
+            "type": "bool"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "media_url",
+            "type": "string"
+          },
+          {
+            "name": "media_type",
+            "type": {
+              "defined": {
+                "name": "MediaType"
+              }
+            }
+          },
+          {
+            "name": "category",
+            "type": "string"
+          },
+          {
+            "name": "creator_name",
+            "type": "string"
+          },
+          {
+            "name": "creator_id",
+            "type": "string"
+          },
+          {
+            "name": "closure_criteria",
+            "type": "string"
+          },
+          {
+            "name": "closure_instructions",
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "selected_option",
+            "type": "u64"
+          },
+          {
+            "name": "decision_time",
+            "type": "i64"
+          },
+          {
+            "name": "is_draw",
+            "type": "bool"
+          },
+          {
+            "name": "winning_option",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "question",
+            "type": "string"
+          },
+          {
+            "name": "options",
+            "type": {
+              "array": [
+                "string",
+                2
+              ]
+            }
+          },
+          {
+            "name": "bets_close_at",
+            "type": "i64"
+          },
+          {
+            "name": "media_url",
+            "type": "string"
+          },
+          {
+            "name": "media_type",
+            "type": {
+              "defined": {
+                "name": "MediaType"
+              }
+            }
+          },
+          {
+            "name": "category",
+            "type": "string"
+          },
+          {
+            "name": "creator_name",
+            "type": "string"
+          },
+          {
+            "name": "creator_id",
+            "type": "string"
+          },
+          {
+            "name": "closure_criteria",
+            "type": "string"
+          },
+          {
+            "name": "closure_instructions",
+            "type": "string"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "yes_usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "no_usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes_points_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "no_points_mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolLockedAndAbleToMigrate",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "locked_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolMediaSet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "media_url",
+            "type": "string"
+          },
+          {
+            "name": "media_type",
+            "type": {
+              "defined": {
+                "name": "MediaType"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolMigratedToLmsr",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "original_pool_id",
+            "type": "u64"
+          },
+          {
+            "name": "lmsr_pool_pda",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "points_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes_lmsr_usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "no_lmsr_usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "yes_lmsr_points_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "no_lmsr_points_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "initial_liquidity_yes_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "initial_liquidity_no_usdc",
+            "type": "u64"
+          },
+          {
+            "name": "initial_liquidity_yes_points",
+            "type": "u64"
+          },
+          {
+            "name": "initial_liquidity_no_points",
+            "type": "u64"
+          },
+          {
+            "name": "fee_rate_basis_points",
+            "type": "u16"
+          },
+          {
+            "name": "migration_timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Graded"
+          },
+          {
+            "name": "Regraded"
+          },
+          {
+            "name": "Locked"
+          },
+          {
+            "name": "Migrated"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Usdc"
+          },
+          {
+            "name": "Points"
+          }
+        ]
+      }
+    }
+  ]
+}

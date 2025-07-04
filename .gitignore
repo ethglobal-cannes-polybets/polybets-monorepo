@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+/node_modules
+/bun.lockb
+
+# Env files
+.env
+.env*.local
+.env.local
+
+# IDE files
+.idea/
+.vscode/
+
+# OS-generated files
+.DS_Store
+*.swo
+*.swp
+*.zip
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+__MACOSX
+Thumbs.db
+ehthumbs.db
+desktop.ini
