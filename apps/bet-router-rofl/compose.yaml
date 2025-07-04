@@ -1,0 +1,7 @@
+services:
+  python-telegram-bot:
+    build: .
+    image: "bet-router-rofl"
+    platform: linux/amd64
+    environment:
+      - TOKEN=${TOKEN}
