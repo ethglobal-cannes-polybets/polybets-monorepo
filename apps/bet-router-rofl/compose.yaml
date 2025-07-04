@@ -1,7 +1,7 @@
 services:
-  python-telegram-bot:
+  bet-router-rofl:
     build: .
-    image: "bet-router-rofl"
+    image: "ghcr.io/ethglobal-cannes-polybets/bet-router-rofl"
     platform: linux/amd64
-    environment:
-      - TOKEN=${TOKEN}
+    # environment:
+      # - TOKEN=${TOKEN}
