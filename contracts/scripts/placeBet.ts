@@ -63,6 +63,7 @@ async function main() {
     const account = testAccounts[i];
     const accountIndex = i + 1; // Account indices 1, 2, 3
     const totalCollateralAmount = getRandomCollateralAmount();
+    const outcomeIndex = Math.floor(Math.random() * 2);
 
     console.log(`\nAccount ${accountIndex} (${account.address}):`);
     console.log(
@@ -143,6 +144,7 @@ async function main() {
       const tx = await polybet.placeBet(
         strategy,
         totalCollateralAmount,
+        outcomeIndex,
         marketplaceIds,
         marketIds
       );

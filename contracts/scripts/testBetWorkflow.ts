@@ -62,6 +62,7 @@ async function main() {
   const tx = await polybet.connect(testacct).placeBet(
     strategy,
     totalCollateralAmount,
+    0,
     marketplaceIds,
     marketIds
   );

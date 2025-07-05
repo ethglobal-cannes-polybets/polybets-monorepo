@@ -29,7 +29,7 @@ export interface Market {
 
 export interface PlaceBetParams {
   amount: number;
-  outcome: "yes" | "no";
+  outcomeIndex: 0 | 1;
   strategy: "maximize-shares" | "maximize-privacy";
   markets: Market[];
   marketplaceId: string;
@@ -198,7 +198,7 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
   };
 
   const placeBet = async (betData: PlaceBetParams) => {
-    const { amount, strategy, markets } = betData;
+    const { amount, strategy, markets, outcomeIndex } = betData;
 
     if (!amount || markets.length === 0) {
       const error = new Error(
@@ -233,7 +233,13 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
         address: polybetsContractAddress,
         abi: polyBetAbi,
         functionName: "placeBet",
-        args: [strategyEnum, totalCollateralAmount, marketplaceIds, marketIds],
+        args: [
+          strategyEnum,
+          totalCollateralAmount,
+          BigInt(outcomeIndex),
+          marketplaceIds,
+          marketIds,
+        ],
       });
     } catch (error) {
       console.log("Error", error);

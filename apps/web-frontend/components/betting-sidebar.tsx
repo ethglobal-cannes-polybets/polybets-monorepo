@@ -1,25 +1,29 @@
 "use client";
 
-import * as React from "react";
-import { TrendingUp, Shield, Info, Zap, X } from "lucide-react";
-import { motion } from "motion/react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Switch } from "@/components/ui/switch";
-import { usePlaceBet, type Market } from "@/hooks/use-place-bet";
+import {
+  PlaceBetParams,
+  usePlaceBet,
+  type Market,
+} from "@/hooks/use-place-bet";
+import { cn } from "@/lib/utils";
+import { Info, Shield, TrendingUp, X, Zap } from "lucide-react";
+import { motion } from "motion/react";
+import * as React from "react";
 
 interface BettingSidebarProps {
   currentMarket: {
@@ -30,15 +34,7 @@ interface BettingSidebarProps {
   };
   initialOutcome: "yes" | "no";
   relatedMarkets: Market[];
-  onPlaceBet?: (betData: {
-    amount: number;
-    outcome: "yes" | "no";
-    strategy: string;
-    markets: Market[];
-    marketplaceId: string;
-    marketId: string;
-    autoArbitrage: boolean;
-  }) => Promise<void>;
+  onPlaceBet?: (betData: PlaceBetParams) => Promise<void>;
   onClose?: () => void;
   isSticky?: boolean;
   isOpen?: boolean;
@@ -268,7 +264,12 @@ const StrategySelector: React.FC<{
 }> = ({ strategy, onStrategyChange }) => (
   <div className="space-y-2">
     <Label className="text-sm font-medium">Strategy</Label>
-    <RadioGroup value={strategy} onValueChange={(newStrategy) => onStrategyChange(newStrategy as "maximize-shares" | "maximize-privacy")}>
+    <RadioGroup
+      value={strategy}
+      onValueChange={(newStrategy) =>
+        onStrategyChange(newStrategy as "maximize-shares" | "maximize-privacy")
+      }
+    >
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="maximize-shares" id="maximize-shares" />
         <Label
@@ -325,7 +326,8 @@ const MarketSelector: React.FC<{
             key={`${market.id}-${market.marketplaceId}`}
             market={market}
             isSelected={selectedMarkets.some(
-              (m) => m.id === market.id && m.marketplaceId === market.marketplaceId
+              (m) =>
+                m.id === market.id && m.marketplaceId === market.marketplaceId
             )}
             onToggle={(checked) => onMarketToggle(market, checked)}
             outcome={outcome}
@@ -422,13 +424,15 @@ export function BettingSidebar({
 }: BettingSidebarProps) {
   const [amount, setAmount] = React.useState("");
   const [outcome, setOutcome] = React.useState<"yes" | "no">(initialOutcome);
-  const [strategy, setStrategy] = React.useState<"maximize-shares" | "maximize-privacy">("maximize-shares");
+  const [strategy, setStrategy] = React.useState<
+    "maximize-shares" | "maximize-privacy"
+  >("maximize-shares");
   const [selectedMarkets, setSelectedMarkets] = React.useState<Market[]>([]);
   const [autoArbitrage, setAutoArbitrage] = React.useState(true);
 
   // Use the centralized place bet hook
   const { placeBet, isPlacingBet } = usePlaceBet();
-  
+
   // Initialize state
   React.useEffect(() => {
     setOutcome(initialOutcome);
@@ -456,27 +460,33 @@ export function BettingSidebar({
 
       // Remove market based on both id and marketplaceId
       return prev.filter(
-        (m) =>
-          !(m.id === market.id && m.marketplaceId === market.marketplaceId)
+        (m) => !(m.id === market.id && m.marketplaceId === market.marketplaceId)
       );
     });
   };
 
   const handlePlaceBet = async () => {
-    console.log("handlePlaceBet", amount, outcome, strategy, selectedMarkets, autoArbitrage);
-    
-    const betData = {
-      amount: Number.parseFloat(amount),
+    console.log(
+      "handlePlaceBet",
+      amount,
       outcome,
+      strategy,
+      selectedMarkets,
+      autoArbitrage
+    );
+
+    const betData: PlaceBetParams = {
+      amount: Number.parseFloat(amount),
+      outcomeIndex: outcome === "yes" ? 0 : 1,
       strategy,
       markets: selectedMarkets,
       marketplaceId: "polymarket",
       marketId: "nyc-mayor-2024",
       autoArbitrage,
     };
-    
+
     await placeBet(betData);
-    
+
     // Also call the optional onPlaceBet prop if provided
     if (onPlaceBet) {
       await onPlaceBet(betData);
@@ -575,7 +585,9 @@ export function BettingSidebar({
 
           <StrategySelector
             strategy={strategy}
-            onStrategyChange={(newStrategy) => setStrategy(newStrategy as "maximize-shares" | "maximize-privacy")}
+            onStrategyChange={(newStrategy) =>
+              setStrategy(newStrategy as "maximize-shares" | "maximize-privacy")
+            }
           />
 
           <Separator />

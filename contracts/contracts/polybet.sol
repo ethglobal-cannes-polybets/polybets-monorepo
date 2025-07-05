@@ -8,15 +8,21 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract PolyBet is SiweAuth, Ownable {
     using SafeERC20 for IERC20;
+
     IERC20 public musdcToken;
-    
+
     event BetSlipCreated(
-        uint256 indexed betId, uint256 totalCollateralAmount, bytes32[] marketplaceIds, bytes32[] marketIds
+        uint256 indexed betId,
+        uint256 totalCollateralAmount,
+        uint256 outcomeIndex,
+        bytes32[] marketplaceIds,
+        bytes32[] marketIds
     );
 
     enum BetSlipStrategy {
         MaximizeShares, // (Default) Bet router places bets with consideration of price impact, and calculates the best way to maximize shares
         MaximizePrivacy // Bet router will put in pauses and rotate wallets to maximize privacy, user must pay a fee. Will only do non-functoinal PoC impl in hackathon.
+
     }
 
     enum BetSlipStatus {
@@ -25,6 +31,7 @@ contract PolyBet is SiweAuth, Ownable {
         Failed, // BetSlip has been processed by BetRouter and failed
         Placed, // BetSlip has been processed by BetRouter and succeeded
         Closed // Set when all proxied bets in the bet slip are closed
+
     }
 
     enum BetOutcome {
@@ -58,20 +65,16 @@ contract PolyBet is SiweAuth, Ownable {
         PricingStrategy pricingStrategy; // "orderbook" or "amm" or "lmsr" - Only LMSR planned to be supported at hackathon
     }
 
-    struct SubBet {
-        bytes32 proxiedBetId; // Reference to the proxied bet
-    }
-
     struct BetSlip {
         BetSlipStrategy strategy;
         uint256 initialCollateral; // The amount for the bet router to distribute to markets
         uint256 finalCollateral; // Informative field, updated when a proxied bet is sold/closed
-        BetOutcome outcome;
+        uint256 outcomeIndex; // The index of the outcome that the bettor chose, at the betslip level for now because the marketplaces we want to support (polymarket, limitless) are all binary where 0 is yes and 1 is no
         BetSlipStatus status;
         string failureReason; // Gets populated if we can't handle the betslip in the bet router.
         bytes32[] marketplaceIds;
         bytes32[] marketIds;
-        bytes32[] proxiedBets;   // The bets we actually placed on markets
+        bytes32[] proxiedBets; // The bets we actually placed on markets
     }
 
     struct ProxiedBet {
@@ -101,18 +104,18 @@ contract PolyBet is SiweAuth, Ownable {
     mapping(address => uint256) private userBalances;
     mapping(bytes32 => ProxiedBet) public proxiedBets;
 
-    constructor() SiweAuth("PolyBet") {
-    }
+    constructor() SiweAuth("PolyBet") {}
 
     function placeBet(
         BetSlipStrategy strategy,
         uint256 totalCollateralAmount,
+        uint256 outcomeIndex,
         bytes32[] memory marketplaceIds,
         bytes32[] memory marketIds
     ) external {
         require(marketplaceIds.length == marketIds.length, "Array lengths must match");
         require(totalCollateralAmount > 0, "Collateral amount must be greater than 0");
-        
+
         // Check each marketplaceId is valid
         for (uint256 i = 0; i < marketplaceIds.length; i++) {
             uint256 marketplaceIdUint = uint256(marketplaceIds[i]);
@@ -120,23 +123,25 @@ contract PolyBet is SiweAuth, Ownable {
         }
 
         musdcToken.safeTransferFrom(msg.sender, address(this), totalCollateralAmount);
-        
+
         uint256 betSlipId = betSlips.length;
-        betSlips.push(BetSlip({
-            strategy: strategy,
-            initialCollateral: totalCollateralAmount,
-            finalCollateral: 0,
-            outcome: BetOutcome.None,
-            status: BetSlipStatus.Pending,
-            failureReason: "",
-            marketplaceIds: marketplaceIds,
-            marketIds: marketIds,
-            proxiedBets: new bytes32[](0)
-        }));
+        betSlips.push(
+            BetSlip({
+                strategy: strategy,
+                initialCollateral: totalCollateralAmount,
+                finalCollateral: 0,
+                outcomeIndex: outcomeIndex,
+                status: BetSlipStatus.Pending,
+                failureReason: "",
+                marketplaceIds: marketplaceIds,
+                marketIds: marketIds,
+                proxiedBets: new bytes32[](0)
+            })
+        );
         betslipsToBettor[betSlipId] = msg.sender;
         userActiveBetSlips[msg.sender].push(betSlipId);
         collateralAmount += totalCollateralAmount;
-        emit BetSlipCreated(betSlipId, totalCollateralAmount, marketplaceIds, marketIds);
+        emit BetSlipCreated(betSlipId, totalCollateralAmount, outcomeIndex, marketplaceIds, marketIds);
     }
 
     function getUserActiveBetslips() external view returns (uint256[] memory) {
@@ -204,35 +209,26 @@ contract PolyBet is SiweAuth, Ownable {
     }
 
     function isClosed(BetOutcome outcome) internal pure returns (bool) {
-      return outcome != BetOutcome.None && outcome != BetOutcome.Placed;
+        return outcome != BetOutcome.None && outcome != BetOutcome.Placed;
     }
 
-    function initiateSellProxiedBets(
-      BetSlipStrategy, 
-      uint,
-      uint,
-      bool) public view onlyOwner {
+    function initiateSellProxiedBets(BetSlipStrategy, uint256, uint256, bool) public view onlyOwner {
         revert("not implemented");
     }
 
-    function recordProxiedBetSold(
-      uint,
-      uint,
-      uint) public view onlyOwner {
+    function recordProxiedBetSold(uint256, uint256, uint256) public view onlyOwner {
         revert("not implemented");
     }
 
-    function recordProxiedBetPlaced(
-      uint betSlipId,
-      ProxiedBet memory proxiedBet) public onlyOwner {
+    function recordProxiedBetPlaced(uint256 betSlipId, ProxiedBet memory proxiedBet) public onlyOwner {
         betSlips[betSlipId].proxiedBets.push(proxiedBet.id);
         proxiedBets[proxiedBet.id] = proxiedBet;
     }
 
-    function recordProxiedBetClosed(
-      bytes32 proxiedBetId,
-      BetOutcome outcome,
-      uint256 winningsCollateralValue) public onlyOwner {
+    function recordProxiedBetClosed(bytes32 proxiedBetId, BetOutcome outcome, uint256 winningsCollateralValue)
+        public
+        onlyOwner
+    {
         require(outcome != BetOutcome.None && outcome != BetOutcome.Sold);
 
         uint256 betSlipId = proxiedBets[proxiedBetId].betSlipId;
@@ -245,11 +241,11 @@ contract PolyBet is SiweAuth, Ownable {
         userBalances[bettor] += winningsCollateralValue;
 
         for (uint256 i = 0; i < betSlip.proxiedBets.length; i++) {
-          if (!isClosed(proxiedBets[betSlip.proxiedBets[i]].outcome)) {
-            return;
-          }
+            if (!isClosed(proxiedBets[betSlip.proxiedBets[i]].outcome)) {
+                return;
+            }
         }
-        
+
         // Remove betSlipId from user's active bet slips
         uint256[] storage activeBetSlips = userActiveBetSlips[bettor];
         for (uint256 i = 0; i < activeBetSlips.length; i++) {
@@ -260,11 +256,11 @@ contract PolyBet is SiweAuth, Ownable {
                 break;
             }
         }
-        
+
         // Add betSlipId to user's closed bet slips
         userClosedBetSlips[bettor].push(betSlipId);
     }
-    
+
     // Withdraw function for users to claim their funds
     function withdrawWinnings(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");

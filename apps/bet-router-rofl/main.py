@@ -9,14 +9,17 @@ from web3 import Web3
 # Load environment variables from .env file
 load_dotenv()
 
+
 # --- Helper Functions ---
 def decode_bytes32_to_int(bytes32_value):
     """Convert bytes32 to integer."""
-    return int.from_bytes(bytes32_value, byteorder='big')
+    return int.from_bytes(bytes32_value, byteorder="big")
+
 
 def decode_bytes32_array(bytes32_array):
     """Convert array of bytes32 to array of integers."""
     return [decode_bytes32_to_int(b) for b in bytes32_array]
+
 
 # --- Environment Variables ---
 SAPPHIRETESTNET_RPC_URL = (
@@ -25,7 +28,7 @@ SAPPHIRETESTNET_RPC_URL = (
 )
 POLYBETS_CONTRACT_ADDRESS = (
     os.getenv("POLYBETS_CONTRACT_ADDRESS")
-    or "0x633D59F15e588c4a5D8F2E35e4d65041191517AA"
+    or "0xaecDA91C878735D6a24A53EbE9C2F7b6c47C9454"
 )
 POLYBETS_CONTRACT_ABI_PATH = (
     os.getenv("POLYBETS_CONTRACT_ABI_PATH")
