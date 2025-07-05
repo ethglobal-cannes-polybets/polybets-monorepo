@@ -15,7 +15,7 @@ async function main() {
 
   // Parameters for placeBet
   const strategy = BetSlipStrategy.MaximizeShares; // 0 - maximize shares strategy
-  const totalCollateralAmount = 100_000_000; // 100 million
+  const totalCollateralAmount = 100_000_000; // 100 USDC (100*10^6)
 
   // Convert marketplace IDs to bytes32
   const marketplaceIds = [

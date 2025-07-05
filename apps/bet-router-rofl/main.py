@@ -97,14 +97,24 @@ def handle_event(event):
 
         nonce = w3.eth.get_transaction_count(account.address)
 
-        # Build transaction
+        # Get gas price for Oasis Sapphire (legacy transaction format)
+        gas_price = w3.eth.gas_price
+
+        # Build transaction with legacy parameters (no EIP-1559)
         update_tx = contract.functions.updateBetSlipStatus(
             bet_slip_id, processing_status
-        ).build_transaction({"nonce": nonce})
+        ).build_transaction(
+            {
+                "nonce": nonce,
+                "gasPrice": gas_price,
+                "gas": 200000,  # Set a reasonable gas limit
+                "chainId": w3.eth.chain_id,
+            }
+        )
 
         # Sign and send transaction
         signed_tx = w3.eth.account.sign_transaction(update_tx, private_key=PRIVATE_KEY)
-        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
         print(f"  Transaction sent to update status. Tx Hash: {tx_hash.hex()}")
 
