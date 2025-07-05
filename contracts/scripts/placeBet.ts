@@ -44,12 +44,16 @@ async function main() {
   const marketplaceIds = [
     ethers.zeroPadValue(ethers.toBeHex(2), 32), // marketplace 2
     ethers.zeroPadValue(ethers.toBeHex(3), 32), // marketplace 3
+    ethers.zeroPadValue(ethers.toBeHex(4), 32), // marketplace 4
+    ethers.zeroPadValue(ethers.toBeHex(5), 32), // marketplace 5
   ];
 
   // Convert market IDs to bytes32
   const marketIds = [
-    ethers.zeroPadValue(ethers.toBeHex(124), 32), // market id 124 for marketplace 2
-    ethers.zeroPadValue(ethers.toBeHex(118), 32), // market id 118 for marketplace 3
+    ethers.zeroPadValue(ethers.toBeHex(143), 32), // market id 143 for marketplace 2
+    ethers.zeroPadValue(ethers.toBeHex(137), 32), // market id 137 for marketplace 3
+    ethers.zeroPadValue(ethers.toBeHex(3), 32), // market id 3 for marketplace 4
+    ethers.zeroPadValue(ethers.toBeHex(3), 32), // market id 3 for marketplace 5 (yes, this is correct)
   ];
 
   console.log("Placing bets with parameters:");
