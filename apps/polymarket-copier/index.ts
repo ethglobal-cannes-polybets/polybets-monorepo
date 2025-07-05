@@ -46,6 +46,35 @@ export class PolymarketCopier {
   }
 
   /**
+   * Utility function to create a URL slug from market question
+   * @param question - The market question
+   * @returns URL-safe slug
+   */
+  private createSlug(question: string): string {
+    return question
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '') // Remove all symbols
+      .replace(/\s+/g, '-') // Replace spaces with dashes
+      .replace(/-+/g, '-') // Replace multiple dashes with single
+      .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
+  }
+
+  /**
+   * Get marketplace prefix for URL generation
+   * @param marketplaceId - Database ID of the marketplace
+   * @returns URL prefix string
+   */
+  private getMarketplacePrefix(marketplaceId: number): string {
+    const prefixMap = {
+      2: "slaughterhouse-predictions",      // Slaughterhouse Predictions
+      3: "terminal-degeneracy-labs",       // Terminal Degeneracy Labs 
+      4: "degen-execution-chamber",        // Degen Execution Chamber
+      5: "nihilistic-prophet-syndicate"    // Nihilistic Prophet Syndicate
+    };
+    return prefixMap[marketplaceId as keyof typeof prefixMap] || "";
+  }
+
+  /**
    * Main execution method
    */
   async run(): Promise<void> {
@@ -87,13 +116,16 @@ export class PolymarketCopier {
           console.log(`✍️  Adding market to database: "${market.question}"`);
 
           try {
+            // Generate slug for URL
+            const slug = this.createSlug(market.question);
+            
             // 1. Insert into markets table
             const { data: marketData, error: marketError } = await supabase
               .from("markets")
               .insert({
                 common_question: market.question,
                 options: JSON.parse(market.outcomes),
-                // TODO Add url here, should be the url to OUR app
+                url: `https://localhost:3001/markets/${slug}`
               })
               .select()
               .single();
@@ -127,6 +159,19 @@ export class PolymarketCopier {
                 }
                 const marketplaceId = marketplaceData.id;
 
+                // Generate external market URL based on marketplace ID
+                let externalMarketUrl = "";
+                if (marketplaceId === 1) {
+                  // Polymarket - for now, use the original market URL from Polymarket
+                  // TODO: Implement proper Polymarket URL structure from their API docs
+                  externalMarketUrl = market.url || `https://polymarket.com/market/${market.slug}`;
+                } else {
+                  // Solana marketplaces
+                  const marketplacePrefix = this.getMarketplacePrefix(marketplaceId);
+                  const marketSlug = this.createSlug(creation.rephrasedMarket.question);
+                  externalMarketUrl = `https://localhost:3005/${marketplacePrefix}/getMarketData/${marketSlug}`;
+                }
+
                 const { error: externalMarketError } = await supabase
                   .from("external_markets")
                   .insert({
@@ -137,7 +182,8 @@ export class PolymarketCopier {
                       marketplaceId: marketplaceId,
                       marketId: creation.poolId,
                     },
-                    // URL will be for the external market, see notes, only Polymarket is going to be tricky
+                    url: externalMarketUrl,
+                    marketplace_id: marketplaceId
                   });
 
                 if (externalMarketError) {
@@ -235,6 +281,13 @@ export class PolymarketCopier {
       for (const [index, marketplace] of this.appState.marketplaces.entries()) {
         try {
           console.log(`\n🏭 Processing for marketplace: ${marketplace.name}`);
+
+          // Random chance to skip creating market on this marketplace (1/6 chance)
+          const skipChance = Math.random();
+          if (skipChance < 1/6) {
+            console.log(`🎲 Randomly skipping marketplace ${marketplace.name} for better variance (${(skipChance * 100).toFixed(1)}% < 16.7%)`);
+            continue;
+          }
 
           // Assign a rephrased market, looping if necessary
           const rephrasedMarket =
