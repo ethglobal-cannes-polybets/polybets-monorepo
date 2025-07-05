@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { slugify } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useActiveBetSlips } from "@/hooks/use-betslips";
+import type { LucideIcon } from "lucide-react";
+import { formatUnits } from "viem";
 
 // Mock data for betslips - updated with higher incremental returns
 const mockBetSlips = {
@@ -219,8 +222,63 @@ const statusConfig = {
   },
 };
 
+// -----------------------------
+// Types
+// -----------------------------
+
+interface Bet {
+  platform: string;
+  marketTitle: string;
+  cost: number;
+  price: number;
+  shares: number;
+  status?: string;
+}
+
+interface ArbitrageEvent {
+  timestamp: string;
+  cause: string;
+  action: string;
+  incrementalReturn: number;
+}
+
+interface BetSlipMock {
+  id: string;
+  market: string;
+  category: string;
+  icon: LucideIcon;
+  position: string;
+  totalCost: number;
+  totalShares: number;
+  avgPrice: number;
+  autoArbitrage: boolean;
+  arbitrageHistory?: ArbitrageEvent[];
+  bets?: Bet[];
+  profit?: number;
+  finalValue?: number;
+  createdAt: string;
+  closedAt?: string;
+}
+
 export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState("open");
+
+  // Fetch on-chain betslips for the authenticated user (PolyBet contract)
+  const { betSlips: onChainBetSlips, error: betSlipsError } =
+    useActiveBetSlips();
+
+  // For now we simply log the results – UI mapping will follow once the
+  // contract data schema is finalised.
+  useEffect(() => {
+    if (onChainBetSlips.length > 0) {
+      console.log("onChainBetSlips", onChainBetSlips);
+      console.table(onChainBetSlips as ReadonlyArray<unknown>);
+    }
+    if (betSlipsError) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to load betSlips", betSlipsError);
+    }
+  }, [onChainBetSlips, betSlipsError]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -253,10 +311,10 @@ export default function PortfolioPage() {
     }
   };
 
-  const renderBetSlip = (betSlip: any, status: string) => {
+  const renderBetSlip = (betSlip: BetSlipMock, status: string) => {
     const CategoryIcon = betSlip.icon;
     const bets = betSlip.bets ?? [];
-    const isProfitable = betSlip.profit > 0;
+    const isProfitable = (betSlip.profit ?? 0) > 0;
 
     return (
       <Card key={betSlip.id} className="mb-6 border-foreground/10">
@@ -312,7 +370,7 @@ export default function PortfolioPage() {
         </CardHeader>
         <CardContent className="p-5 space-y-4">
           <div className="space-y-3">
-            {bets.map((bet: any, index: number) => (
+            {bets.map((bet: Bet, index: number) => (
               <div
                 key={index}
                 className="flex items-center justify-between p-3 bg-accent/50 border border-foreground/10"
@@ -324,7 +382,7 @@ export default function PortfolioPage() {
                   <div>
                     <div className="font-bold">{bet.platform}</div>
                     <div className="text-sm text-muted-foreground">
-                      "{bet.marketTitle}"
+                      {bet.marketTitle}
                     </div>
                   </div>
                 </div>
@@ -339,16 +397,16 @@ export default function PortfolioPage() {
               </div>
             ))}
           </div>
-          {betSlip.autoArbitrage && betSlip.arbitrageHistory?.length > 0 && (
+          {betSlip.autoArbitrage && (betSlip.arbitrageHistory?.length ?? 0) > 0 && (
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1" className="border-foreground/10">
                 <AccordionTrigger className="text-sm font-bold text-primary hover:no-underline uppercase">
-                  Show Arbitrage History ({betSlip.arbitrageHistory.length})
+                  Show Arbitrage History ({betSlip.arbitrageHistory?.length ?? 0})
                 </AccordionTrigger>
                 <AccordionContent className="pt-2">
                   <div className="space-y-3">
-                    {betSlip.arbitrageHistory.map(
-                      (event: any, index: number) => (
+                    {(betSlip.arbitrageHistory ?? []).map(
+                      (event: ArbitrageEvent, index: number) => (
                         <div
                           key={index}
                           className="flex items-start gap-3 text-sm p-4 bg-accent/50 border border-foreground/10"
@@ -400,7 +458,7 @@ export default function PortfolioPage() {
                   <TrendingDown className="w-4 h-4" />
                 )}
                 {isProfitable ? "+" : ""}
-                {formatCurrency(betSlip.profit)}
+                {formatCurrency(betSlip.profit ?? 0)}
               </div>
             ) : (
               <div className="font-bold text-primary font-heading">
@@ -435,6 +493,31 @@ export default function PortfolioPage() {
       </Card>
     );
   };
+
+  /* --------------------------------------------------
+   * Merge on-chain betslips into the display data
+   * -------------------------------------------------- */
+  const onChainDisplaySlips: BetSlipMock[] = onChainBetSlips.map((slip) => {
+    // `initialCollateral` and `status` are the only reliable fields for now
+    // The rest is placeholder data so the card component can render.
+    return {
+      id: slip.id.toString(),
+      market: `On-chain BetSlip #${slip.id.toString()}`,
+      category: "On-chain",
+      icon: ShieldCheck,
+      position: "Yes",
+      totalCost: Number(formatUnits(slip.initialCollateral, 6)),
+      totalShares: Number(formatUnits(slip.initialCollateral, 6)),
+      avgPrice: 100,
+      autoArbitrage: false,
+      createdAt: new Date().toISOString(),
+    } satisfies BetSlipMock;
+  });
+
+  const combinedBetSlips = {
+    ...mockBetSlips,
+    open: [...onChainDisplaySlips, ...mockBetSlips.open] as BetSlipMock[],
+  } as typeof mockBetSlips & { open: BetSlipMock[] };
 
   return (
     <div className="container mx-auto p-4 sm:p-6 max-w-4xl">
@@ -477,7 +560,7 @@ export default function PortfolioPage() {
             Open Positions
           </CardTitle>
           <p className="text-2xl font-bold font-heading">
-            {mockBetSlips.open.length}
+            {combinedBetSlips.open.length}
           </p>
         </Card>
       </div>
@@ -491,7 +574,7 @@ export default function PortfolioPage() {
           <TabsList className="grid w-full grid-cols-3 bg-accent border border-foreground/10 p-1 mb-6">
             {Object.entries(statusConfig).map(([key, config]) => {
               const count =
-                mockBetSlips[key as keyof typeof mockBetSlips].length;
+                combinedBetSlips[key as keyof typeof combinedBetSlips].length;
               return (
                 <TabsTrigger
                   key={key}
@@ -511,7 +594,7 @@ export default function PortfolioPage() {
           </TabsList>
           {Object.entries(statusConfig).map(([key]) => (
             <TabsContent key={key} value={key}>
-              {mockBetSlips[key as keyof typeof mockBetSlips].length === 0 ? (
+              {combinedBetSlips[key as keyof typeof combinedBetSlips].length === 0 ? (
                 <div className="text-center py-16">
                   <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
                   <h3 className="text-lg font-bold mb-2 uppercase">
@@ -523,7 +606,7 @@ export default function PortfolioPage() {
                 </div>
               ) : (
                 <div>
-                  {mockBetSlips[key as keyof typeof mockBetSlips].map(
+                  {(combinedBetSlips[key as keyof typeof combinedBetSlips] as BetSlipMock[]).map(
                     (betSlip) => renderBetSlip(betSlip, key)
                   )}
                 </div>

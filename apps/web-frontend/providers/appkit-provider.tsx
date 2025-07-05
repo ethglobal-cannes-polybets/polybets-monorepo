@@ -1,10 +1,11 @@
 "use client";
 
-import { wagmiAdapter, projectId, networks } from "@/lib/wagmi";
+import { wagmiAdapter, projectId, networks, siweConfig } from "@/lib/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppKit } from "@reown/appkit/react";
 import React, { type ReactNode } from "react";
 import { cookieToInitialState, WagmiProvider, type Config } from "wagmi";
+import { SessionProvider } from "next-auth/react";
 
 // Set up queryClient
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const metadata = {
 export const modal = createAppKit({
   adapters: [wagmiAdapter],
   projectId,
+  siweConfig,
   networks,
   metadata,
   themeMode: "light",
@@ -45,11 +47,13 @@ export function AppKitProvider({
   );
 
   return (
-    <WagmiProvider
-      config={wagmiAdapter.wagmiConfig as Config}
-      initialState={initialState}
-    >
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </WagmiProvider>
+    <SessionProvider>
+      <WagmiProvider
+        config={wagmiAdapter.wagmiConfig as Config}
+        initialState={initialState}
+      >
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </WagmiProvider>
+    </SessionProvider>
   );
 }
