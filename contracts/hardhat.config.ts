@@ -35,9 +35,11 @@ const config: HardhatUserConfig = {
       // gas: 10_000_000, // High gas limit for complex operations
       // gasPrice: 50_000_000_000, // 50 gwei, adjust based on network conditions
       accounts:
-        process.env.SAPPHIRETESTNET_PRIVATE_KEY !== undefined
-          ? [process.env.SAPPHIRETESTNET_PRIVATE_KEY]
-          : [],
+        [  process.env.SAPPHIRETESTNET_PRIVATE_KEY,
+           process.env.SAPPHIRETESTNET_TESTACCOUNT_1_KEY, 
+           process.env.SAPPHIRETESTNET_TESTACCOUNT_2_KEY,
+           process.env.SAPPHIRETESTNET_TESTACCOUNT_3_KEY
+        ]
     },
   },
 };
