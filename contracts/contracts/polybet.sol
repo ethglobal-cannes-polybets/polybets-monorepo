@@ -86,10 +86,8 @@ contract PolyBet is SiweAuth {
         string failureReason; // Gets populated if we can't handle the betslip in the bet router.
     }
 
-    uint256 nextMarketplaceId;
-    Marketplace[] public marketplaces;
-
-    mapping(uint256 => uint256) public marketIdMapping;
+  Marketplace[] public marketplaces;
+  mapping(uint256 => uint256) public marketIdMapping;
 
     uint256 private nextBetId;
     mapping(uint256 => BetSlip) public betSlips;
@@ -167,8 +165,6 @@ contract PolyBet is SiweAuth {
     function addMarketplace(uint64 chainId, ChainFamily family, string memory name, string memory marketplaceProxy)
         public
     {
-        uint256 marketplaceId = nextMarketplaceId;
-        ++nextMarketplaceId;
         marketplaces.push(
             Marketplace({
                 warpRouterId: 0,
