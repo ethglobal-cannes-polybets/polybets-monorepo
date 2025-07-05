@@ -11,10 +11,10 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
     programId: "Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb", // Variant 1 program ID
     keypair:
       // process.env.OPERATIONS_KEYPAIR ||
-      "/Users/adoll/.config/solana/canibeton-cannes.json",
+      "~/.config/solana/canibeton-cannes.json",
     authorityKeypair:
       // process.env.MIGRATE_KEYPAIR ||
-      "/Users/adoll/.config/solana/canibeton.json",
+      "~/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||
@@ -34,8 +34,8 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
     programId: "9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY", // Variant 2 program ID
     keypair:
       process.env.VARIANT2_KEYPAIR ||
-      "/Users/adoll/.config/solana/canibeton-cannes.json",
-    authorityKeypair: "/Users/adoll/.config/solana/canibeton.json",
+      "~/.config/solana/canibeton-cannes.json",
+    authorityKeypair: "~/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||
