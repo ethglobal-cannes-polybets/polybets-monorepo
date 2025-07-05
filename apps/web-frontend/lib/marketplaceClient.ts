@@ -11,7 +11,9 @@ interface AdapterClient {
 
 export interface MarketplacePriceClient {
   "slaughterhouse-predictions": AdapterClient;
-  "terminal-degenerecy-labs": AdapterClient;
+  "terminal-degeneracy-labs": AdapterClient;
+  "degen-execution-chamber": AdapterClient;
+  "nihilistic-prophet-syndicate": AdapterClient;
 }
 
 const BASE_URL =
@@ -26,4 +28,8 @@ export const marketplaceClient = hc(
 export const slaughterhouseClient =
   marketplaceClient["slaughterhouse-predictions"];
 export const terminalDegenClient =
-  marketplaceClient["terminal-degenerecy-labs"];
+  marketplaceClient["terminal-degeneracy-labs"];
+export const degenExecutionChamberClient =
+  marketplaceClient["degen-execution-chamber"];
+export const nihilisticProphetSyndicateClient =
+  marketplaceClient["nihilistic-prophet-syndicate"];
