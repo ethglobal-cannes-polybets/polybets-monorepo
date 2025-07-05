@@ -144,12 +144,13 @@ export class PolymarketCopier {
             // 2. Insert into external_markets for each successful creation
             for (const creation of successfulCreations) {
               try {
-                // Look up marketplace id
+                // Look up marketplace id (only active ones)
                 const { data: marketplaceData, error: marketplaceError } =
                   await supabase
                     .from("marketplaces")
                     .select("id")
                     .eq("address", creation.programId)
+                    .eq("active", true)
                     .single();
 
                 if (marketplaceError || !marketplaceData) {

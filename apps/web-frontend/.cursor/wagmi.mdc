@@ -1,0 +1,476 @@
+---
+description: Wagmi best practices and patterns for Web3 React development
+alwaysApply: false
+---
+
+# Wagmi Best Practices & Patterns
+
+## Core Principles
+
+- Always use TypeScript with proper type inference
+- Handle loading states properly with `isPending` and `isLoading`
+- Use proper error handling with try/catch and error states
+- Implement proper user feedback with toasts/notifications
+- Follow the mutation pattern for write operations
+- Avoid useEffect when wagmi hooks can handle reactivity automatically
+
+## Transaction Handling
+
+### ✅ DO: Use mutation configuration for callbacks
+
+```typescript
+const { writeContract } = useWriteContract({
+  mutation: {
+    onSuccess: (hash) => {
+      toast.success("Transaction Submitted", {
+        description: `Transaction hash: ${hash}`,
+      });
+    },
+    onError: (error) => {
+      toast.error("Transaction Failed", {
+        description: error.message,
+      });
+    },
+  },
+});
+
+// Then call writeContract with just the contract parameters
+writeContract({
+  address: contractAddress,
+  abi: contractAbi,
+  functionName: "myFunction",
+  args: [arg1, arg2],
+});
+```
+
+### ❌ DON'T: Pass callbacks as second parameter
+
+```typescript
+// This is incorrect and won't work reliably
+writeContract(
+  { address, abi, functionName, args },
+  {
+    onSuccess: (hash) => { /* callback */ },
+    onError: (error) => { /* callback */ }
+  }
+);
+```
+
+### Transaction Receipt Waiting
+
+Always use `useWaitForTransactionReceipt` to wait for transaction confirmation:
+
+```typescript
+const { data: txHash, isPending: isWritePending, writeContract } = useWriteContract();
+
+const { 
+  isLoading: isTxConfirming, 
+  isSuccess: isTxConfirmed,
+  error: txError 
+} = useWaitForTransactionReceipt({
+  hash: txHash,
+  onReplaced: (replacement) => {
+    toast.error("Transaction Replaced", {
+      description: `Transaction was ${replacement.reason}`,
+    });
+  },
+});
+
+const isTransactionPending = isWritePending || isTxConfirming;
+```
+
+## Error Handling
+
+### Comprehensive Error Handling Pattern
+
+```typescript
+const placeBet = async (params: BetParams) => {
+  // Validate inputs first
+  if (!validateInputs(params)) {
+    toast.error("Invalid parameters", {
+      description: "Please check your inputs",
+    });
+    return;
+  }
+
+  try {
+    // Prepare transaction data
+    const txData = prepareTxData(params);
+    
+    // Execute transaction
+    writeContract(txData);
+    
+  } catch (error) {
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : "An unexpected error occurred";
+    
+    toast.error("Transaction Failed", {
+      description: errorMessage,
+    });
+    
+    console.error("Transaction error:", error);
+  }
+};
+```
+
+## Hook Usage Patterns
+
+### Reading Contract Data
+
+```typescript
+const { data, isLoading, error } = useReadContract({
+  address: contractAddress,
+  abi: contractAbi,
+  functionName: "getData",
+  args: [param1, param2],
+});
+```
+
+### Account Information
+
+```typescript
+const { address, isConnected, isDisconnected } = useAccount();
+const { data: balance } = useBalance({
+  address: address,
+  token: tokenAddress, // Optional for ERC20 tokens
+});
+```
+
+### Network Information
+
+```typescript
+const { chain } = useAccount();
+const { switchChain } = useSwitchChain();
+
+// Check if user is on correct network
+if (chain?.id !== requiredChainId) {
+  switchChain({ chainId: requiredChainId });
+}
+```
+
+## Type Safety
+
+### Proper ABI Typing
+
+```typescript
+// Define ABI with proper typing
+const contractAbi = [
+  {
+    name: "placeBet",
+    type: "function",
+    inputs: [
+      { name: "strategy", type: "uint8" },
+      { name: "amount", type: "uint256" },
+      { name: "marketIds", type: "bytes32[]" },
+    ],
+  },
+] as const;
+
+// Use with proper type inference
+const { writeContract } = useWriteContract();
+writeContract({
+  address: contractAddress,
+  abi: contractAbi,
+  functionName: "placeBet", // TypeScript will infer available functions
+  args: [strategy, amount, marketIds], // TypeScript will infer required types
+});
+```
+
+### Data Transformation
+
+```typescript
+// Helper for encoding data
+const toBytes32 = (value: number | bigint | string): Hex => {
+  const numeric = typeof value === "string" && value.startsWith("0x")
+    ? (value as Hex)
+    : (`0x${BigInt(value).toString(16)}` as Hex);
+  return pad(numeric, { size: 32 });
+};
+
+// Helper for parsing units
+const parseTokenAmount = (amount: string, decimals: number = 18): bigint => {
+  return parseUnits(amount, decimals);
+};
+```
+
+## Loading States
+
+### Proper Loading State Management
+
+```typescript
+const MyComponent = () => {
+  const { isPending: isWritePending, writeContract } = useWriteContract();
+  const { isLoading: isTxConfirming } = useWaitForTransactionReceipt();
+  
+  const isLoading = isWritePending || isTxConfirming;
+  
+  return (
+    <button 
+      disabled={isLoading}
+      onClick={() => writeContract({ /* params */ })}
+    >
+      {isLoading ? "Processing..." : "Submit Transaction"}
+    </button>
+  );
+};
+```
+
+## Common Pitfalls
+
+### 1. Not handling disconnected state
+```typescript
+// Always check if wallet is connected
+const { isConnected } = useAccount();
+
+if (!isConnected) {
+  return <ConnectWallet />;
+}
+```
+
+### 2. Not handling network switching
+```typescript
+// Check and switch networks when needed
+const { chain } = useAccount();
+const { switchChain } = useSwitchChain();
+
+// Handle network switching in event handlers or conditional rendering
+if (chain && chain.id !== requiredChainId) {
+  // Show UI to prompt user to switch
+  return <NetworkSwitcher onSwitch={() => switchChain({ chainId: requiredChainId })} />;
+}
+```
+
+### 3. Not handling transaction replacement
+```typescript
+// Always handle transaction replacement
+useWaitForTransactionReceipt({
+  hash: txHash,
+  onReplaced: (replacement) => {
+    // Handle replacement (speed up, cancel, etc.)
+    toast.info(`Transaction ${replacement.reason}`, {
+      description: `New hash: ${replacement.transaction.hash}`,
+    });
+  },
+});
+```
+
+## useEffect Anti-Patterns
+
+### ❌ DON'T: Use useEffect for data fetching
+```typescript
+// This is unnecessary - wagmi hooks are reactive
+useEffect(() => {
+  if (address) {
+    // Don't do this!
+    fetchBalance(address);
+  }
+}, [address]);
+```
+
+### ✅ DO: Let wagmi hooks handle reactivity
+```typescript
+// This automatically re-runs when address changes
+const { data: balance } = useBalance({
+  address: address,
+  query: {
+    enabled: !!address, // Only run when address exists
+  },
+});
+```
+
+### ❌ DON'T: Use useEffect to trigger contract reads
+```typescript
+// Unnecessary useEffect
+useEffect(() => {
+  if (contractAddress && userAddress) {
+    readContract({
+      address: contractAddress,
+      abi: contractAbi,
+      functionName: "balanceOf",
+      args: [userAddress],
+    });
+  }
+}, [contractAddress, userAddress]);
+```
+
+### ✅ DO: Use reactive queries with proper dependencies
+```typescript
+// Automatically re-runs when dependencies change
+const { data: balance } = useReadContract({
+  address: contractAddress,
+  abi: contractAbi,
+  functionName: "balanceOf",
+  args: [userAddress],
+  query: {
+    enabled: !!contractAddress && !!userAddress,
+  },
+});
+```
+
+### ❌ DON'T: Use useEffect for network switching
+```typescript
+// Overly complex with useEffect
+useEffect(() => {
+  if (chain?.id !== requiredChainId) {
+    switchChain({ chainId: requiredChainId });
+  }
+}, [chain?.id, requiredChainId, switchChain]);
+```
+
+### ✅ DO: Handle network switching reactively
+```typescript
+// Better approach with conditional logic
+const { chain } = useAccount();
+const { switchChain } = useSwitchChain();
+
+// Handle in event handlers or use conditional rendering
+const handleSwitchNetwork = () => {
+  if (chain?.id !== requiredChainId) {
+    switchChain({ chainId: requiredChainId });
+  }
+};
+```
+
+### ✅ When TO use useEffect
+```typescript
+// These are valid useEffect use cases:
+
+// 1. Local storage operations
+useEffect(() => {
+  localStorage.setItem('lastVisited', Date.now().toString());
+}, []);
+
+// 2. Event listeners
+useEffect(() => {
+  const handleResize = () => setIsMobile(window.innerWidth < 768);
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
+// 3. Manual DOM manipulation
+useEffect(() => {
+  document.title = `${balance} ETH - My App`;
+}, [balance]);
+
+// 4. Third-party integrations
+useEffect(() => {
+  gtag('event', 'wallet_connected', { address });
+}, [address]);
+```
+
+## Testing Patterns
+
+### Mock wagmi hooks for testing
+```typescript
+// In test files
+jest.mock('wagmi', () => ({
+  useAccount: () => ({
+    address: '0x123...',
+    isConnected: true,
+  }),
+  useWriteContract: () => ({
+    writeContract: jest.fn(),
+    isPending: false,
+  }),
+}));
+```
+
+## Performance Optimization
+
+### Conditional Queries with `enabled`
+```typescript
+// Only run query when conditions are met
+const { data: balance } = useBalance({
+  address: userAddress,
+  query: {
+    enabled: !!userAddress && isConnected,
+  },
+});
+
+// Conditional contract reads
+const { data: tokenBalance } = useReadContract({
+  address: tokenAddress,
+  abi: erc20Abi,
+  functionName: "balanceOf",
+  args: [userAddress],
+  query: {
+    enabled: !!tokenAddress && !!userAddress,
+    refetchInterval: 5000, // Refetch every 5 seconds
+  },
+});
+```
+
+### Memoize expensive computations
+```typescript
+const preparedArgs = useMemo(() => {
+  return markets.map(market => ({
+    id: toBytes32(market.id),
+    amount: parseUnits(market.amount.toString(), 6),
+  }));
+}, [markets]);
+```
+
+### Debounce user inputs
+```typescript
+const debouncedAmount = useDebounce(amount, 300);
+
+// Use debounced value in queries
+const { data: quote } = useReadContract({
+  address: quoterAddress,
+  abi: quoterAbi,
+  functionName: "getQuote",
+  args: [debouncedAmount],
+  query: {
+    enabled: !!debouncedAmount && Number(debouncedAmount) > 0,
+  },
+});
+```
+
+## Integration with Toast Notifications
+
+### Sonner Integration Pattern
+```typescript
+import { toast } from "sonner";
+
+const { writeContract } = useWriteContract({
+  mutation: {
+    onSuccess: (hash) => {
+      toast.success("Transaction Submitted", {
+        description: `Hash: ${hash}`,
+      });
+    },
+    onError: (error) => {
+      toast.error("Transaction Failed", {
+        description: error.message,
+      });
+    },
+  },
+});
+```
+
+## Debugging
+
+### Add proper logging
+```typescript
+const { writeContract } = useWriteContract({
+  mutation: {
+    onSuccess: (hash) => {
+      console.log("Transaction submitted:", hash);
+      toast.success("Transaction Submitted");
+    },
+    onError: (error) => {
+      console.error("Transaction failed:", error);
+      toast.error("Transaction Failed");
+    },
+  },
+});
+```
+
+## Security Considerations
+
+- Always validate inputs before sending transactions
+- Use proper error handling to prevent sensitive data exposure
+- Implement proper authorization checks
+- Use secure RPC endpoints
+- Never expose private keys or sensitive data in client-side code

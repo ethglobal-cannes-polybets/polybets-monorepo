@@ -11,7 +11,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -20,17 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
-
-export interface Market {
-  id: number;
-  marketplaceId: string;
-  platform: string;
-  title: string;
-  yesPrice: number;
-  noPrice: number;
-  liquidity: number;
-  selected: boolean;
-}
+import { usePlaceBet, type Market } from "@/hooks/use-place-bet";
 
 interface BettingSidebarProps {
   currentMarket: {
@@ -41,7 +30,7 @@ interface BettingSidebarProps {
   };
   initialOutcome: "yes" | "no";
   relatedMarkets: Market[];
-  onPlaceBet: (betData: {
+  onPlaceBet?: (betData: {
     amount: number;
     outcome: "yes" | "no";
     strategy: string;
@@ -279,7 +268,7 @@ const StrategySelector: React.FC<{
 }> = ({ strategy, onStrategyChange }) => (
   <div className="space-y-2">
     <Label className="text-sm font-medium">Strategy</Label>
-    <RadioGroup value={strategy} onValueChange={onStrategyChange}>
+    <RadioGroup value={strategy} onValueChange={(newStrategy) => onStrategyChange(newStrategy as "maximize-shares" | "maximize-privacy")}>
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="maximize-shares" id="maximize-shares" />
         <Label
@@ -431,14 +420,15 @@ export function BettingSidebar({
   isSticky = false,
   isOpen = true,
 }: BettingSidebarProps) {
-  const { toast } = useToast();
   const [amount, setAmount] = React.useState("");
   const [outcome, setOutcome] = React.useState<"yes" | "no">(initialOutcome);
-  const [strategy, setStrategy] = React.useState("maximize-shares");
+  const [strategy, setStrategy] = React.useState<"maximize-shares" | "maximize-privacy">("maximize-shares");
   const [selectedMarkets, setSelectedMarkets] = React.useState<Market[]>([]);
-  const [isPlacingBet, setIsPlacingBet] = React.useState(false);
   const [autoArbitrage, setAutoArbitrage] = React.useState(true);
 
+  // Use the centralized place bet hook
+  const { placeBet, isPlacingBet } = usePlaceBet();
+  
   // Initialize state
   React.useEffect(() => {
     setOutcome(initialOutcome);
@@ -473,44 +463,23 @@ export function BettingSidebar({
   };
 
   const handlePlaceBet = async () => {
-    if (!amount || selectedMarkets.length === 0) {
-      toast({
-        title: "Invalid bet",
-        description: "Please enter an amount and select at least one market.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsPlacingBet(true);
-    try {
-      await onPlaceBet({
-        amount: Number.parseFloat(amount),
-        outcome,
-        strategy,
-        markets: selectedMarkets,
-        marketplaceId: "polymarket",
-        marketId: "nyc-mayor-2024",
-        autoArbitrage,
-      });
-
-      toast({
-        title: "Bet placed successfully",
-        description: `Your ${outcome.toUpperCase()} bet is being processed through the Oasis network.`,
-      });
-
-      setAmount("");
-      if (onClose && !isSticky) {
-        onClose();
-      }
-    } catch {
-      toast({
-        title: "Bet failed",
-        description: "There was an error placing your bet. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsPlacingBet(false);
+    console.log("handlePlaceBet", amount, outcome, strategy, selectedMarkets, autoArbitrage);
+    
+    const betData = {
+      amount: Number.parseFloat(amount),
+      outcome,
+      strategy,
+      markets: selectedMarkets,
+      marketplaceId: "polymarket",
+      marketId: "nyc-mayor-2024",
+      autoArbitrage,
+    };
+    
+    await placeBet(betData);
+    
+    // Also call the optional onPlaceBet prop if provided
+    if (onPlaceBet) {
+      await onPlaceBet(betData);
     }
   };
 
@@ -606,7 +575,7 @@ export function BettingSidebar({
 
           <StrategySelector
             strategy={strategy}
-            onStrategyChange={setStrategy}
+            onStrategyChange={(newStrategy) => setStrategy(newStrategy as "maximize-shares" | "maximize-privacy")}
           />
 
           <Separator />

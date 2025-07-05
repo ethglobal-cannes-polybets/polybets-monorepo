@@ -54,10 +54,39 @@ async function getSupabaseClient() {
 async function fetchMarkets(): Promise<GroupedMarket[]> {
   const supabase = await getSupabaseClient();
 
-  // Fetch top-level markets
+  // Fetch markets that have at least one *active* external market.
+  // The query performs two inner joins:
+  //   1. markets  -> external_markets (parent_market FK)
+  //   2. external_markets -> marketplaces (marketplace_id FK)
+  // and filters for marketplaces.active === true. Thanks to the `!inner`
+  // modifier every join acts as an `EXISTS(...)` in SQL, mirroring the
+  // original requirement:
+  //   SELECT *
+  //   FROM markets
+  //   WHERE EXISTS (
+  //     SELECT 1
+  //     FROM external_markets
+  //     JOIN marketplaces ON marketplaces.id = external_markets.marketplace_id
+  //     WHERE external_markets.parent_market = markets.id
+  //       AND marketplaces.active = TRUE
+  //   );
   const { data: marketData, error: marketError } = await supabase
     .from("markets")
-    .select("*")
+    .select(
+      `
+        *,
+        external_markets!inner (
+          id,
+          marketplace_id,
+          marketplaces!inner (
+            id,
+            active
+          )
+        )
+      `
+    )
+    // Keep only rows where the joined marketplace row is active.
+    .eq("external_markets.marketplaces.active", true)
     .limit(200);
 
   if (marketError) throw new Error(marketError.message);
@@ -69,7 +98,17 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
   // Fetch all external markets that reference the above IDs in one round-trip
   const { data: extData, error: extError } = await supabase
     .from("external_markets")
-    .select("*")
+    .select(
+      `
+        *,
+        marketplaces!inner (
+          id,
+          active
+        )
+      `
+    )
+    // Only keep external markets whose linked marketplace is active
+    .eq("marketplaces.active", true)
     .in(
       "parent_market",
       markets.map((m) => m.id)
@@ -204,18 +243,9 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
       (ext) => ext.parent_market === marketRow.id
     );
 
-    // Build Market[] list starting with aggregated view, then each external
+    // Build Market[] list with each external market entry
     const marketEntries: Market[] = [];
 
-    // Aggregated placeholder entry – percentage & volume are fake defaults
-    marketEntries.push({
-      platform: aggregatorPlatform,
-      title: marketRow.common_question,
-      percentage: 50, // TODO(fake): replace with aggregated probability
-      volume: formatUsd(0), // TODO(fake): replace with aggregated volume
-    });
-
-    // External markets entries
     relatedExternal.forEach((ext) => {
       let platform: Platform | undefined;
 
@@ -267,12 +297,10 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
       groupedTitle: marketRow.common_question,
       icon: undefined,
       aggregatedPercentage:
-        marketEntries.length > 1
+        marketEntries.length > 0
           ? Math.round(
-              (marketEntries
-                .slice(1) // skip first aggregated placeholder
-                .reduce((sum, m) => sum + m.percentage, 0) /
-                (marketEntries.length - 1)) *
+              (marketEntries.reduce((sum, m) => sum + m.percentage, 0) /
+                marketEntries.length) *
                 10
             ) / 10
           : 50,

@@ -4,15 +4,18 @@ import { useSession } from "next-auth/react";
 import { useReadContract, useReadContracts } from "wagmi";
 import { useMemo } from "react";
 import { polybetsContractAddress } from "polybets-common";
-import { PolyBet__factory } from "../../../contracts/typechain-types/factories/contracts/polybet.sol/PolyBet__factory";
+import { polyBetAbi } from "@/lib/abi/polyBet";
+import type { Abi } from "viem";
 
 /**
  * Hook fetching the current user's active betslips from the PolyBet contract.
  * It first retrieves the bet-slip IDs with `getUserActiveBetslips` and then
  * fetches each bet slip via `getBetSlip`.
  *
- * When the user is not authenticated (no authToken in the session) the query is
- * disabled and the hook returns an empty array.
+ * When the user is not authenticated (no authToken in the session) we fall back
+ * to the overload of `getUserActiveBetslips` that takes **no** arguments. This
+ * variant relies on `msg.sender` and therefore still works for EOA wallets even
+ * without the auth-token based flow.
  */
 export function useActiveBetSlips() {
   const { data: session } = useSession();
@@ -26,15 +29,20 @@ export function useActiveBetSlips() {
     isLoading: isIdsLoading,
     error: idsError,
   } = useReadContract({
-    abi: PolyBet__factory.abi,
+    abi: polyBetAbi,
     address: polybetsContractAddress as `0x${string}`,
     functionName: "getUserActiveBetslips",
-    // Overload selection: when we have authToken, we call the variant that
-    // requires an argument. Otherwise the hook is disabled altogether.
+    // If we have an authToken use the corresponding overload, otherwise call
+    // the zero-argument variant.
     ...(authToken ? { args: [authToken] as [`0x${string}`] } : {}),
-    // `query.enabled` ensures the hook runs only when we have an authToken
-    query: { enabled: !!authToken },
   });
+
+  console.log("betSlipIds", betSlipIds);
+
+  // Ensure we have a strongly-typed array of bet slip IDs to work with
+  const ids = Array.isArray(betSlipIds)
+    ? (betSlipIds as readonly bigint[])
+    : [];
 
   /* --------------------------------------------------
    * 2) Fetch BetSlip structs for each returned ID
@@ -46,11 +54,11 @@ export function useActiveBetSlips() {
   } = useReadContracts({
     allowFailure: true,
     query: {
-      enabled: Array.isArray(betSlipIds) && betSlipIds.length > 0,
+      enabled: ids.length > 0,
     },
-    contracts: (Array.isArray(betSlipIds) ? betSlipIds : []).map((id) => ({
+    contracts: ids.map((id) => ({
       address: polybetsContractAddress as `0x${string}`,
-      abi: PolyBet__factory.abi,
+      abi: polyBetAbi as Abi,
       functionName: "getBetSlip" as const,
       args: [id as bigint],
     })),
@@ -60,22 +68,22 @@ export function useActiveBetSlips() {
    * 3) Combine ID + struct into a richer object array
    * -------------------------------------------------- */
   const betSlips = useMemo(() => {
-    if (!betSlipResults || !Array.isArray(betSlipIds)) return [];
+    if (!betSlipResults || ids.length === 0) return [];
 
     return betSlipResults.flatMap((result, idx) => {
       if (result.status !== "success") return [];
       return [
         {
-          id: betSlipIds[idx],
-          ...result.result,
+          id: ids[idx],
+          ...(result.result as Record<string, unknown>),
         },
       ];
     });
-  }, [betSlipResults, betSlipIds]);
+  }, [betSlipResults, ids]);
 
   return {
     betSlips,
     isLoading: isIdsLoading || areSlipsLoading,
     error: idsError ?? slipsError,
   } as const;
-} 
+}
