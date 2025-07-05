@@ -1,103 +1,216 @@
-import Image from "next/image";
+import HomeClient from "@/components/home-client";
+import { Icons } from "@/components/icons";
+import type { Market, Platform } from "@/components/market-card";
+import type { GroupedMarket } from "@/types/markets";
+import type { Database } from "polybets-common";
+import type React from "react";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+export const revalidate = 60; // ISR every 60 seconds
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+// Row types for Supabase tables we need
+type MarketRow = Database["public"]["Tables"]["markets"]["Row"];
+type ExternalMarketRow =
+  Database["public"]["Tables"]["external_markets"]["Row"];
+type MarketplaceRow = Database["public"]["Tables"]["marketplaces"]["Row"];
+
+// Reusable formatters – creating them once is more performant than instantiating
+// a new `Intl.NumberFormat` for every call.
+const usdFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+const usdCompactFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+function formatUsd(amount: number): string {
+  // Below 1,000 show the full value (e.g. $987)
+  if (amount < 1_000) return usdFormatter.format(amount);
+
+  // 1,000 and above – use compact notation (e.g. $1.2K, $3.4M)
+  return usdCompactFormatter.format(amount);
+}
+
+const aggregatorPlatform: Platform = {
+  name: "Polybet",
+  icon: <Icons.poly />,
+  color: "bg-blue-500",
+};
+
+async function getSupabaseClient() {
+  const { createClient } = await import("@supabase/supabase-js");
+  return createClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!
   );
+}
+
+async function fetchMarkets(): Promise<GroupedMarket[]> {
+  const supabase = await getSupabaseClient();
+
+  // Fetch top-level markets
+  const { data: marketData, error: marketError } = await supabase
+    .from("markets")
+    .select("*")
+    .limit(200);
+
+  if (marketError) throw new Error(marketError.message);
+
+  const markets = (marketData ?? []) as MarketRow[];
+
+  if (markets.length === 0) return [];
+
+  // Fetch all external markets that reference the above IDs in one round-trip
+  const { data: extData, error: extError } = await supabase
+    .from("external_markets")
+    .select("*")
+    .in(
+      "parent_market",
+      markets.map((m) => m.id)
+    );
+
+  if (extError) throw new Error(extError.message);
+
+  const externalMarkets = (extData ?? []) as ExternalMarketRow[];
+
+  // Collect all referenced marketplaceIds from price_lookup_params
+  const marketplaceIdSet = new Set<number>();
+  externalMarkets.forEach((ext) => {
+    const params = ext.price_lookup_params as
+      | { marketplaceId?: number | null }
+      | null
+      | undefined;
+    if (params && typeof params === "object" && params.marketplaceId != null) {
+      marketplaceIdSet.add(params.marketplaceId as number);
+    }
+  });
+
+  // Fetch metadata for referenced marketplaces
+  let marketplaceById = new Map<number, MarketplaceRow>();
+  if (marketplaceIdSet.size > 0) {
+    const { data: mpData, error: mpError } = await supabase
+      .from("marketplaces")
+      .select("*")
+      .in("id", Array.from(marketplaceIdSet));
+
+    if (mpError) throw new Error(mpError.message);
+
+    (mpData ?? []).forEach((row) =>
+      marketplaceById.set(row.id, row as MarketplaceRow)
+    );
+  }
+
+  // Helper maps for icons & colors derived from marketplace name (lowercased)
+  const iconMap: Record<string, React.ReactNode> = {
+    polymarket: <Icons.poly />,
+    limitless: <Icons.limitless />,
+    kalshi: <Icons.kalshi />,
+  };
+
+  const colorMap: Record<string, string> = {
+    polymarket: "bg-purple-600",
+    limitless: "bg-green-600",
+    kalshi: "bg-indigo-600",
+  };
+
+  // Fallback platform map based on price_lookup_method when marketplace metadata missing
+  const methodFallbackMap: Record<string, Platform> = {
+    "polymarket-orderbook": {
+      name: "Polymarket",
+      icon: iconMap["polymarket"],
+      color: colorMap["polymarket"],
+    },
+    "limitless-orderbook": {
+      name: "Limitless",
+      icon: iconMap["limitless"],
+      color: colorMap["limitless"],
+    },
+    "canibeton-lmsr": {
+      name: "CanIBetOn",
+      icon: iconMap["kalshi"],
+      color: colorMap["kalshi"],
+    },
+  };
+
+  const groupedMarkets: GroupedMarket[] = markets.map((marketRow) => {
+    const relatedExternal = externalMarkets.filter(
+      (ext) => ext.parent_market === marketRow.id
+    );
+
+    // Build Market[] list starting with aggregated view, then each external
+    const marketEntries: Market[] = [];
+
+    // Aggregated placeholder entry – percentage & volume are fake defaults
+    marketEntries.push({
+      platform: aggregatorPlatform,
+      title: marketRow.common_question,
+      percentage: 50, // TODO(fake): replace with aggregated probability
+      volume: formatUsd(0), // TODO(fake): replace with aggregated volume
+    });
+
+    // External markets entries
+    relatedExternal.forEach((ext) => {
+      let platform: Platform | undefined;
+
+      // Determine platform via marketplace metadata, else fallback
+      const params = ext.price_lookup_params as
+        | { marketplaceId?: number | null }
+        | null
+        | undefined;
+      if (
+        params &&
+        typeof params === "object" &&
+        params.marketplaceId != null
+      ) {
+        const mpRow = marketplaceById.get(params.marketplaceId);
+        if (mpRow) {
+          const key = mpRow.name.toLowerCase();
+          platform = {
+            name: mpRow.name,
+            icon: iconMap[key] ?? <Icons.logo />,
+            color: colorMap[key] ?? "bg-gray-500",
+          };
+        }
+      }
+
+      if (!platform) {
+        platform =
+          methodFallbackMap[ext.price_lookup_method ?? ""] ??
+          aggregatorPlatform;
+      }
+      marketEntries.push({
+        platform,
+        title: ext.question,
+        percentage: 50, // TODO(fake): replace with real probability
+        volume: formatUsd(0), // TODO(fake): replace with real volume
+      });
+    });
+
+    console.log("relatedExternal", relatedExternal);
+
+    return {
+      id: marketRow.id,
+      groupedTitle: marketRow.common_question,
+      icon: undefined,
+      aggregatedPercentage: 50, // TODO(fake): replace with aggregated probability
+      totalVolume: formatUsd(0), // TODO(fake): replace with aggregated volume
+      category: "General", // TODO(fake): replace with real category once available
+      markets: marketEntries,
+    } satisfies GroupedMarket;
+  });
+
+  console.log("groupedMarkets", groupedMarkets);
+
+  return groupedMarkets;
+}
+
+export default async function Page() {
+  const groupedMarkets = await fetchMarkets();
+
+  return <HomeClient groupedMarkets={groupedMarkets} />;
 }
