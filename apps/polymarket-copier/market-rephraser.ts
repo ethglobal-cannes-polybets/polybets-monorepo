@@ -1,7 +1,7 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
-import type { MarketplaceConfig } from "polybets-common";
+import type { MarketplaceConfig } from "polybets-common/src/types";
 import { z } from "zod";
 import type { PolymarketMarket, RephrasedMarket } from "./types";
 import { RephrasedMarketSchema } from "./types";

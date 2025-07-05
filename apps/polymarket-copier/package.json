@@ -1,12 +1,13 @@
 {
   "name": "polymarket-copier",
   "version": "1.0.0",
+  "packageManager": "bun@1.2.18",
   "description": "Copy and rephrase Polymarket data to multiple Solana marketplaces",
   "main": "index.ts",
   "scripts": {
     "start": "bun run index.ts",
     "dev": "bun run --watch index.ts",
-    "build": "bun build index.ts --outdir ./dist",
+    "build": "tsc",
     "test-rephrasing": "bun run test-rephrasing.ts"
   },
   "dependencies": {

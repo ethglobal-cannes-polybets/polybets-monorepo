@@ -1,5 +1,6 @@
 {
   "name": "polybets-monorepo",
+  "packageManager": "bun@1.2.18",
   "workspaces": [
     "packages/*",
     "apps/*",

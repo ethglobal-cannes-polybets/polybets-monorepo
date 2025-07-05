@@ -1,12 +1,15 @@
 import "dotenv/config";
 // TODO: Fix this Supabase import after refactoring the common package
-import type { MarketplaceConfig, OddsCalculation } from "polybets-common";
 import {
-  loadMarketplaceConfigs,
   SolanaPoolManager,
-  supabase,
   TokenType,
-} from "polybets-common";
+} from "polybets-common/src/clients/solana-pool-manager";
+import { loadMarketplaceConfigs } from "polybets-common/src/config";
+import { supabase } from "polybets-common/src/lib/supabase";
+import type {
+  MarketplaceConfig,
+  OddsCalculation,
+} from "polybets-common/src/types";
 import { MarketRephraser } from "./market-rephraser";
 import { PolymarketClient } from "./polymarket-client";
 import type {
@@ -53,10 +56,10 @@ export class PolymarketCopier {
   private createSlug(question: string): string {
     return question
       .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '') // Remove all symbols
-      .replace(/\s+/g, '-') // Replace spaces with dashes
-      .replace(/-+/g, '-') // Replace multiple dashes with single
-      .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
+      .replace(/[^a-z0-9\s]/g, "") // Remove all symbols
+      .replace(/\s+/g, "-") // Replace spaces with dashes
+      .replace(/-+/g, "-") // Replace multiple dashes with single
+      .replace(/^-|-$/g, ""); // Remove leading/trailing dashes
   }
 
   /**
@@ -66,10 +69,10 @@ export class PolymarketCopier {
    */
   private getMarketplacePrefix(marketplaceId: number): string {
     const prefixMap = {
-      2: "slaughterhouse-predictions",      // Slaughterhouse Predictions
-      3: "terminal-degeneracy-labs",       // Terminal Degeneracy Labs 
-      4: "degen-execution-chamber",        // Degen Execution Chamber
-      5: "nihilistic-prophet-syndicate"    // Nihilistic Prophet Syndicate
+      2: "slaughterhouse-predictions", // Slaughterhouse Predictions
+      3: "terminal-degeneracy-labs", // Terminal Degeneracy Labs
+      4: "degen-execution-chamber", // Degen Execution Chamber
+      5: "nihilistic-prophet-syndicate", // Nihilistic Prophet Syndicate
     };
     return prefixMap[marketplaceId as keyof typeof prefixMap] || "";
   }
@@ -118,14 +121,14 @@ export class PolymarketCopier {
           try {
             // Generate slug for URL
             const slug = this.createSlug(market.question);
-            
+
             // 1. Insert into markets table
             const { data: marketData, error: marketError } = await supabase
               .from("markets")
               .insert({
                 common_question: market.question,
                 options: JSON.parse(market.outcomes),
-                url: `https://localhost:3001/markets/${slug}`
+                url: `https://localhost:3001/markets/${slug}`,
               })
               .select()
               .single();
@@ -165,11 +168,16 @@ export class PolymarketCopier {
                 if (marketplaceId === 1) {
                   // Polymarket - for now, use the original market URL from Polymarket
                   // TODO: Implement proper Polymarket URL structure from their API docs
-                  externalMarketUrl = market.url || `https://polymarket.com/market/${market.slug}`;
+                  externalMarketUrl =
+                    market.url ||
+                    `https://polymarket.com/market/${market.slug}`;
                 } else {
                   // Solana marketplaces
-                  const marketplacePrefix = this.getMarketplacePrefix(marketplaceId);
-                  const marketSlug = this.createSlug(creation.rephrasedMarket.question);
+                  const marketplacePrefix =
+                    this.getMarketplacePrefix(marketplaceId);
+                  const marketSlug = this.createSlug(
+                    creation.rephrasedMarket.question
+                  );
                   externalMarketUrl = `https://localhost:3005/${marketplacePrefix}/getMarketData/${marketSlug}`;
                 }
 
@@ -184,7 +192,7 @@ export class PolymarketCopier {
                       marketId: creation.poolId,
                     },
                     url: externalMarketUrl,
-                    marketplace_id: marketplaceId
+                    marketplace_id: marketplaceId,
                   });
 
                 if (externalMarketError) {
@@ -285,8 +293,10 @@ export class PolymarketCopier {
 
           // Random chance to skip creating market on this marketplace (1/6 chance)
           const skipChance = Math.random();
-          if (skipChance < 1/6) {
-            console.log(`🎲 Randomly skipping marketplace ${marketplace.name} for better variance (${(skipChance * 100).toFixed(1)}% < 16.7%)`);
+          if (skipChance < 1 / 6) {
+            console.log(
+              `🎲 Randomly skipping marketplace ${marketplace.name} for better variance (${(skipChance * 100).toFixed(1)}% < 16.7%)`
+            );
             continue;
           }
 
