@@ -115,8 +115,8 @@ const PositionSelector: React.FC<{
           </TooltipTrigger>
           <TooltipContent>
             <p>
-              Price represents the cost per share. If your position wins,
-              each share pays $1.00.
+              Price represents the cost per share. If your position wins, each
+              share pays $1.00.
             </p>
           </TooltipContent>
         </Tooltip>
@@ -160,7 +160,13 @@ const AmountInput: React.FC<{
   calculations: BetCalculations;
   outcome: "yes" | "no";
   hasSelectedMarkets: boolean;
-}> = ({ amount, onAmountChange, calculations, outcome, hasSelectedMarkets }) => (
+}> = ({
+  amount,
+  onAmountChange,
+  calculations,
+  outcome,
+  hasSelectedMarkets,
+}) => (
   <div className="space-y-2">
     <Label htmlFor="amount" className="text-sm font-medium">
       Amount
@@ -208,7 +214,7 @@ const BetCalculationCard: React.FC<{
   amount: string;
 }> = ({ calculations, outcome, amount }) => {
   const profit = calculations.potentialWinnings - Number.parseFloat(amount);
-  
+
   return (
     <Card className="bg-primary/10 border-primary/20">
       <CardContent className="p-3">
@@ -324,15 +330,19 @@ const MarketSelector: React.FC<{
       Select platforms to distribute your bet
     </div>
     <div className="space-y-2">
-      {markets.map((market) => (
-        <MarketCard
-          key={market.id}
-          market={market}
-          isSelected={selectedMarkets.some((m) => m.id === market.id)}
-          onToggle={(checked) => onMarketToggle(market, checked)}
-          outcome={outcome}
-        />
-      ))}
+      {markets.map((market) => {
+        return (
+          <MarketCard
+            key={`${market.id}-${market.marketplaceId}`}
+            market={market}
+            isSelected={selectedMarkets.some(
+              (m) => m.id === market.id && m.marketplaceId === market.marketplaceId
+            )}
+            onToggle={(checked) => onMarketToggle(market, checked)}
+            outcome={outcome}
+          />
+        );
+      })}
     </div>
   </div>
 );
@@ -347,7 +357,7 @@ const MarketCard: React.FC<{
   <Card className="p-2.5 bg-accent/30 border-foreground/10">
     <div className="flex items-start space-x-2">
       <Checkbox
-        id={market.id.toString()}
+        id={`${market.id}-${market.marketplaceId}`}
         checked={isSelected}
         onCheckedChange={onToggle}
         className="mt-0.5"
@@ -355,7 +365,7 @@ const MarketCard: React.FC<{
       <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
           <Label
-            htmlFor={market.id.toString()}
+            htmlFor={`${market.id}-${market.marketplaceId}`}
             className="text-sm font-medium cursor-pointer"
           >
             {market.platform}
@@ -440,9 +450,26 @@ export function BettingSidebar({
 
   // Event handlers
   const handleMarketToggle = (market: Market, checked: boolean) => {
-    setSelectedMarkets((prev) =>
-      checked ? [...prev, market] : prev.filter((m) => m.id !== market.id)
-    );
+    setSelectedMarkets((prev) => {
+      if (checked) {
+        // Add market only if it is not already selected, identified by both id and marketplaceId
+        if (
+          prev.some(
+            (m) =>
+              m.id === market.id && m.marketplaceId === market.marketplaceId
+          )
+        ) {
+          return prev;
+        }
+        return [...prev, market];
+      }
+
+      // Remove market based on both id and marketplaceId
+      return prev.filter(
+        (m) =>
+          !(m.id === market.id && m.marketplaceId === market.marketplaceId)
+      );
+    });
   };
 
   const handlePlaceBet = async () => {
@@ -466,12 +493,12 @@ export function BettingSidebar({
         marketId: "nyc-mayor-2024",
         autoArbitrage,
       });
-      
+
       toast({
         title: "Bet placed successfully",
         description: `Your ${outcome.toUpperCase()} bet is being processed through the Oasis network.`,
       });
-      
+
       setAmount("");
       if (onClose && !isSticky) {
         onClose();
@@ -540,7 +567,7 @@ export function BettingSidebar({
   );
 
   return (
-    <motion.div 
+    <motion.div
       className={sidebarClasses}
       initial={{ x: "100%" }}
       animate={{ x: 0 }}

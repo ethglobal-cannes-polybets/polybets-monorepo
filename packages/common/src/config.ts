@@ -11,10 +11,10 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "Where dreams get butchered and only the most ruthless degenerates survive. Your portfolio's funeral starts here.",
     programId: "Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb", // Variant 1 program ID
     keypair:
-      // process.env.OPERATIONS_KEYPAIR ||
+      process.env.OPERATIONS_KEYPAIR ||
       "/Users/adoll/.config/solana/canibeton-cannes.json",
     authorityKeypair:
-      // process.env.MIGRATE_KEYPAIR ||
+      process.env.MIGRATE_KEYPAIR ||
       "/Users/adoll/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
@@ -34,9 +34,10 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "Weaponized spectrum energy meets financial nihilism. We don't just predict the future - we execute it with surgical precision while your hopes bleed out.",
     programId: "9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY", // Variant 2 program ID
     keypair:
-      process.env.VARIANT2_KEYPAIR ||
+      process.env.OPERATIONS_KEYPAIR ||
       "/Users/adoll/.config/solana/canibeton-cannes.json",
-    authorityKeypair: "/Users/adoll/.config/solana/canibeton.json",
+    authorityKeypair:
+      process.env.MIGRATE_KEYPAIR || "/Users/adoll/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||

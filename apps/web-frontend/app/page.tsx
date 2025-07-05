@@ -4,6 +4,7 @@ import type { Market, Platform } from "@/components/market-card";
 import type { GroupedMarket } from "@/types/markets";
 import type { Database } from "polybets-common";
 import type React from "react";
+import { slaughterhouseClient, terminalDegenClient } from "@/lib/marketplaceClient";
 
 export const revalidate = 60; // ISR every 60 seconds
 
@@ -91,7 +92,7 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
   });
 
   // Fetch metadata for referenced marketplaces
-  let marketplaceById = new Map<number, MarketplaceRow>();
+  const marketplaceById = new Map<number, MarketplaceRow>();
   if (marketplaceIdSet.size > 0) {
     const { data: mpData, error: mpError } = await supabase
       .from("marketplaces")
@@ -136,6 +137,67 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
       color: colorMap["kalshi"],
     },
   };
+
+  // --- Fetch live prices for external markets in parallel ---
+  const pricePromises = externalMarkets.map(async (ext) => {
+    const params = ext.price_lookup_params as
+      | { marketplaceId?: number | null; marketId?: number | null }
+      | null
+      | undefined;
+
+    // Validate required params
+    if (
+      !params ||
+      params.marketplaceId == null ||
+      params.marketId == null ||
+      Number.isNaN(Number(params.marketId))
+    ) {
+      return [ext.id, null] as const;
+    }
+
+    const mpRow = marketplaceById.get(params.marketplaceId);
+    if (!mpRow) {
+      return [ext.id, null] as const;
+    }
+
+    try {
+      if (mpRow.name === "Slaughterhouse Predictions") {
+        const res = await slaughterhouseClient["get-prices"].$post({
+          json: { marketId: Number(params.marketId) },
+        });
+
+        if (!res.ok) {
+          return [ext.id, null] as const;
+        }
+        const data = (await res.json()) as [number, number];
+        return [ext.id, data] as const;
+      }
+
+      if (mpRow.name === "Terminal Degeneracy Labs") {
+        const res = await terminalDegenClient["get-prices"].$post({
+          json: { marketId: Number(params.marketId) },
+        });
+
+        if (!res.ok) {
+          return [ext.id, null] as const;
+        }
+        const data = (await res.json()) as [number, number];
+        return [ext.id, data] as const;
+      }
+
+      // Unsupported marketplace – skip
+      return [ext.id, null] as const;
+    } catch (error) {
+      console.error("Failed to fetch price for external market", ext.id, error);
+      return [ext.id, null] as const;
+    }
+  });
+
+  const priceByExternalId = new Map<number, [number, number] | null>(
+    await Promise.all(pricePromises)
+  );
+
+  // Debug logs can be re-enabled during development if needed
 
   const groupedMarkets: GroupedMarket[] = markets.map((marketRow) => {
     const relatedExternal = externalMarkets.filter(
@@ -183,28 +245,42 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
           methodFallbackMap[ext.price_lookup_method ?? ""] ??
           aggregatorPlatform;
       }
+
+      // Determine probability using fetched prices if available
+      const prices = priceByExternalId.get(ext.id) ?? null;
+      let yesPercentage = 50;
+      if (prices && prices[0] + prices[1] > 0) {
+        yesPercentage =
+          Math.round((prices[0] / (prices[0] + prices[1])) * 100 * 10) / 10; // round to 1 decimal
+      }
+
       marketEntries.push({
         platform,
         title: ext.question,
-        percentage: 50, // TODO(fake): replace with real probability
-        volume: formatUsd(0), // TODO(fake): replace with real volume
+        percentage: yesPercentage,
+        volume: formatUsd(0), // TODO: replace with real volume when available
       });
     });
-
-    console.log("relatedExternal", relatedExternal);
 
     return {
       id: marketRow.id,
       groupedTitle: marketRow.common_question,
       icon: undefined,
-      aggregatedPercentage: 50, // TODO(fake): replace with aggregated probability
-      totalVolume: formatUsd(0), // TODO(fake): replace with aggregated volume
+      aggregatedPercentage:
+        marketEntries.length > 1
+          ? Math.round(
+              (marketEntries
+                .slice(1) // skip first aggregated placeholder
+                .reduce((sum, m) => sum + m.percentage, 0) /
+                (marketEntries.length - 1)) *
+                10
+            ) / 10
+          : 50,
+      totalVolume: formatUsd(0), // TODO: replace with aggregated volume when available
       category: "General", // TODO(fake): replace with real category once available
       markets: marketEntries,
     } satisfies GroupedMarket;
   });
-
-  console.log("groupedMarkets", groupedMarkets);
 
   return groupedMarkets;
 }
