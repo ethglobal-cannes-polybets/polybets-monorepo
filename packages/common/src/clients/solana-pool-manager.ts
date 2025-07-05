@@ -1133,7 +1133,7 @@ export class SolanaPoolManager {
         lmsrTokensToSell,
         new BN(optionIndex),
         tokenTypeSolanaEnum,
-        new BN(1) // minPaymentTokensToReceive
+        new BN(0) // minPaymentTokensToReceive
       )
       .accountsPartial({
         seller: this.wallet.publicKey,
