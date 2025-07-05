@@ -133,26 +133,39 @@ export type Database = {
       external_markets: {
         Row: {
           id: number
+          marketplace_id: number | null
           parent_market: number | null
           price_lookup_method: string | null
           price_lookup_params: Json | null
           question: string
+          url: string | null
         }
         Insert: {
           id?: number
+          marketplace_id?: number | null
           parent_market?: number | null
           price_lookup_method?: string | null
           price_lookup_params?: Json | null
           question: string
+          url?: string | null
         }
         Update: {
           id?: number
+          marketplace_id?: number | null
           parent_market?: number | null
           price_lookup_method?: string | null
           price_lookup_params?: Json | null
           question?: string
+          url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "external_markets_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplaces"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "external_markets_parent_market_fkey"
             columns: ["parent_market"]
@@ -392,16 +405,19 @@ export type Database = {
           common_question: string
           id: number
           options: string[]
+          url: string | null
         }
         Insert: {
           common_question: string
           id?: number
           options?: string[]
+          url?: string | null
         }
         Update: {
           common_question?: string
           id?: number
           options?: string[]
+          url?: string | null
         }
         Relationships: []
       }

@@ -506,3 +506,36 @@ SELECT
   transaction_hash,
   created_at
 FROM canibeton_variant4.lmsr_shares_sold_events;
+
+
+CREATE OR REPLACE VIEW canibeton_variant2.pool_lmsr_data_view AS
+    with bought as (
+      select pool_id, option_index, sum(lmsr_tokens_minted) as tokens_minted
+      from canibeton_variant2.lmsr_shares_bought_events
+      group by pool_id, option_index
+    ),
+    sold as (
+      select pool_id, option_index, sum(lmsr_tokens_burned) as tokens_burned
+      from canibeton_variant2.lmsr_shares_sold_events
+      group by pool_id, option_index
+    ),
+    combined as (
+      select
+        pools.id as pool_id,
+        pools.status,
+        coalesce(b0.tokens_minted, 0) as lmsr_yes_tokens_minted,
+        coalesce(s0.tokens_burned, 0) as lmsr_yes_tokens_burned,
+        coalesce(b1.tokens_minted, 0) as lmsr_no_tokens_minted,
+        coalesce(s1.tokens_burned, 0) as lmsr_no_tokens_burned,
+        pools.lmsr_yes_usdc_initial_liquidity,
+        pools.lmsr_no_usdc_initial_liquidity
+      from canibeton_variant2.pools
+      left join bought b0 on b0.pool_id = pools.id and b0.option_index = 0
+      left join sold s0 on s0.pool_id = pools.id and s0.option_index = 0
+      left join bought b1 on b1.pool_id = pools.id and b1.option_index = 1
+      left join sold s1 on s1.pool_id = pools.id and s1.option_index = 1
+    )
+    select *,
+           (lmsr_yes_tokens_minted - lmsr_yes_tokens_burned) as lmsr_yes_token_supply,
+           (lmsr_no_tokens_minted - lmsr_no_tokens_burned) as lmsr_no_token_supply
+    from combined;
