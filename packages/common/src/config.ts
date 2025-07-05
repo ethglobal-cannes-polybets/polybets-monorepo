@@ -10,7 +10,8 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "Where dreams get butchered and only the most ruthless degenerates survive. Your portfolio's funeral starts here.",
     programId: "Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb", // Variant 1 program ID
     keypair:
-      process.env.OPERATIONS_KEYPAIR ?? "~/.config/solana/canibeton-cannes.json",
+      process.env.OPERATIONS_KEYPAIR ??
+      "~/.config/solana/canibeton-cannes.json",
     authorityKeypair:
       process.env.MIGRATE_KEYPAIR ?? "~/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
@@ -49,9 +50,9 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
     name: "Degen Execution Chamber",
     description:
       "Where financial suicide becomes an art form. Your losses fuel our algorithms while we feast on your liquidated dreams.",
-    programId: "4x33dYAwq2fprVaiakJjrGwxdu36JhJUCoegximvALyy", // Variant 3 program ID
+    programId: "4XVwcwETMmcFcV33uBp66gQLd3AJpxd2qz7E2JTn5Jkm", // Variant 3 program ID
     keypair:
-      process.env.VARIANT2_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
+      process.env.VARIANT3_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
     authorityKeypair: "~/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
@@ -71,7 +72,7 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "Sleep paralysis demons are real. We're here to help you navigate the dark side of the subconscious.",
     programId: "EWwuoaLcycGPMQWg8Xbyg5x2HVdNWgPF5AwZNRPibeWz", // Variant 4 program ID
     keypair:
-      process.env.VARIANT2_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
+      process.env.VARIANT4_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
     authorityKeypair: "~/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:

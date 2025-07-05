@@ -44,7 +44,7 @@ async function main() {
       name: "Degen Execution Chamber",
       chainId: 0, // Solana, chainId not used
       chainFamily: ChainFamily.SVM,
-      marketplaceProxy: "4x33dYAwq2fprVaiakJjrGwxdu36JhJUCoegximvALyy",
+      marketplaceProxy: "4XVwcwETMmcFcV33uBp66gQLd3AJpxd2qz7E2JTn5Jkm",
     },
     {
       name: "Nihilistic Prophet Syndicate",

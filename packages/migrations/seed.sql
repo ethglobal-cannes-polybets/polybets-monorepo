@@ -130,7 +130,7 @@ INSERT INTO marketplaces (name, chain_id, chain_name, chain_family, address, pri
     ('PolyMarket', 137, 'polygon', 'evm', 'varied', 'orderbook'),
     ('Slaughterhouse Predictions', NULL, 'solana-devnet', 'solana', 'Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb', 'lmsr'),
     ('Terminal Degeneracy Labs', NULL, 'solana-devnet', 'solana', '9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY', 'lmsr'),
-    ('Degen Execution Chamber', NULL, 'solana-devnet', 'solana', '4x33dYAwq2fprVaiakJjrGwxdu36JhJUCoegximvALyy', 'lmsr'),
+    ('Degen Execution Chamber', NULL, 'solana-devnet', 'solana', '4XVwcwETMmcFcV33uBp66gQLd3AJpxd2qz7E2JTn5Jkm', 'lmsr'),
     ('Nihilistic Prophet Syndicate', NULL, 'solana-devnet', 'solana', 'EWwuoaLcycGPMQWg8Xbyg5x2HVdNWgPF5AwZNRPibeWz', 'lmsr');
 
 

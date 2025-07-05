@@ -41,11 +41,13 @@ const MPL_TOKEN_METADATA_PROGRAM_ID = new PublicKey(
 // Import the actual IDL files
 import type { BettingPools2 as Variant1IDL } from "../artifacts/variant1_betting_pools_2";
 import type { BettingPools2 as Variant2IDL } from "../artifacts/variant2_betting_pools_2";
+import type { BettingPools2 as Variant3IDL } from "../artifacts/variant3_betting_pools_2";
+import type { BettingPools2 as Variant4IDL } from "../artifacts/variant4_betting_pools_2";
 
 // Constants from the IDL files
 const VARIANT1_PROGRAM_ID = "Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb";
 const VARIANT2_PROGRAM_ID = "9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY";
-const VARIANT3_PROGRAM_ID = "4x33dYAwq2fprVaiakJjrGwxdu36JhJUCoegximvALyy";
+const VARIANT3_PROGRAM_ID = "4XVwcwETMmcFcV33uBp66gQLd3AJpxd2qz7E2JTn5Jkm";
 const VARIANT4_PROGRAM_ID = "EWwuoaLcycGPMQWg8Xbyg5x2HVdNWgPF5AwZNRPibeWz";
 
 // PDA seeds (from the IDL)
@@ -118,12 +120,14 @@ export interface LmsrPool {
 
 export class SolanaPoolManager {
   private connection: Connection;
-  private program: Program<Variant1IDL | Variant2IDL> | null = null;
+  private program: Program<
+    Variant1IDL | Variant2IDL | Variant3IDL | Variant4IDL
+  > | null = null;
   private provider: AnchorProvider;
   private wallet: Wallet;
   private authorityWallet: Wallet | null = null;
   private marketplace: MarketplaceConfig;
-  private variant: "variant1" | "variant2";
+  private variant: "variant1" | "variant2" | "variant3" | "variant4";
   private programId: PublicKey;
   private bettingPoolsPDA: PublicKey;
 
@@ -132,8 +136,17 @@ export class SolanaPoolManager {
     this.connection = new Connection(marketplace.rpcUrl, "confirmed");
 
     // Determine which variant to use based on program ID
-    this.variant =
-      marketplace.programId === VARIANT1_PROGRAM_ID ? "variant1" : "variant2";
+    if (marketplace.programId === VARIANT1_PROGRAM_ID) {
+      this.variant = "variant1";
+    } else if (marketplace.programId === VARIANT2_PROGRAM_ID) {
+      this.variant = "variant2";
+    } else if (marketplace.programId === VARIANT3_PROGRAM_ID) {
+      this.variant = "variant3";
+    } else if (marketplace.programId === VARIANT4_PROGRAM_ID) {
+      this.variant = "variant4";
+    } else {
+      throw new Error(`Unknown program ID: ${marketplace.programId}`);
+    }
 
     this.programId = new PublicKey(marketplace.programId);
 
@@ -211,7 +224,11 @@ export class SolanaPoolManager {
       const idlPath =
         this.variant === "variant1"
           ? "../artifacts/variant1_betting_pools_2.json"
-          : "../artifacts/variant2_betting_pools_2.json";
+          : this.variant === "variant2"
+            ? "../artifacts/variant2_betting_pools_2.json"
+            : this.variant === "variant3"
+              ? "../artifacts/variant3_betting_pools_2.json"
+              : "../artifacts/variant4_betting_pools_2.json";
 
       const idlString = readFileSync(join(__dirname, idlPath), "utf8");
       const idl = JSON.parse(idlString);
@@ -219,8 +236,12 @@ export class SolanaPoolManager {
       // Create program with correct parameter order and types
       if (this.variant === "variant1") {
         this.program = new Program<Variant1IDL>(idl, this.provider);
-      } else {
+      } else if (this.variant === "variant2") {
         this.program = new Program<Variant2IDL>(idl, this.provider);
+      } else if (this.variant === "variant3") {
+        this.program = new Program<Variant3IDL>(idl, this.provider);
+      } else if (this.variant === "variant4") {
+        this.program = new Program<Variant4IDL>(idl, this.provider);
       }
     } catch (error) {
       console.error("Failed to initialize program:", error);
@@ -786,7 +807,7 @@ export class SolanaPoolManager {
   /**
    * Get the variant being used
    */
-  getVariant(): "variant1" | "variant2" {
+  getVariant(): "variant1" | "variant2" | "variant3" | "variant4" {
     return this.variant;
   }
 
@@ -846,7 +867,7 @@ export class SolanaPoolManager {
       this.authorityWallet &&
       this.authorityWallet.publicKey.toBase58() !==
         this.wallet.publicKey.toBase58()
-        ? new Program<Variant1IDL | Variant2IDL>(
+        ? new Program<Variant1IDL | Variant2IDL | Variant3IDL | Variant4IDL>(
             this.program.idl,
             migrationProvider
           )
