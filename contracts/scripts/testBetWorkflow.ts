@@ -18,7 +18,7 @@ enum BetOutcome {
 }
 
 async function main() {
-  const [owner] = await ethers.getSigners();
+  const [owner, testacct] = await ethers.getSigners();
   console.log("Testing bet workflow with account:", owner.address);
 
   // Get the deployed PolyBet contract
@@ -27,10 +27,21 @@ async function main() {
     polybetsContractAddress
   );
 
+  // Get mUSDC token address from the contract
+  const musdcAddress = await polybet.musdcToken();
+  const musdc = await ethers.getContractAt("MockUSDC", musdcAddress);
+  console.log("mUSDC token address:", musdcAddress);
+
   // Step 1: Place a bet that will spawn multiple proxied bets
   console.log("\n=== Step 1: Placing bet ===");
   const strategy = BetSlipStrategy.MaximizeShares;
   const totalCollateralAmount = 100_000_000; // 100 USDC
+
+  // Approve mUSDC spending
+  console.log("Approving mUSDC spending...");
+  const approveTx = await musdc.connect(testacct).approve(polybetsContractAddress, totalCollateralAmount);
+  await approveTx.wait();
+  console.log("Approval complete");
 
   // This single bet will be split across 3 markets
   const marketplaceIds = [
@@ -45,7 +56,7 @@ async function main() {
     ethers.zeroPadValue(ethers.toBeHex(118), 32), // market 118
   ];
 
-  const tx = await polybet.placeBet(
+  const tx = await polybet.connect(testacct).placeBet(
     strategy,
     totalCollateralAmount,
     marketplaceIds,
@@ -148,23 +159,23 @@ async function main() {
       result.winnings
     );
     await closeTx.wait();
-    console.log(`Closed bet ${result.betId.substring(0, 10)}... - Outcome: ${result.outcome === BetOutcome.Won ? 'Won' : 'Lost'}, Winnings: ${result.winnings / 1_000_000} USDC`);
+    console.log(`Closed bet ${result.betId.substring(0, 10)}... - Outcome: ${result.outcome === BetOutcome.Won ? 'Won' : 'Lost'}, Winnings: ${ethers.formatUnits(result.winnings, 6)} USDC`);
   }
 
   // Check final state
   console.log("\n=== Final State ===");
   betSlip = await polybet.getBetSlip(betSlipId);
-  console.log(`BetSlip final collateral: ${betSlip.finalCollateral / 1_000_000} USDC`);
+  console.log(`BetSlip final collateral: ${ethers.formatUnits(betSlip.finalCollateral, 6)} USDC`);
   console.log(`Total winnings: ${(80_000_000 + 0 + 45_000_000) / 1_000_000} USDC`);
   console.log(`Net profit/loss: ${((80_000_000 + 0 + 45_000_000) - 100_000_000) / 1_000_000} USDC`);
 
   // Check user balance
-  const userBalance = await polybet.getUserBalance();
-  console.log(`User balance: ${userBalance / 1_000_000} USDC`);
+  const userBalance = await polybet.connect(testacct).getUserBalance();
+  console.log(`User balance: ${ethers.formatUnits(userBalance, 6)} USDC`);
 
   // Check active vs closed bets
-  const activeBets = await polybet.getUserActiveBetslips();
-  const closedBets = await polybet.getUserClosedBets();
+  const activeBets = await polybet.connect(testacct).getUserActiveBetslips();
+  const closedBets = await polybet.connect(testacct).getUserClosedBets();
   console.log(`Active betslips: ${activeBets.length}`);
   console.log(`Closed betslips: ${closedBets.length}`);
 }
