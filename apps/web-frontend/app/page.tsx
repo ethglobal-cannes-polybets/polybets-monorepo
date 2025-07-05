@@ -4,7 +4,13 @@ import type { Market, Platform } from "@/components/market-card";
 import type { GroupedMarket } from "@/types/markets";
 import type { Database } from "polybets-common";
 import type React from "react";
-import { slaughterhouseClient, terminalDegenClient } from "@/lib/marketplaceClient";
+import {
+  slaughterhouseClient,
+  terminalDegenClient,
+  degenExecutionChamberClient,
+  nihilisticProphetSyndicateClient,
+} from "@/lib/marketplaceClient";
+import { formatUnits } from "viem";
 
 export const revalidate = 60; // ISR every 60 seconds
 
@@ -177,6 +183,16 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
     },
   };
 
+  // Map marketplace names to their respective price-adapter clients
+  const priceClientMap = {
+    "Slaughterhouse Predictions": slaughterhouseClient,
+    "Terminal Degeneracy Labs": terminalDegenClient,
+    "Degen Execution Chamber": degenExecutionChamberClient,
+    "Nihilistic Prophet Syndicate": nihilisticProphetSyndicateClient,
+  } as const;
+
+  type SupportedMarketplaceName = keyof typeof priceClientMap;
+
   // --- Fetch live prices for external markets in parallel ---
   const pricePromises = externalMarkets.map(async (ext) => {
     const params = ext.price_lookup_params as
@@ -199,33 +215,22 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
       return [ext.id, null] as const;
     }
 
+    const client = priceClientMap[mpRow.name as SupportedMarketplaceName];
+    if (!client) {
+      return [ext.id, null] as const; // Unsupported marketplace – skip
+    }
+
     try {
-      if (mpRow.name === "Slaughterhouse Predictions") {
-        const res = await slaughterhouseClient["get-prices"].$post({
-          json: { marketId: Number(params.marketId) },
-        });
+      const res = await client["get-prices"].$post({
+        json: { marketId: Number(params.marketId) },
+      });
 
-        if (!res.ok) {
-          return [ext.id, null] as const;
-        }
-        const data = (await res.json()) as [number, number];
-        return [ext.id, data] as const;
+      if (!res.ok) {
+        return [ext.id, null] as const;
       }
+      const data = (await res.json()) as [number, number];
 
-      if (mpRow.name === "Terminal Degeneracy Labs") {
-        const res = await terminalDegenClient["get-prices"].$post({
-          json: { marketId: Number(params.marketId) },
-        });
-
-        if (!res.ok) {
-          return [ext.id, null] as const;
-        }
-        const data = (await res.json()) as [number, number];
-        return [ext.id, data] as const;
-      }
-
-      // Unsupported marketplace – skip
-      return [ext.id, null] as const;
+      return [ext.id, data] as const;
     } catch (error) {
       console.error("Failed to fetch price for external market", ext.id, error);
       return [ext.id, null] as const;
@@ -258,33 +263,49 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
 
     if (sellErr) throw new Error(sellErr.message);
 
-    const sum = (rows: { payment_amount: number | null }[] | null) =>
+    // The `payment_amount` values are denominated in USDC's smallest unit (6-decimals).
+    // Use viem's `formatUnits` to safely convert micro-USDC (BigInt) to a human-readable
+    // floating-point USD amount while preserving precision.
+    const sumMicro = (rows: { payment_amount: number | null }[] | null) =>
       (rows ?? []).reduce((acc, row) => acc + (row.payment_amount ?? 0), 0);
 
-    return sum(buyRows) + sum(sellRows);
+    const totalMicro = sumMicro(buyRows) + sumMicro(sellRows);
+    // Ensure we work with BigInt as required by viem utilities.
+    const totalMicroBigInt = BigInt(Math.round(totalMicro));
+    return Number(formatUnits(totalMicroBigInt, 6));
   }
 
   type VolumeResult = readonly [number, number]; // [externalMarketId, volumeUSD]
 
-  const volumePromises: Promise<VolumeResult>[] = externalMarkets.map(async (ext) => {
-    const params = ext.price_lookup_params as
-      | { marketplaceId?: number | null; marketId?: number | null }
-      | null
-      | undefined;
+  const volumePromises: Promise<VolumeResult>[] = externalMarkets.map(
+    async (ext) => {
+      const params = ext.price_lookup_params as
+        | { marketplaceId?: number | null; marketId?: number | null }
+        | null
+        | undefined;
 
-    // Validate presence of pool id
-    if (!params || params.marketId == null || Number.isNaN(Number(params.marketId))) {
-      return [ext.id, 0] as const;
-    }
+      // Validate presence of pool id
+      if (
+        !params ||
+        params.marketId == null ||
+        Number.isNaN(Number(params.marketId))
+      ) {
+        return [ext.id, 0] as const;
+      }
 
-    try {
-      const volume = await fetchPoolVolume(Number(params.marketId));
-      return [ext.id, volume] as const;
-    } catch (error) {
-      console.error("Failed to fetch volume for external market", ext.id, error);
-      return [ext.id, 0] as const;
+      try {
+        const volume = await fetchPoolVolume(Number(params.marketId));
+        return [ext.id, volume] as const;
+      } catch (error) {
+        console.error(
+          "Failed to fetch volume for external market",
+          ext.id,
+          error
+        );
+        return [ext.id, 0] as const;
+      }
     }
-  });
+  );
 
   const volumeByExternalId = new Map<number, number>(
     await Promise.all(volumePromises)
