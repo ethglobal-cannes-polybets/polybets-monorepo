@@ -5,27 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MenuIcon } from "lucide-react";
 import { Icons } from "@/components/icons";
-import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { useAccount } from "wagmi";
+import WalletButton from "./wallet-button";
 import { cn } from "@/lib/utils";
 
 export default function Navbar() {
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { isConnected } = useAccount();
   const pathname = usePathname();
-
-  const handleConnectWallet = () => {
-    // Simulate wallet connection
-    setIsWalletConnected(true);
-  };
-
-  const handleDisconnectWallet = () => {
-    setIsWalletConnected(false);
-  };
-
   const isPortfolioActive = pathname === "/portfolio";
 
   return (
-    <header className="sticky top-0 z-10 w-full ">
+    <header className="sticky top-0 z-50 w-full ">
       <div className="container mx-auto mt-4 flex h-20 items-center px-4 py-2 border border-foreground/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex w-full items-center justify-between">
           {/* Left side - Logo */}
@@ -54,10 +45,8 @@ export default function Navbar() {
                   <span className="font-bold font-heading">POLYBET</span>
                 </Link>
                 <div className="flex flex-col space-y-4">
-                  {!isWalletConnected ? (
-                    <Button onClick={handleConnectWallet} className="w-full">
-                      Connect Wallet
-                    </Button>
+                  {!isConnected ? (
+                    <WalletButton className="w-full" />
                   ) : (
                     <>
                       <Link
@@ -69,13 +58,7 @@ export default function Navbar() {
                       >
                         Portfolio
                       </Link>
-                      <Button
-                        onClick={handleDisconnectWallet}
-                        variant="outline"
-                        className="w-full bg-transparent"
-                      >
-                        Disconnect Wallet
-                      </Button>
+                      <WalletButton className="w-full" />
                     </>
                   )}
                 </div>
@@ -85,7 +68,7 @@ export default function Navbar() {
 
           {/* Right side - Wallet & Portfolio */}
           <div className="hidden md:flex items-center space-x-4">
-            {isWalletConnected ? (
+            {isConnected ? (
               <>
                 <Link
                   href="/portfolio"
@@ -96,16 +79,10 @@ export default function Navbar() {
                 >
                   Portfolio
                 </Link>
-                <Button
-                  onClick={handleDisconnectWallet}
-                  variant="outline"
-                  className="bg-transparent"
-                >
-                  Disconnect Wallet
-                </Button>
+                <WalletButton />
               </>
             ) : (
-              <Button onClick={handleConnectWallet}>Connect Wallet</Button>
+              <WalletButton />
             )}
           </div>
         </div>
