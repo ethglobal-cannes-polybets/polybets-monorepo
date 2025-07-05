@@ -61,6 +61,31 @@ export declare namespace PolyBet {
     status: bigint;
   };
 
+  export type MarketplaceStruct = {
+    warpRouterId: BigNumberish;
+    chainId: BigNumberish;
+    chainFamily: BigNumberish;
+    name: string;
+    marketplaceProxy: string;
+    pricingStrategy: BigNumberish;
+  };
+
+  export type MarketplaceStructOutput = [
+    warpRouterId: bigint,
+    chainId: bigint,
+    chainFamily: bigint,
+    name: string,
+    marketplaceProxy: string,
+    pricingStrategy: bigint
+  ] & {
+    warpRouterId: bigint;
+    chainId: bigint;
+    chainFamily: bigint;
+    name: string;
+    marketplaceProxy: string;
+    pricingStrategy: bigint;
+  };
+
   export type ProxiedBetStruct = {
     id: BytesLike;
     betSlipId: BytesLike;
@@ -115,6 +140,7 @@ export interface PolyBetInterface extends Interface {
       | "betSlips"
       | "domain"
       | "getBetSlip"
+      | "getMarketplace"
       | "getProxiedBet"
       | "getUserActiveBetslips()"
       | "getUserActiveBetslips(bytes)"
@@ -127,6 +153,7 @@ export interface PolyBetInterface extends Interface {
       | "marketplaces"
       | "placeBet"
       | "proxiedBets"
+      | "updateBetSlipStatus"
       | "userActiveBetSlips"
       | "userBalances"
       | "userClosedBetSlips"
@@ -145,6 +172,10 @@ export interface PolyBetInterface extends Interface {
   encodeFunctionData(functionFragment: "domain", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getBetSlip",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMarketplace",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -196,6 +227,10 @@ export interface PolyBetInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "updateBetSlipStatus",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "userActiveBetSlips",
     values: [AddressLike, BigNumberish]
   ): string;
@@ -215,6 +250,10 @@ export interface PolyBetInterface extends Interface {
   decodeFunctionResult(functionFragment: "betSlips", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "domain", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getBetSlip", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getMarketplace",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getProxiedBet",
     data: BytesLike
@@ -258,6 +297,10 @@ export interface PolyBetInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "updateBetSlipStatus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "userActiveBetSlips",
     data: BytesLike
   ): Result;
@@ -272,11 +315,23 @@ export interface PolyBetInterface extends Interface {
 }
 
 export namespace BetSlipCreatedEvent {
-  export type InputTuple = [betId: BigNumberish, user: AddressLike];
-  export type OutputTuple = [betId: bigint, user: string];
+  export type InputTuple = [
+    betId: BigNumberish,
+    totalCollateralAmount: BigNumberish,
+    marketplaceIds: BytesLike[],
+    marketIds: BytesLike[]
+  ];
+  export type OutputTuple = [
+    betId: bigint,
+    totalCollateralAmount: bigint,
+    marketplaceIds: string[],
+    marketIds: string[]
+  ];
   export interface OutputObject {
     betId: bigint;
-    user: string;
+    totalCollateralAmount: bigint;
+    marketplaceIds: string[];
+    marketIds: string[];
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -358,6 +413,12 @@ export interface PolyBet extends BaseContract {
   getBetSlip: TypedContractMethod<
     [betSlipId: BigNumberish],
     [PolyBet.BetSlipStructOutput],
+    "view"
+  >;
+
+  getMarketplace: TypedContractMethod<
+    [marketplaceId: BigNumberish],
+    [PolyBet.MarketplaceStructOutput],
     "view"
   >;
 
@@ -461,6 +522,12 @@ export interface PolyBet extends BaseContract {
     "view"
   >;
 
+  updateBetSlipStatus: TypedContractMethod<
+    [betSlipId: BigNumberish, status: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   userActiveBetSlips: TypedContractMethod<
     [arg0: AddressLike, arg1: BigNumberish],
     [bigint],
@@ -515,6 +582,13 @@ export interface PolyBet extends BaseContract {
   ): TypedContractMethod<
     [betSlipId: BigNumberish],
     [PolyBet.BetSlipStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getMarketplace"
+  ): TypedContractMethod<
+    [marketplaceId: BigNumberish],
+    [PolyBet.MarketplaceStructOutput],
     "view"
   >;
   getFunction(
@@ -618,6 +692,13 @@ export interface PolyBet extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "updateBetSlipStatus"
+  ): TypedContractMethod<
+    [betSlipId: BigNumberish, status: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "userActiveBetSlips"
   ): TypedContractMethod<
     [arg0: AddressLike, arg1: BigNumberish],
@@ -644,7 +725,7 @@ export interface PolyBet extends BaseContract {
   >;
 
   filters: {
-    "BetSlipCreated(uint256,address)": TypedContractEvent<
+    "BetSlipCreated(uint256,uint256,bytes32[],bytes32[])": TypedContractEvent<
       BetSlipCreatedEvent.InputTuple,
       BetSlipCreatedEvent.OutputTuple,
       BetSlipCreatedEvent.OutputObject

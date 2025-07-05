@@ -1,9 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import {
-  loadMarketplaceConfigs,
-  SolanaMarketplaceAdapter,
-} from "polybets-common";
+import { loadMarketplaceConfigs } from "polybets-common";
+import { SolanaMarketplaceAdapter } from "polybets-common/src/marketplace-adapters/solana-adapter";
 import { z } from "zod";
 
 const app = new Hono();

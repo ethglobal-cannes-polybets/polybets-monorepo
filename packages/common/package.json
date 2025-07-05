@@ -1,7 +1,6 @@
 {
   "name": "polybets-common",
   "module": "index.ts",
-  "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
     "@wagmi/cli": "^2.3.1"

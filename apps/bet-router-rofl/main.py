@@ -10,41 +10,63 @@ from web3 import Web3
 load_dotenv()
 
 # --- Environment Variables ---
-RPC_URL = os.getenv("RPC_URL")
-CONTRACT_ADDRESS = os.getenv("CONTRACT_ADDRESS")
-CONTRACT_ABI_PATH = os.getenv("CONTRACT_ABI_PATH")
+SAPPHIRETESTNET_RPC_URL = (
+    os.getenv("SAPPHIRETESTNET_RPC_URL") or "https://testnet.sapphire.oasis.io"
+)
+POLYBETS_CONTRACT_ADDRESS = (
+    os.getenv("POLYBETS_CONTRACT_ADDRESS")
+    or "0x2C7f55aB45b3B78Bd0cf041Bf752C6D1bAbD7ec7"
+)
+POLYBETS_CONTRACT_ABI_PATH = (
+    os.getenv("POLYBETS_CONTRACT_ABI_PATH")
+    or "../../contracts/artifacts/contracts/polybet.sol/PolyBet.json"
+)
 PRIVATE_KEY = os.getenv("PRIVATE_KEY")  # For sending transactions if needed
 
 # --- Basic Sanity Checks ---
-if not all([RPC_URL, CONTRACT_ADDRESS, CONTRACT_ABI_PATH]):
+if not all(
+    [
+        SAPPHIRETESTNET_RPC_URL,
+        POLYBETS_CONTRACT_ADDRESS,
+        POLYBETS_CONTRACT_ABI_PATH,
+        PRIVATE_KEY,
+    ]
+):
     raise ValueError(
-        "Missing required environment variables: RPC_URL, CONTRACT_ADDRESS, CONTRACT_ABI_PATH"
+        "Missing required environment variables: SAPPHIRETESTNET_RPC_URL, POLYBETS_CONTRACT_ADDRESS, POLYBETS_CONTRACT_ABI_PATH, PRIVATE_KEY"
     )
 
-if not os.path.exists(CONTRACT_ABI_PATH):
-    raise FileNotFoundError(f"Contract ABI file not found at: {CONTRACT_ABI_PATH}")
+if not os.path.exists(POLYBETS_CONTRACT_ABI_PATH):
+    raise FileNotFoundError(
+        f"Contract ABI file not found at: {POLYBETS_CONTRACT_ABI_PATH}"
+    )
 
 
 def load_contract_abi():
     """Loads the contract ABI from the specified file path."""
-    with open(CONTRACT_ABI_PATH, "r") as f:
+    with open(POLYBETS_CONTRACT_ABI_PATH, "r") as f:
         return json.load()["abi"]
 
 
 # --- Web3 Setup ---
-w3 = Web3(Web3.HTTPProvider(RPC_URL))
+w3 = Web3(Web3.HTTPProvider(SAPPHIRETESTNET_RPC_URL))
 if not w3.is_connected():
-    raise ConnectionError(f"Failed to connect to the RPC node at {RPC_URL}")
+    raise ConnectionError(
+        f"Failed to connect to the RPC node at {SAPPHIRETESTNET_RPC_URL}"
+    )
+
+account = w3.eth.account.from_key(PRIVATE_KEY)
+w3.eth.default_account = account.address
 
 CONTRACT_ABI = load_contract_abi()
-contract = w3.eth.contract(address=CONTRACT_ADDRESS, abi=CONTRACT_ABI)
+contract = w3.eth.contract(address=POLYBETS_CONTRACT_ADDRESS, abi=CONTRACT_ABI)
 
 
 # --- Event Handling ---
 def handle_event(event):
     """
     Callback function to handle a new BetSlipCreated event.
-    Fetches the bet slip data and prints it.
+    Fetches the bet slip data, prints it, and updates its status to "Processing".
     """
     print("-----------------------------------")
     print(f"🎉 BetSlipCreated event detected!")
@@ -65,8 +87,41 @@ def handle_event(event):
         print(f"  Outcome: {bet_slip_data[4]}")
         print(f"  Status: {bet_slip_data[5]}")
         print("========================\n")
+
+        # --- Update Bet Slip Status ---
+        print(f"⏳ Updating status for BetSlip ID: {bet_slip_id} to 'Processing'...")
+
+        # 'Processing' is the 2nd status in the enum (index 1)
+        processing_status = 1
+
+        nonce = w3.eth.get_transaction_count(account.address)
+
+        # Build transaction
+        update_tx = contract.functions.updateBetSlipStatus(
+            bet_slip_id, processing_status
+        ).build_transaction({"nonce": nonce})
+
+        # Sign and send transaction
+        signed_tx = w3.eth.account.sign_transaction(update_tx, private_key=PRIVATE_KEY)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+        print(f"  Transaction sent to update status. Tx Hash: {tx_hash.hex()}")
+
+        # Wait for the transaction to be mined
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        if receipt.status == 1:
+            print(
+                f"  ✅ Transaction successful! Status for BetSlip ID {bet_slip_id} is now 'Processing'."
+            )
+        else:
+            print(
+                f"  ❌ Transaction failed! Could not update status for BetSlip ID {bet_slip_id}."
+            )
+            print(f"  Receipt: {receipt}")
+
     except Exception as e:
-        print(f"🚨 Error fetching bet slip data: {e}")
+        print(f"🚨 Error processing bet slip: {e}")
 
 
 async def log_loop(event_filter, poll_interval):
@@ -84,7 +139,9 @@ def main():
     Main function to set up the event filter and start the listener loop.
     """
     print("🚀 Starting Bet-Router-ROFL Event Listener...")
-    print(f"Listening for 'BetSlipCreated' events on contract: {CONTRACT_ADDRESS}")
+    print(
+        f"Listening for 'BetSlipCreated' events on contract: {POLYBETS_CONTRACT_ADDRESS}"
+    )
     print("Press Ctrl+C to stop.")
 
     # Create a filter for the BetSlipCreated event
