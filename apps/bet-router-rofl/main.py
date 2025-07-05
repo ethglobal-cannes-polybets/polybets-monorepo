@@ -11,11 +11,12 @@ load_dotenv()
 
 # --- Environment Variables ---
 SAPPHIRETESTNET_RPC_URL = (
-    os.getenv("SAPPHIRETESTNET_RPC_URL") or "https://testnet.sapphire.oasis.io"
+    os.getenv("SAPPHIRETESTNET_RPC_URL")
+    or "https://oasis-sapphire-testnet.core.chainstack.com/86690140e8855e0871e6059dac29a04c"
 )
 POLYBETS_CONTRACT_ADDRESS = (
     os.getenv("POLYBETS_CONTRACT_ADDRESS")
-    or "0x2C7f55aB45b3B78Bd0cf041Bf752C6D1bAbD7ec7"
+    or "0x537E481a67df5e69f6C3c8AfA78079AA1E0E3ec3"
 )
 POLYBETS_CONTRACT_ABI_PATH = (
     os.getenv("POLYBETS_CONTRACT_ABI_PATH")
@@ -45,7 +46,7 @@ if not os.path.exists(POLYBETS_CONTRACT_ABI_PATH):
 def load_contract_abi():
     """Loads the contract ABI from the specified file path."""
     with open(POLYBETS_CONTRACT_ABI_PATH, "r") as f:
-        return json.load()["abi"]
+        return json.load(f)["abi"]
 
 
 # --- Web3 Setup ---
@@ -136,7 +137,7 @@ async def log_loop(event_filter, poll_interval):
 
 def main():
     """
-    Main function to set up the event filter and start the listener loop.
+    Main function to start the event listener loop.
     """
     print("🚀 Starting Bet-Router-ROFL Event Listener...")
     print(
@@ -144,13 +145,10 @@ def main():
     )
     print("Press Ctrl+C to stop.")
 
-    # Create a filter for the BetSlipCreated event
-    event_filter = contract.events.BetSlipCreated.create_filter(fromBlock="latest")
-
     # Start the asynchronous event loop
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(asyncio.gather(log_loop(event_filter, poll_interval=2)))
+        loop.run_until_complete(asyncio.gather(log_loop(poll_interval=2)))
     except KeyboardInterrupt:
         print("\n🛑 Shutting down listener.")
     finally:

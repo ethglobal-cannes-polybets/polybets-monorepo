@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+When you have to choose a package manager to use for Typescript, you should always use bun.

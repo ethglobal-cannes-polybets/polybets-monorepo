@@ -56,14 +56,37 @@ echo -e "\n4. Verifying contract on Sapphire Testnet explorer..."
 npx hardhat verify "${CONTRACT_ADDRESS}" --network sapphiretestnet
 
 echo -e "\n5. Updating contract address in common package..."
-CONFIG_FILE="../packages/common/src/config.ts"
+CONFIG_FILE="${SCRIPT_DIR}/../packages/common/src/config.ts"
 # Using sed to replace the address. This works on macOS (darwin).
-# It finds the line with polybetsContractAddress, goes to the next line (n),
-# and substitutes the quoted string with the new contract address.
-if sed -i '' -e '/polybetsContractAddress =/!b' -e 'n' -e "s/\"0x[a-fA-F0-9]\{40\}\"/\"${CONTRACT_ADDRESS}\"/" "${CONFIG_FILE}"; then
+# Handle both single-line and multi-line formats
+if sed -i '' -e "s/export const polybetsContractAddress = \"0x[a-fA-F0-9]\{40\}\"/export const polybetsContractAddress = \"${CONTRACT_ADDRESS}\"/" "${CONFIG_FILE}" || \
+   sed -i '' -e '/polybetsContractAddress =/!b' -e 'n' -e "s/\"0x[a-fA-F0-9]\{40\}\"/\"${CONTRACT_ADDRESS}\"/" "${CONFIG_FILE}"; then
   echo "   => Updated ${CONFIG_FILE}"
 else
   echo "   => Error updating ${CONFIG_FILE}"
+  exit 1
+fi
+
+echo -e "\n6. Updating contract address in bet-router-rofl .env file..."
+ENV_FILE="${SCRIPT_DIR}/../apps/bet-router-rofl/.env"
+if [ -f "${ENV_FILE}" ]; then
+  if sed -i '' -e "s/^POLYBETS_CONTRACT_ADDRESS=.*/POLYBETS_CONTRACT_ADDRESS=\"${CONTRACT_ADDRESS}\"/" "${ENV_FILE}" || \
+     sed -i '' -e "s/^export POLYBETS_CONTRACT_ADDRESS=.*/export POLYBETS_CONTRACT_ADDRESS=\"${CONTRACT_ADDRESS}\"/" "${ENV_FILE}"; then
+    echo "   => Updated ${ENV_FILE}"
+  else
+    echo "   => Error updating ${ENV_FILE}"
+    exit 1
+  fi
+else
+  echo "   => ${ENV_FILE} not found, skipping"
+fi
+
+echo -e "\n7. Updating fallback address in bet-router-rofl main.py..."
+MAIN_PY_FILE="${SCRIPT_DIR}/../apps/bet-router-rofl/main.py"
+if sed -i '' -e '/POLYBETS_CONTRACT_ADDRESS/,/)/s/"0x[a-fA-F0-9]\{40\}"/"'"${CONTRACT_ADDRESS}"'"/' "${MAIN_PY_FILE}"; then
+  echo "   => Updated ${MAIN_PY_FILE}"
+else
+  echo "   => Error updating ${MAIN_PY_FILE}"
   exit 1
 fi
 
@@ -71,4 +94,8 @@ echo -e "\n----------------------------------------------------"
 echo "✅ Contract deployed and verified successfully!"
 echo "   Address: ${CONTRACT_ADDRESS}"
 echo "   Explorer URL: https://explorer.oasis.io/testnet/sapphire/address/${CONTRACT_ADDRESS}"
+echo "   Updated files:"
+echo "     - packages/common/src/config.ts"
+echo "     - apps/bet-router-rofl/.env (if exists)"
+echo "     - apps/bet-router-rofl/main.py"
 echo "----------------------------------------------------"
