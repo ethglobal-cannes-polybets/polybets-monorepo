@@ -1,9 +1,9 @@
 import os
 import time
+import requests
 from typing import List, Dict, Any, Optional
 from uagents import Agent, Context, Model, Protocol
 from uagents.setup import fund_agent_if_low
-from supabase import create_client, Client
 import openai
 from dotenv import load_dotenv
 
@@ -49,14 +49,21 @@ class RateLimiter:
 # Initialize components
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
-supabase: Client = create_client(supabase_url, supabase_key)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 rate_limiter = RateLimiter()
 
+# Supabase REST API headers
+supabase_headers = {
+    "apikey": supabase_key,
+    "Authorization": f"Bearer {supabase_key}",
+    "Content-Type": "application/json",
+    "Prefer": "return=representation"
+}
+
 # Create ASI-compatible mailbox agent
 agent = Agent(
-    name="polybet-market-agent-02",
-    seed="polybet_market_agent_seed_2025",
+    name="Polybets-Market-Finder",
+    seed="polybet_market_agent_seed_25",
     port=8001,
     endpoint=["http://127.0.0.1:8001/submit"],
     mailbox=True,
@@ -67,28 +74,40 @@ agent = Agent(
 fund_agent_if_low(agent.wallet.address())
 
 def get_markets_from_supabase() -> List[Dict[str, Any]]:
-    """Fetch all markets from Supabase"""
+    """Fetch all markets from Supabase using REST API"""
     try:
-        response = supabase.table("markets").select("*").execute()
-        return response.data
+        url = f"{supabase_url}/rest/v1/markets"
+        response = requests.get(url, headers=supabase_headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Network error fetching markets: {e}")
+        return []
+    except ValueError as e:
+        print(f"JSON parsing error fetching markets: {e}")
+        return []
     except Exception as e:
-        print(f"Error fetching markets: {e}")
+        print(f"Unexpected error fetching markets: {e}")
         return []
 
 def get_external_markets_from_supabase() -> List[Dict[str, Any]]:
-    """Fetch all external markets with marketplace info from Supabase"""
+    """Fetch all external markets with marketplace info from Supabase using REST API"""
     try:
-        response = supabase.table("external_markets").select("""
-            *,
-            marketplaces (
-                name,
-                chain_name,
-                chain_family
-            )
-        """).execute()
-        return response.data
+        url = f"{supabase_url}/rest/v1/external_markets"
+        params = {
+            "select": "*,marketplaces(name,chain_name,chain_family)"
+        }
+        response = requests.get(url, headers=supabase_headers, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Network error fetching external markets: {e}")
+        return []
+    except ValueError as e:
+        print(f"JSON parsing error fetching external markets: {e}")
+        return []
     except Exception as e:
-        print(f"Error fetching external markets: {e}")
+        print(f"Unexpected error fetching external markets: {e}")
         return []
 
 def filter_markets_with_llm(user_query: str, markets: List[Dict[str, Any]], market_type: str) -> List[Dict[str, Any]]:
@@ -222,14 +241,14 @@ structured_protocol = Protocol("StructuredOutput")
 
 @agent.on_event("startup")
 async def startup_function(ctx: Context):
-    print(f"🚀 PolyBet Market Agent starting up...")
+    print("🚀 PolyBet Market Agent starting up...")
     print(f"📍 Agent address: {agent.address}")
-    print(f"🏷️  Agent name: {agent.name}")
-    print(f"✅ Ready to help with betting market recommendations!")
-    print(f"👀 Waiting for messages...")
-    ctx.logger.info(f"PolyBet Market Agent starting up...")
+    print("🏷️  Agent name: Polybets-Market-Finder")
+    print("✅ Ready to help with betting market recommendations!")
+    print("👀 Waiting for messages...")
+    ctx.logger.info("PolyBet Market Agent starting up...")
     ctx.logger.info(f"Agent address: {agent.address}")
-    ctx.logger.info(f"Agent name: {agent.name}")
+    ctx.logger.info("Agent name: Polybets-Market-Finder")
     ctx.logger.info("Ready to help with betting market recommendations!")
 
 # Chat Protocol Handler (for protocol-specific handling if needed)
