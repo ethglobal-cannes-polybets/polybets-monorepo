@@ -62,6 +62,12 @@ supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 rate_limiter = RateLimiter()
 
+# Debug environment variables
+print(f"🔧 Environment check:")
+print(f"   Supabase URL: {'✅ Set' if supabase_url else '❌ Missing'}")
+print(f"   Supabase Key: {'✅ Set' if supabase_key else '❌ Missing'}")
+print(f"   OpenAI Key: {'✅ Set' if openai.api_key else '❌ Missing'}")
+
 # Supabase REST API headers
 supabase_headers = {
     "apikey": supabase_key,
@@ -87,9 +93,13 @@ def get_markets_from_supabase() -> List[Dict[str, Any]]:
     """Fetch all markets from Supabase using REST API"""
     try:
         url = f"{supabase_url}/rest/v1/markets"
+        print(f"🔍 Fetching markets from: {url}")
         response = requests.get(url, headers=supabase_headers, timeout=10)
+        print(f"📊 Response status: {response.status_code}")
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        print(f"📈 Found {len(data)} markets")
+        return data
     except requests.exceptions.RequestException as e:
         print(f"Network error fetching markets: {e}")
         return []
@@ -107,9 +117,13 @@ def get_external_markets_from_supabase() -> List[Dict[str, Any]]:
         params = {
             "select": "*,marketplaces(name,chain_name,chain_family)"
         }
+        print(f"🔍 Fetching external markets from: {url}")
         response = requests.get(url, headers=supabase_headers, params=params, timeout=10)
+        print(f"📊 Response status: {response.status_code}")
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        print(f"📈 Found {len(data)} external markets")
+        return data
     except requests.exceptions.RequestException as e:
         print(f"Network error fetching external markets: {e}")
         return []
@@ -197,32 +211,39 @@ def extract_query_parameters(text: str) -> Dict[str, Any]:
 def process_market_recommendation(user_query: str) -> PolyBetResponse:
     """Process market recommendation request"""
     try:
+        print(f"🔍 Processing query: {user_query}")
+        
         # Step 1: Get all markets
         internal_markets = get_markets_from_supabase()
         external_markets = get_external_markets_from_supabase()
         
-        # Step 2: Filter markets using LLM
-        relevant_internal = filter_markets_with_llm(user_query, internal_markets, "internal")
-        relevant_external = filter_markets_with_llm(user_query, external_markets, "external")
+        print(f"📊 Total markets found - Internal: {len(internal_markets)}, External: {len(external_markets)}")
         
-        # Step 3: Format recommendations
+        # If no markets found at all, provide a different message
+        if not internal_markets and not external_markets:
+            return PolyBetResponse(
+                recommendations=[],
+                message="No markets are currently available in the database. Please check your Supabase connection."
+            )
+        
+        # For debugging, let's return some markets without LLM filtering first
         recommendations = []
         
-        # Add internal markets
-        for market in relevant_internal:
+        # Add first few internal markets for testing
+        for market in internal_markets[:3]:
             recommendations.append({
-                "question": market["common_question"],
-                "url": market.get("url", "#"),
+                "question": market.get("common_question", "Unknown question"),
+                "url": market.get("url") or "#",  # Handle None values
                 "type": "PolyBets Platform",
-                "options": ", ".join(market.get("options", []))
+                "options": ", ".join(market.get("options", []) if market.get("options") else [])
             })
         
-        # Add external markets
-        for market in relevant_external:
-            marketplace_name = market.get("marketplaces", {}).get("name", "Unknown")
+        # Add first few external markets for testing
+        for market in external_markets[:3]:
+            marketplace_name = market.get("marketplaces", {}).get("name", "Unknown") if market.get("marketplaces") else "Unknown"
             recommendations.append({
-                "question": market["question"],
-                "url": market.get("url", "#"),
+                "question": market.get("question", "Unknown question"),
+                "url": market.get("url") or "#",  # Handle None values
                 "type": f"External - {marketplace_name}",
                 "options": "Variable"
             })
@@ -230,19 +251,19 @@ def process_market_recommendation(user_query: str) -> PolyBetResponse:
         if not recommendations:
             return PolyBetResponse(
                 recommendations=[],
-                message="Sorry, I couldn't find any relevant markets for your query. Try being more specific or check back later for new markets."
+                message="Markets were found in the database but could not be processed. Check the data structure."
             )
         
         return PolyBetResponse(
             recommendations=recommendations,
-            message="Here are some markets I found for you:"
+            message="Here are some available markets (Debug mode - showing first few):"
         )
         
     except Exception as e:
         print(f"Error processing recommendation: {e}")
         return PolyBetResponse(
             recommendations=[],
-            message="Sorry, I encountered an error while searching for markets. Please try again later."
+            message=f"Sorry, I encountered an error while searching for markets: {str(e)}"
         )
 
 # Create protocols
