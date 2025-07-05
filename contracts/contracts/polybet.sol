@@ -193,7 +193,8 @@ contract PolyBet is SiweAuth, Ownable {
 
     //TODO This is a stub that might not be used in end product, used to test bet router
     function updateBetSlipStatus(uint256 betSlipId, BetSlipStatus status) external {
-        //TODO In the prod version require this to come from BetRouter ROFL https://github.com/oasisprotocol/oasis-sdk/blob/main/examples/runtime-sdk/rofl-oracle/oracle/contracts/Oracle.sol#L32
+        //TODO In the prod version require this to come from BetRouter ROFL
+        // https://github.com/oasisprotocol/oasis-sdk/blob/main/examples/runtime-sdk/rofl-oracle/oracle/contracts/Oracle.sol#L32
         betSlips[betSlipId].status = status;
     }
 
