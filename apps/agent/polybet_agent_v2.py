@@ -2,6 +2,8 @@ import os
 import time
 import requests
 from typing import List, Dict, Any, Optional
+from datetime import datetime
+from uuid import uuid4
 from uagents import Agent, Context, Model, Protocol
 from uagents.setup import fund_agent_if_low
 import openai
@@ -287,8 +289,16 @@ async def handle_structured_query(ctx: Context, sender: str, msg: StructuredQuer
 @chat_proto.on_message(model=ChatMessage)
 async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
     """Main message handler for all ChatMessage types"""
-    print(f"🔥 MESSAGE RECEIVED! From: {sender}, Text: {msg.text}, Type: {msg.type}")
-    ctx.logger.info(f"🔥 MESSAGE RECEIVED! From: {sender}, Text: {msg.text}, Type: {msg.type}")
+    # Extract text from content
+    text_content = ""
+    if msg.content and len(msg.content) > 0:
+        for content in msg.content:
+            if hasattr(content, 'text'):
+                text_content += content.text + " "
+    text_content = text_content.strip()
+    
+    print(f"🔥 MESSAGE RECEIVED! From: {sender}, Text: {text_content}")
+    ctx.logger.info(f"🔥 MESSAGE RECEIVED! From: {sender}, Text: {text_content}")
     
     # Send acknowledgment
     ack = ChatAcknowledgement(
@@ -298,39 +308,49 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
     await ctx.send(sender, ack)
 
     # Health check
-    # if msg.text.lower() in ["health", "status", "ping"]:
-    #     print(f"💚 Health check request from {sender}")
-    #     await ctx.send(sender, ChatMessage(
-    #         text="PolyBet Market Agent is healthy and ready to help with betting market recommendations!",
-    #         type="status"
-    #     ))
-    #     return
+    if text_content.lower() in ["health", "status", "ping"]:
+        print(f"💚 Health check request from {sender}")
+        response = ChatMessage(
+            timestamp=datetime.utcnow(),
+            msg_id=uuid4(),
+            content=[TextContent(type="text", text="PolyBet Market Agent is healthy and ready to help with betting market recommendations!")]
+        )
+        await ctx.send(sender, response)
+        return
     
     # Regular chat message handling
-    # print(f"🎯 Processing betting query from {sender}: {msg.text}")
-    # ctx.logger.info(f"Received chat message from {sender}: {msg.text}")
+    print(f"🎯 Processing betting query from {sender}: {text_content}")
+    ctx.logger.info(f"Received chat message from {sender}: {text_content}")
     
     # Rate limiting
-    # if not rate_limiter.is_allowed(sender):
-    #     await ctx.send(sender, ChatMessage(
-    #         text="Rate limit exceeded. Please try again later.",
-    #         type="error"
-    #     ))
-    #     return
+    if not rate_limiter.is_allowed(sender):
+        response = ChatMessage(
+            timestamp=datetime.utcnow(),
+            msg_id=uuid4(),
+            content=[TextContent(type="text", text="Rate limit exceeded. Please try again later.")]
+        )
+        await ctx.send(sender, response)
+        return
     
     # Extract parameters and process query
-    response = process_market_recommendation(msg.text)
+    polybet_response = process_market_recommendation(text_content)
     
     # Format response for chat
-    formatted_message = f"{response.message}\n"
-    if response.recommendations:
-        for i, rec in enumerate(response.recommendations[:5], 1):  # Limit to 5 results
+    formatted_message = f"{polybet_response.message}\n"
+    if polybet_response.recommendations:
+        for i, rec in enumerate(polybet_response.recommendations[:5], 1):  # Limit to 5 results
             formatted_message += f"{i}. {rec['question']} ({rec['type']})\n"
             if rec['url'] != "#":
                 formatted_message += f"   Link: {rec['url']}\n"
     
-    await ctx.send(sender, ChatMessage(text=formatted_message, type="polybet_response"))
-    ctx.logger.info(f"Sent {len(response.recommendations)} recommendations to {sender}")
+    # Send response message
+    response = ChatMessage(
+        timestamp=datetime.utcnow(),
+        msg_id=uuid4(),
+        content=[TextContent(type="text", text=formatted_message)]
+    )
+    await ctx.send(sender, response)
+    ctx.logger.info(f"Sent {len(polybet_response.recommendations)} recommendations to {sender}")
 
 
 # Acknowledgement Handler - Process received acknowledgements
