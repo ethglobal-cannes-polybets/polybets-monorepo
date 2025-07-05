@@ -21,30 +21,28 @@ contract PolyBet is SiweAuth, Ownable {
         bytes32[] marketIds
     );
 
-    event ProxyBetSellingStateUpdate (
-        bytes32 indexed betId
+    event BetSlipSellingStateUpdate (
+        uint256 indexed betId
     );
 
     enum BetSlipStrategy {
         MaximizeShares, // (Default) Bet router places bets with consideration of price impact, and calculates the best way to maximize shares
         MaximizePrivacy // Bet router will put in pauses and rotate wallets to maximize privacy, user must pay a fee. Will only do non-functoinal PoC impl in hackathon.
-
     }
 
     enum BetSlipStatus {
-        Pending, // Be,tSlip hasn't been processed by BetRouter
+        Pending,
         Processing, // BetSlip is being processed by BetRouter
-        Failed, // BetSlip has been processed by BetRouter and failed
         Placed, // BetSlip has been processed by BetRouter and succeeded
+        Selling,
+        Failed, // BetSlip has been processed by BetRouter and failed
         Closed // Set when all proxied bets in the bet slip are closed
-
     }
 
     enum BetOutcome {
         None,
         Placed,
         Failed, // Set when we cannot possibly place a bet on the market, such as if the market doesn't exist on the provided marketplace
-        Selling,
         Sold, // Set when user sells 100% of their shares in a bet.
         Won,
         Lost,
@@ -254,10 +252,11 @@ contract PolyBet is SiweAuth, Ownable {
         userClosedBetSlips[bettor].push(betSlipId);
     }
 
-    function initiateSellProxiedBets(bytes32 proxiedBetId) public onlyOwner {
-      require(proxiedBets[proxiedBetId].outcome == BetOutcome.Placed, "cannot sell inactive proxy bet");
-      proxiedBets[proxiedBetId].outcome = BetOutcome.Selling;
-      emit ProxyBetSellingStateUpdate(proxiedBetId);
+    function initiateSellProxiedBets(uint256 betSlipId) public onlyOwner {
+        require(betSlipId < betSlips.length, "invalid bet slip id");
+        require(betSlips[betSlipId].status == BetSlipStatus.Placed, "cannot cancel a bet thats not placed");
+        betSlips[betSlipId].status = BetSlipStatus.Selling;
+        emit BetSlipSellingStateUpdate(betSlipId);
     }
 
     function recordProxiedBetSold(
