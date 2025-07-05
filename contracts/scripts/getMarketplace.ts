@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 // @ts-ignore
-import { polybetsContractAddress } from "polybets-common";
+import { polybetsContractAddress } from "polybets-common/src/config";
 
 async function main() {
   console.log(

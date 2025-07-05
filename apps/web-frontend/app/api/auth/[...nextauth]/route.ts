@@ -13,7 +13,7 @@ import {
   type Abi,
 } from "viem";
 import { polyBetAbi } from "@/lib/abi/polyBet";
-import { polybetsContractAddress } from "polybets-common";
+import { polybetsContractAddress } from "polybets-common/src/config";
 
 declare module "next-auth" {
   interface Session extends SIWESession {

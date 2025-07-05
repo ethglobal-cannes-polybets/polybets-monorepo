@@ -1,11 +1,11 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useReadContract, useReadContracts } from "wagmi";
-import { useMemo } from "react";
-import { polybetsContractAddress } from "polybets-common";
 import { polyBetAbi } from "@/lib/abi/polyBet";
-import type { Abi } from "viem";
+import { useSession } from "next-auth/react";
+import { polybetsContractAddress } from "polybets-common/src/config";
+import { useMemo } from "react";
+import { Abi } from "viem";
+import { useReadContract, useReadContracts } from "wagmi";
 
 /**
  * Hook fetching the current user's active betslips from the PolyBet contract.

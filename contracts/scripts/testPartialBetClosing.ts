@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { polybetsContractAddress } from "polybets-common";
+import { polybetsContractAddress } from "polybets-common/src/config";
 
 enum BetSlipStrategy {
   MaximizeShares,
@@ -14,7 +14,7 @@ enum BetOutcome {
   Won,
   Lost,
   Draw,
-  Void
+  Void,
 }
 
 async function main() {
@@ -51,7 +51,7 @@ async function main() {
     marketplaceIds,
     marketIds
   );
-  
+
   const receipt = await tx.wait();
   const betSlipCreatedEvent = receipt.logs.find(
     (log: any) => log.eventName === "BetSlipCreated"
@@ -76,11 +76,14 @@ async function main() {
       sharesBought: 60 + i * 5, // Different share amounts
       sharesSold: 0,
       outcome: BetOutcome.Placed,
-      failureReason: ""
+      failureReason: "",
     };
-    
+
     proxiedBets.push(proxiedBet);
-    const recordTx = await polybet.recordProxiedBetPlaced(betSlipId, proxiedBet);
+    const recordTx = await polybet.recordProxiedBetPlaced(
+      betSlipId,
+      proxiedBet
+    );
     await recordTx.wait();
     console.log(`Recorded bet ${i + 1}/4 on market ${proxiedBet.marketId}`);
   }
@@ -89,7 +92,7 @@ async function main() {
 
   // Test partial closing - close 2 out of 4 bets
   console.log("\n=== Closing 2 out of 4 bets ===");
-  
+
   // Close first bet as Won
   let closeTx = await polybet.recordProxiedBetClosed(
     proxiedBets[0].id,
@@ -102,7 +105,9 @@ async function main() {
   // Check if betslip is still active
   let activeBets = await polybet.getUserActiveBetslips();
   console.log(`Active betslips after closing 1 bet: ${activeBets.length}`);
-  console.log(`BetSlip ${betSlipId} still active: ${activeBets.includes(betSlipId)}`);
+  console.log(
+    `BetSlip ${betSlipId} still active: ${activeBets.includes(betSlipId)}`
+  );
 
   // Close second bet as Lost
   closeTx = await polybet.recordProxiedBetClosed(
@@ -116,11 +121,13 @@ async function main() {
   // Check status again
   activeBets = await polybet.getUserActiveBetslips();
   console.log(`Active betslips after closing 2 bets: ${activeBets.length}`);
-  console.log(`BetSlip ${betSlipId} still active: ${activeBets.includes(betSlipId)}`);
+  console.log(
+    `BetSlip ${betSlipId} still active: ${activeBets.includes(betSlipId)}`
+  );
 
   // Close remaining bets
   console.log("\n=== Closing remaining 2 bets ===");
-  
+
   // Close third bet as Draw
   closeTx = await polybet.recordProxiedBetClosed(
     proxiedBets[2].id,
@@ -142,24 +149,41 @@ async function main() {
   // Final checks
   console.log("\n=== Final State ===");
   const betSlip = await polybet.getBetSlip(betSlipId);
-  console.log(`BetSlip final collateral: ${betSlip.finalCollateral / 1_000_000} USDC`);
-  
+  console.log(
+    `BetSlip final collateral: ${betSlip.finalCollateral / 1_000_000} USDC`
+  );
+
   activeBets = await polybet.getUserActiveBetslips();
   const closedBets = await polybet.getUserClosedBets();
   console.log(`Active betslips: ${activeBets.length}`);
   console.log(`Closed betslips: ${closedBets.length}`);
-  console.log(`BetSlip ${betSlipId} is now closed: ${closedBets.includes(betSlipId)}`);
+  console.log(
+    `BetSlip ${betSlipId} is now closed: ${closedBets.includes(betSlipId)}`
+  );
 
   const userBalance = await polybet.getUserBalance();
   console.log(`\nUser balance: ${userBalance / 1_000_000} USDC`);
-  console.log(`Expected: 100 (won) + 0 (lost) + 50 (draw) + 50 (void) = 200 USDC`);
+  console.log(
+    `Expected: 100 (won) + 0 (lost) + 50 (draw) + 50 (void) = 200 USDC`
+  );
 
   // Verify individual proxied bet states
   console.log("\n=== Verifying proxied bet states ===");
   for (let i = 0; i < proxiedBets.length; i++) {
     const proxiedBet = await polybet.getProxiedBet(proxiedBets[i].id);
-    const outcomeStr = ['None', 'Placed', 'Failed', 'Sold', 'Won', 'Lost', 'Draw', 'Void'][proxiedBet.outcome];
-    console.log(`Bet ${i + 1}: ${outcomeStr}, Final amount: ${proxiedBet.finalCollateralAmount / 1_000_000} USDC`);
+    const outcomeStr = [
+      "None",
+      "Placed",
+      "Failed",
+      "Sold",
+      "Won",
+      "Lost",
+      "Draw",
+      "Void",
+    ][proxiedBet.outcome];
+    console.log(
+      `Bet ${i + 1}: ${outcomeStr}, Final amount: ${proxiedBet.finalCollateralAmount / 1_000_000} USDC`
+    );
   }
 }
 

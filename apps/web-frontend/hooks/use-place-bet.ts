@@ -1,14 +1,20 @@
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseUnits, pad, Hex } from "viem";
-import { toast } from "sonner";
-import { polybetsContractAddress } from "polybets-common";
 import { polyBetAbi } from "@/lib/abi/polyBet";
-import { useRef } from "react";
-import { readContract, waitForTransactionReceipt, writeContract as writeContractAction } from "wagmi/actions";
-import { erc20Abi } from "viem";
 import { wagmiAdapter } from "@/lib/wagmi";
-import { useAccount } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
+import { polybetsContractAddress } from "polybets-common/src/config";
+import { useRef } from "react";
+import { toast } from "sonner";
+import { erc20Abi, Hex, pad, parseUnits } from "viem";
+import {
+  useAccount,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import {
+  readContract,
+  waitForTransactionReceipt,
+  writeContract as writeContractAction,
+} from "wagmi/actions";
 
 export interface Market {
   id: number;
@@ -71,16 +77,19 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
     },
   });
 
-  const { isLoading: isTxConfirming, isSuccess: isTxConfirmed, data: txReceipt } =
-    useWaitForTransactionReceipt({
-      hash: txHash,
-      onReplaced: (replacement) => {
-        console.error("Transaction Replaced", replacement);
-        toast.error("Transaction Replaced", {
-          description: `Transaction was ${replacement.reason}`,
-        });
-      },
-    });
+  const {
+    isLoading: isTxConfirming,
+    isSuccess: isTxConfirmed,
+    data: txReceipt,
+  } = useWaitForTransactionReceipt({
+    hash: txHash,
+    onReplaced: (replacement) => {
+      console.error("Transaction Replaced", replacement);
+      toast.error("Transaction Replaced", {
+        description: `Transaction was ${replacement.reason}`,
+      });
+    },
+  });
 
   // Show success toast when transaction is confirmed (only once)
   if (isTxConfirmed && txReceipt && !successToastShown.current) {
@@ -120,7 +129,10 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
         address: musdcTokenAddress,
         abi: erc20Abi,
         functionName: "allowance",
-        args: [address as `0x${string}`, polybetsContractAddress as `0x${string}`],
+        args: [
+          address as `0x${string}`,
+          polybetsContractAddress as `0x${string}`,
+        ],
       })) as bigint;
 
       if (currentAllowance >= totalCollateralAmount) return; // already approved
@@ -135,7 +147,9 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
         functionName: "approve",
         args: [
           polybetsContractAddress as `0x${string}`,
-          BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+          BigInt(
+            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          ),
         ],
       })) as `0x${string}`;
 
@@ -153,7 +167,8 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
   });
 
   // Derive loading state (includes approval mutation)
-  const isPlacingBet = approveMutation.isPending || isWritePending || isTxConfirming;
+  const isPlacingBet =
+    approveMutation.isPending || isWritePending || isTxConfirming;
 
   // Helper to encode number/string to bytes32 (left-padded)
   const toBytes32 = (value: number | bigint | string): Hex => {
@@ -170,13 +185,13 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
     if (/^\d+$/.test(marketplaceId)) {
       return BigInt(marketplaceId);
     }
-    
+
     // For string identifiers like "Polybet", we need to hash them or use a mapping
     // For now, let's create a simple hash of the string
     let hash = 0;
     for (let i = 0; i < marketplaceId.length; i++) {
       const char = marketplaceId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return BigInt(Math.abs(hash));
@@ -218,12 +233,7 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
         address: polybetsContractAddress,
         abi: polyBetAbi,
         functionName: "placeBet",
-        args: [
-          strategyEnum,
-          totalCollateralAmount,
-          marketplaceIds,
-          marketIds,
-        ],
+        args: [strategyEnum, totalCollateralAmount, marketplaceIds, marketIds],
       });
     } catch (error) {
       console.log("Error", error);

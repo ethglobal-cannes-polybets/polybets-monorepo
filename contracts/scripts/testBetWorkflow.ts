@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { polybetsContractAddress } from "polybets-common";
+import { polybetsContractAddress } from "polybets-common/src/config";
 
 enum BetSlipStrategy {
   MaximizeShares,
@@ -14,7 +14,7 @@ enum BetOutcome {
   Won,
   Lost,
   Draw,
-  Void
+  Void,
 }
 
 async function main() {
@@ -39,7 +39,9 @@ async function main() {
 
   // Approve mUSDC spending
   console.log("Approving mUSDC spending...");
-  const approveTx = await musdc.connect(testacct).approve(polybetsContractAddress, totalCollateralAmount);
+  const approveTx = await musdc
+    .connect(testacct)
+    .approve(polybetsContractAddress, totalCollateralAmount);
   await approveTx.wait();
   console.log("Approval complete");
 
@@ -56,16 +58,13 @@ async function main() {
     ethers.zeroPadValue(ethers.toBeHex(118), 32), // market 118
   ];
 
-  const tx = await polybet.connect(testacct).placeBet(
-    strategy,
-    totalCollateralAmount,
-    marketplaceIds,
-    marketIds
-  );
-  
+  const tx = await polybet
+    .connect(testacct)
+    .placeBet(strategy, totalCollateralAmount, marketplaceIds, marketIds);
+
   const receipt = await tx.wait();
   console.log("Bet placed successfully!");
-  
+
   // Get the betSlipId from the event
   const betSlipCreatedEvent = receipt.logs.find(
     (log: any) => log.eventName === "BetSlipCreated"
@@ -79,8 +78,10 @@ async function main() {
   console.log(`Number of markets: ${betSlip.marketplaceIds.length}`);
 
   // Step 2: Simulate BetRouter recording proxied bets
-  console.log("\n=== Step 2: Recording proxied bets (simulating BetRouter) ===");
-  
+  console.log(
+    "\n=== Step 2: Recording proxied bets (simulating BetRouter) ==="
+  );
+
   // In real scenario, BetRouter would split the 100 USDC across markets
   // Let's say it splits: 40 USDC, 35 USDC, 25 USDC
   const proxiedBets = [
@@ -97,7 +98,7 @@ async function main() {
       sharesBought: 50, // Got 50 shares for 40 USDC
       sharesSold: 0,
       outcome: BetOutcome.Placed,
-      failureReason: ""
+      failureReason: "",
     },
     {
       id: ethers.keccak256(ethers.toUtf8Bytes(`bet-${betSlipId}-1`)),
@@ -112,7 +113,7 @@ async function main() {
       sharesBought: 42, // Got 42 shares for 35 USDC
       sharesSold: 0,
       outcome: BetOutcome.Placed,
-      failureReason: ""
+      failureReason: "",
     },
     {
       id: ethers.keccak256(ethers.toUtf8Bytes(`bet-${betSlipId}-2`)),
@@ -127,15 +128,20 @@ async function main() {
       sharesBought: 30, // Got 30 shares for 25 USDC
       sharesSold: 0,
       outcome: BetOutcome.Placed,
-      failureReason: ""
-    }
+      failureReason: "",
+    },
   ];
 
   // Record each proxied bet
   for (const proxiedBet of proxiedBets) {
-    const recordTx = await polybet.recordProxiedBetPlaced(betSlipId, proxiedBet);
+    const recordTx = await polybet.recordProxiedBetPlaced(
+      betSlipId,
+      proxiedBet
+    );
     await recordTx.wait();
-    console.log(`Recorded proxied bet ${proxiedBet.id.substring(0, 10)}... on market ${proxiedBet.marketId}`);
+    console.log(
+      `Recorded proxied bet ${proxiedBet.id.substring(0, 10)}... on market ${proxiedBet.marketId}`
+    );
   }
 
   // Check bet slip after placing proxied bets
@@ -143,8 +149,10 @@ async function main() {
   console.log(`\nBetSlip now has ${betSlip.proxiedBets.length} proxied bets`);
 
   // Step 3: Simulate markets closing and recording outcomes
-  console.log("\n=== Step 3: Closing proxied bets (simulating market resolution) ===");
-  
+  console.log(
+    "\n=== Step 3: Closing proxied bets (simulating market resolution) ==="
+  );
+
   // Let's say: bet 1 wins, bet 2 loses, bet 3 wins
   const outcomes = [
     { betId: proxiedBets[0].id, outcome: BetOutcome.Won, winnings: 80_000_000 }, // Won 80 USDC
@@ -159,15 +167,23 @@ async function main() {
       result.winnings
     );
     await closeTx.wait();
-    console.log(`Closed bet ${result.betId.substring(0, 10)}... - Outcome: ${result.outcome === BetOutcome.Won ? 'Won' : 'Lost'}, Winnings: ${ethers.formatUnits(result.winnings, 6)} USDC`);
+    console.log(
+      `Closed bet ${result.betId.substring(0, 10)}... - Outcome: ${result.outcome === BetOutcome.Won ? "Won" : "Lost"}, Winnings: ${ethers.formatUnits(result.winnings, 6)} USDC`
+    );
   }
 
   // Check final state
   console.log("\n=== Final State ===");
   betSlip = await polybet.getBetSlip(betSlipId);
-  console.log(`BetSlip final collateral: ${ethers.formatUnits(betSlip.finalCollateral, 6)} USDC`);
-  console.log(`Total winnings: ${(80_000_000 + 0 + 45_000_000) / 1_000_000} USDC`);
-  console.log(`Net profit/loss: ${((80_000_000 + 0 + 45_000_000) - 100_000_000) / 1_000_000} USDC`);
+  console.log(
+    `BetSlip final collateral: ${ethers.formatUnits(betSlip.finalCollateral, 6)} USDC`
+  );
+  console.log(
+    `Total winnings: ${(80_000_000 + 0 + 45_000_000) / 1_000_000} USDC`
+  );
+  console.log(
+    `Net profit/loss: ${(80_000_000 + 0 + 45_000_000 - 100_000_000) / 1_000_000} USDC`
+  );
 
   // Check user balance
   const userBalance = await polybet.connect(testacct).getUserBalance();

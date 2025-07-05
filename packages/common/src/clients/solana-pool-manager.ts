@@ -1,4 +1,3 @@
-import * as anchor from "@coral-xyz/anchor";
 import { AnchorProvider, BN, Program, Wallet } from "@coral-xyz/anchor";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -84,7 +83,7 @@ const PROGRAM_ID = new PublicKey("11111111111111111111111111111111");
 // This should be defined based on the anchor IDL
 // I am defining a placeholder based on the user's snippet
 export interface LmsrPool {
-  originalPoolId: anchor.BN;
+  originalPoolId: BN;
   creatorAuthority: PublicKey;
   usdcMint: PublicKey;
   pointsMint: PublicKey;
@@ -92,28 +91,28 @@ export interface LmsrPool {
   noLmsrUsdcMint: PublicKey;
   yesLmsrPointsMint: PublicKey;
   noLmsrPointsMint: PublicKey;
-  initialLiquidityYesUsdc: anchor.BN;
-  initialLiquidityNoUsdc: anchor.BN;
-  initialLiquidityYesPoints: anchor.BN;
-  initialLiquidityNoPoints: anchor.BN;
-  bUsdc: anchor.BN;
-  initialQYesUsdc: anchor.BN;
-  initialQNoUsdc: anchor.BN;
-  initialPriceYesUsdc: anchor.BN;
-  initialPriceNoUsdc: anchor.BN;
-  actualMaxLossUsdc: anchor.BN;
-  yesUsdcCurrentSupply: anchor.BN;
-  noUsdcCurrentSupply: anchor.BN;
-  yesPointsCurrentSupply: anchor.BN;
-  noPointsCurrentSupply: anchor.BN;
-  bPoints: anchor.BN;
-  initialQYesPoints: anchor.BN;
-  initialQNoPoints: anchor.BN;
-  initialPriceYesPoints: anchor.BN;
-  initialPriceNoPoints: anchor.BN;
-  actualMaxLossPoints: anchor.BN;
-  feesCollectedUsdc: anchor.BN;
-  feesCollectedPoints: anchor.BN;
+  initialLiquidityYesUsdc: BN;
+  initialLiquidityNoUsdc: BN;
+  initialLiquidityYesPoints: BN;
+  initialLiquidityNoPoints: BN;
+  bUsdc: BN;
+  initialQYesUsdc: BN;
+  initialQNoUsdc: BN;
+  initialPriceYesUsdc: BN;
+  initialPriceNoUsdc: BN;
+  actualMaxLossUsdc: BN;
+  yesUsdcCurrentSupply: BN;
+  noUsdcCurrentSupply: BN;
+  yesPointsCurrentSupply: BN;
+  noPointsCurrentSupply: BN;
+  bPoints: BN;
+  initialQYesPoints: BN;
+  initialQNoPoints: BN;
+  initialPriceYesPoints: BN;
+  initialPriceNoPoints: BN;
+  actualMaxLossPoints: BN;
+  feesCollectedUsdc: BN;
+  feesCollectedPoints: BN;
   bump: number;
   feeRateBasisPoints: number;
 }
@@ -124,8 +123,10 @@ export class SolanaPoolManager {
     Variant1IDL | Variant2IDL | Variant3IDL | Variant4IDL
   > | null = null;
   private provider: AnchorProvider;
-  private wallet: Wallet;
-  private authorityWallet: Wallet | null = null;
+  private wallet: import("@coral-xyz/anchor/dist/cjs/provider").Wallet;
+  private authorityWallet:
+    | import("@coral-xyz/anchor/dist/cjs/provider").Wallet
+    | null = null;
   private marketplace: MarketplaceConfig;
   private variant: "variant1" | "variant2" | "variant3" | "variant4";
   private programId: PublicKey;

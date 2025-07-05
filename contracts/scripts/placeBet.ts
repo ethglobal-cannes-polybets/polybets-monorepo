@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { polybetsContractAddress } from "polybets-common";
+import { polybetsContractAddress } from "polybets-common/src/config";
 
 enum BetSlipStrategy {
   MaximizeShares,
