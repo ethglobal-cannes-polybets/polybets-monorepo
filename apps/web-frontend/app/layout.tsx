@@ -4,6 +4,7 @@ import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { Toaster } from "sonner";
 import { headers } from "next/headers";
 import { AppKitProvider } from "@/providers/appkit-provider";
 
@@ -43,6 +44,13 @@ export default async function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          <Toaster 
+            position="top-left"
+            offset={16}
+            toastOptions={{
+              className: "border border-foreground/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 rounded-lg shadow-lg",
+            }}
+          />
         </AppKitProvider>
       </body>
     </html>

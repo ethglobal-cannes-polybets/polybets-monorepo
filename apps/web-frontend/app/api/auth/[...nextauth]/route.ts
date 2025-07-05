@@ -6,8 +6,13 @@ import {
   getChainIdFromMessage,
   getAddressFromMessage,
 } from "@reown/appkit-siwe";
-import { createPublicClient, http, parseSignature as viemParseSignature } from "viem";
-import { PolyBet__factory } from "../../../../../../contracts/typechain-types/factories/contracts/polybet.sol/PolyBet__factory";
+import {
+  createPublicClient,
+  http,
+  parseSignature as viemParseSignature,
+  type Abi,
+} from "viem";
+import { polyBetAbi } from "@/lib/abi/polyBet";
 import { polybetsContractAddress } from "polybets-common";
 
 declare module "next-auth" {
@@ -84,7 +89,7 @@ const providers = [
             });
 
             authToken = (await sapphireClient.readContract({
-              abi: PolyBet__factory.abi,
+              abi: polyBetAbi as Abi,
               address: polybetsContractAddress as `0x${string}`,
               functionName: "login",
               args: [message, { r: r as `0x${string}`, s: s as `0x${string}`, v: v as bigint }],

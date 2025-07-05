@@ -4,5 +4,11 @@
     "packages/*",
     "apps/*",
     "contracts"
+  ],
+  "trustedDependencies": [
+    "@arbitrum/nitro-contracts",
+    "@reown/appkit",
+    "protobufjs",
+    "unrs-resolver"
   ]
 }

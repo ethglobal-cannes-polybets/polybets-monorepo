@@ -8,7 +8,7 @@ import MarketCard from "@/components/market-card";
 import type { Market, Platform } from "@/components/market-card";
 import { SearchIcon, ArrowRight } from "lucide-react";
 import { BettingSidebar } from "@/components/betting-sidebar";
-import type { Market as SidebarMarket } from "@/components/betting-sidebar";
+import type { Market as SidebarMarket } from "@/hooks/use-place-bet";
 import { useState, useEffect } from "react";
 import { GroupedMarket } from "@/types/markets";
 import { motion, AnimatePresence } from "motion/react";
@@ -51,16 +51,6 @@ export default function HomeClient({ groupedMarkets }: HomeClientProps) {
       setSelectedOutcome("no");
       setSidebarOpen(true);
     }
-  };
-
-  const handlePlaceBet = async (
-    betData: Parameters<
-      NonNullable<React.ComponentProps<typeof BettingSidebar>["onPlaceBet"]>
-    >[0]
-  ) => {
-    // eslint-disable-next-line no-console
-    console.log("Placing bet:", betData);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
   };
 
   const categories = [
@@ -174,8 +164,12 @@ export default function HomeClient({ groupedMarkets }: HomeClientProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={() => setSidebarOpen(false)}
-              onWheel={(e: React.WheelEvent<HTMLDivElement>) => e.preventDefault()}
-              onTouchMove={(e: React.TouchEvent<HTMLDivElement>) => e.preventDefault()}
+              onWheel={(e: React.WheelEvent<HTMLDivElement>) =>
+                e.preventDefault()
+              }
+              onTouchMove={(e: React.TouchEvent<HTMLDivElement>) =>
+                e.preventDefault()
+              }
             />
             <BettingSidebar
               key="sidebar"
@@ -187,7 +181,6 @@ export default function HomeClient({ groupedMarkets }: HomeClientProps) {
               }}
               initialOutcome={selectedOutcome}
               relatedMarkets={sidebarRelatedMarkets}
-              onPlaceBet={handlePlaceBet}
               onClose={() => setSidebarOpen(false)}
               isSticky={false}
             />

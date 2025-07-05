@@ -397,50 +397,52 @@ export default function PortfolioPage() {
               </div>
             ))}
           </div>
-          {betSlip.autoArbitrage && (betSlip.arbitrageHistory?.length ?? 0) > 0 && (
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-foreground/10">
-                <AccordionTrigger className="text-sm font-bold text-primary hover:no-underline uppercase">
-                  Show Arbitrage History ({betSlip.arbitrageHistory?.length ?? 0})
-                </AccordionTrigger>
-                <AccordionContent className="pt-2">
-                  <div className="space-y-3">
-                    {(betSlip.arbitrageHistory ?? []).map(
-                      (event: ArbitrageEvent, index: number) => (
-                        <div
-                          key={index}
-                          className="flex items-start gap-3 text-sm p-4 bg-accent/50 border border-foreground/10"
-                        >
-                          <Scale className="w-5 h-5 mt-0.5 text-primary flex-shrink-0" />
-                          <div className="flex-1 space-y-2">
-                            <p className="font-medium text-foreground leading-relaxed">
-                              {event.cause} → {event.action}
-                            </p>
-                            <div className="flex items-center gap-3 pt-3 mt-3 border-t border-foreground/10">
-                              <PlusCircle className="w-5 h-5 text-green-600" />
-                              <div>
-                                <p className="font-bold text-foreground font-heading">
-                                  +{formatCurrency(event.incrementalReturn)}{" "}
-                                  Incremental Return
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  Potential profit to be realized upon final
-                                  resolution.
-                                </p>
+          {betSlip.autoArbitrage &&
+            (betSlip.arbitrageHistory?.length ?? 0) > 0 && (
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1" className="border-foreground/10">
+                  <AccordionTrigger className="text-sm font-bold text-primary hover:no-underline uppercase">
+                    Show Arbitrage History (
+                    {betSlip.arbitrageHistory?.length ?? 0})
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-2">
+                    <div className="space-y-3">
+                      {(betSlip.arbitrageHistory ?? []).map(
+                        (event: ArbitrageEvent, index: number) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-3 text-sm p-4 bg-accent/50 border border-foreground/10"
+                          >
+                            <Scale className="w-5 h-5 mt-0.5 text-primary flex-shrink-0" />
+                            <div className="flex-1 space-y-2">
+                              <p className="font-medium text-foreground leading-relaxed">
+                                {event.cause} → {event.action}
+                              </p>
+                              <div className="flex items-center gap-3 pt-3 mt-3 border-t border-foreground/10">
+                                <PlusCircle className="w-5 h-5 text-green-600" />
+                                <div>
+                                  <p className="font-bold text-foreground font-heading">
+                                    +{formatCurrency(event.incrementalReturn)}{" "}
+                                    Incremental Return
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Potential profit to be realized upon final
+                                    resolution.
+                                  </p>
+                                </div>
                               </div>
+                              <p className="text-xs text-muted-foreground text-right pt-1">
+                                {formatDate(event.timestamp)}
+                              </p>
                             </div>
-                            <p className="text-xs text-muted-foreground text-right pt-1">
-                              {formatDate(event.timestamp)}
-                            </p>
                           </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
+                        )
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
           <Separator className="my-4" />
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground uppercase">
@@ -594,7 +596,8 @@ export default function PortfolioPage() {
           </TabsList>
           {Object.entries(statusConfig).map(([key]) => (
             <TabsContent key={key} value={key}>
-              {combinedBetSlips[key as keyof typeof combinedBetSlips].length === 0 ? (
+              {combinedBetSlips[key as keyof typeof combinedBetSlips].length ===
+              0 ? (
                 <div className="text-center py-16">
                   <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
                   <h3 className="text-lg font-bold mb-2 uppercase">
@@ -606,9 +609,11 @@ export default function PortfolioPage() {
                 </div>
               ) : (
                 <div>
-                  {(combinedBetSlips[key as keyof typeof combinedBetSlips] as BetSlipMock[]).map(
-                    (betSlip) => renderBetSlip(betSlip, key)
-                  )}
+                  {(
+                    combinedBetSlips[
+                      key as keyof typeof combinedBetSlips
+                    ] as BetSlipMock[]
+                  ).map((betSlip) => renderBetSlip(betSlip, key))}
                 </div>
               )}
             </TabsContent>
