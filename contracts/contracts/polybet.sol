@@ -112,6 +112,12 @@ contract PolyBet is SiweAuth, Ownable {
     ) external {
         require(marketplaceIds.length == marketIds.length, "Array lengths must match");
         require(totalCollateralAmount > 0, "Collateral amount must be greater than 0");
+        
+        // Check each marketplaceId is valid
+        for (uint256 i = 0; i < marketplaceIds.length; i++) {
+            uint256 marketplaceIdUint = uint256(marketplaceIds[i]);
+            require(marketplaceIdUint < marketplaces.length, "Invalid marketplace ID");
+        }
 
         musdcToken.safeTransferFrom(msg.sender, address(this), totalCollateralAmount);
         
@@ -128,9 +134,8 @@ contract PolyBet is SiweAuth, Ownable {
             proxiedBets: new bytes32[](0)
         }));
         betslipsToBettor[betSlipId] = msg.sender;
-
-        collateralAmount += totalCollateralAmount;
         userActiveBetSlips[msg.sender].push(betSlipId);
+        collateralAmount += totalCollateralAmount;
         emit BetSlipCreated(betSlipId, totalCollateralAmount, marketplaceIds, marketIds);
     }
 
@@ -210,18 +215,18 @@ contract PolyBet is SiweAuth, Ownable {
         revert("not implemented");
     }
 
-    function recordProxiedBetPlaced(
-      uint betSlipId,
-      ProxiedBet memory proxiedBet) public onlyOwner {
-        betSlips[betSlipId].proxiedBets.push(proxiedBet.id);
-        proxiedBets[proxiedBet.id] = proxiedBet;
-    }
-
     function recordProxiedBetSold(
       uint,
       uint,
       uint) public view onlyOwner {
         revert("not implemented");
+    }
+
+    function recordProxiedBetPlaced(
+      uint betSlipId,
+      ProxiedBet memory proxiedBet) public onlyOwner {
+        betSlips[betSlipId].proxiedBets.push(proxiedBet.id);
+        proxiedBets[proxiedBet.id] = proxiedBet;
     }
 
     function recordProxiedBetClosed(
