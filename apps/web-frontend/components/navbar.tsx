@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MenuIcon } from "lucide-react";
-import { Icons } from "@/components/icons";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAccount } from "wagmi";
 import WalletButton from "./wallet-button";
@@ -22,8 +22,14 @@ export default function Navbar() {
           {/* Left side - Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <Icons.logo className="h-8 w-8" />
-              <span className="font-bold font-heading">POLYBET</span>
+              <Image
+                src="/polybet-logo.svg"
+                alt="Polybet Logo"
+                width={116}
+                height={24}
+                className="h-6 w-auto"
+                priority
+              />
             </Link>
           </div>
 
@@ -40,9 +46,12 @@ export default function Navbar() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="pr-0">
-                <Link href="/" className="mb-6 flex items-center space-x-2">
-                  <Icons.logo className="h-8 w-8" />
-                  <span className="font-bold font-heading">POLYBET</span>
+                <Link href="/" className="mb-6 flex items-center">
+                  <Image
+                    src="/polybet-logo.svg"
+                    alt="Polybet Logo"
+                    className="h-6 w-auto"
+                  />
                 </Link>
                 <div className="flex flex-col space-y-4">
                   {!isConnected ? (
