@@ -1,4 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
+import { TokenType } from "./clients/solana-pool-manager";
+
 
 // Marketplace configuration
 export interface MarketplaceConfig {

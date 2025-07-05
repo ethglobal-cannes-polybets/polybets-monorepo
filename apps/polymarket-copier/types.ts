@@ -137,7 +137,7 @@ export type RephrasedMarket = z.infer<typeof RephrasedMarketSchema>;
 export interface SuccessfulPoolInfo {
   marketId: string;
   marketplaceName: string;
-  poolId: string;
+  poolId: number;
   timestamp: Date;
   rephrasedMarket: RephrasedMarket;
   programId: string;
@@ -168,7 +168,7 @@ export interface ProcessingResult {
   success: boolean;
   marketId: string;
   marketplaceName: string;
-  poolId?: string;
+  poolId?: number;
   rephrasedMarket?: RephrasedMarket;
   oddsCalculation?: OddsCalculation;
   error?: string;

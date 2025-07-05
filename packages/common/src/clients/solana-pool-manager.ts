@@ -45,6 +45,8 @@ import type { BettingPools2 as Variant2IDL } from "../artifacts/variant2_betting
 // Constants from the IDL files
 const VARIANT1_PROGRAM_ID = "Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb";
 const VARIANT2_PROGRAM_ID = "9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY";
+const VARIANT3_PROGRAM_ID = "4x33dYAwq2fprVaiakJjrGwxdu36JhJUCoegximvALyy";
+const VARIANT4_PROGRAM_ID = "EWwuoaLcycGPMQWg8Xbyg5x2HVdNWgPF5AwZNRPibeWz";
 
 // PDA seeds (from the IDL)
 const YES_USDC_MINT_SEED = Buffer.from("yes_usdc_mint");
@@ -233,7 +235,7 @@ export class SolanaPoolManager {
    */
   async createPool(
     args: CreatePoolArgs
-  ): Promise<{ poolId: string; pdas: PoolPDAs }> {
+  ): Promise<{ poolId: number; pdas: PoolPDAs }> {
     if (!this.program) {
       throw new Error("Program not initialized");
     }
@@ -363,7 +365,7 @@ export class SolanaPoolManager {
         .add(createPoolIx);
       const tx = await this.provider.sendAndConfirm(transaction);
 
-      const poolId = `${nextPoolId.toString()}`;
+      const poolId = parseInt(nextPoolId.toString());
 
       console.log(`✅ Pool created successfully: ${poolId}`);
       console.log(`   Transaction: ${tx}`);
@@ -385,7 +387,7 @@ export class SolanaPoolManager {
    * @returns Promise<{yesTransactionId: string, noTransactionId: string}>
    */
   async placeBets(
-    poolId: string,
+    poolId: number,
     oddsCalculation: OddsCalculation,
     pdas: PoolPDAs
   ): Promise<{ yesTransactionId: string; noTransactionId: string }> {
@@ -454,7 +456,7 @@ export class SolanaPoolManager {
    * @returns Promise<string> - Transaction ID
    */
   private async placeBet(
-    poolId: string,
+    poolId: number,
     optionIndex: number,
     amount: number,
     tokenType: TokenType,
@@ -480,11 +482,7 @@ export class SolanaPoolManager {
     const nextBetId = bettingPoolsState.nextBetId;
 
     // Generate bet PDA
-    const poolIdParts = poolId.split("_");
-    if (poolIdParts.length < 2 || !poolIdParts[1]) {
-      throw new Error(`Invalid pool ID format: ${poolId}`);
-    }
-    const poolIdNum = parseInt(poolIdParts[1]);
+    const poolIdNum = poolId;
     const [betPda] = PublicKey.findProgramAddressSync(
       [
         BET_SEED,
@@ -733,7 +731,9 @@ export class SolanaPoolManager {
       // Check if the program ID matches one of our known variants
       const isValidProgram =
         this.marketplace.programId === VARIANT1_PROGRAM_ID ||
-        this.marketplace.programId === VARIANT2_PROGRAM_ID;
+        this.marketplace.programId === VARIANT2_PROGRAM_ID ||
+        this.marketplace.programId === VARIANT3_PROGRAM_ID ||
+        this.marketplace.programId === VARIANT4_PROGRAM_ID;
 
       if (!isValidProgram) {
         console.error(`Invalid program ID: ${this.marketplace.programId}`);
@@ -826,7 +826,7 @@ export class SolanaPoolManager {
    * @param pdas - The pool PDAs
    * @returns Promise<string> - Transaction ID
    */
-  async migrateToLmsr(poolId: string, pdas: PoolPDAs): Promise<string> {
+  async migrateToLmsr(poolId: number, pdas: PoolPDAs): Promise<string> {
     if (!this.program) {
       throw new Error("Program not initialized");
     }
@@ -856,11 +856,7 @@ export class SolanaPoolManager {
       console.log(`🕊️  Migrating pool ${poolId} to LMSR...`);
       console.log(`   Using migrator: ${migrationWallet.publicKey.toString()}`);
 
-      const poolIdParts = poolId.split("_");
-      if (poolIdParts.length < 2 || !poolIdParts[1]) {
-        throw new Error(`Invalid pool ID format: ${poolId}`);
-      }
-      const poolIdBN = new BN(parseInt(poolIdParts[1], 10));
+      const poolIdBN = new BN(poolId);
       const poolIdBytes = poolIdBN.toBuffer("le", 8);
 
       const [lmsrPoolAddress] = PublicKey.findProgramAddressSync(

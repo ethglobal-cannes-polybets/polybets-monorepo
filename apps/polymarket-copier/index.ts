@@ -341,7 +341,7 @@ export class PolymarketCopier {
 
       // Step 4: Place bets to seed the pool
       console.log(`💰 Seeding pool with bets...`);
-      await poolManager.placeBets(poolId, oddsCalculation, pdas);
+      await poolManager.placeBets(Number(poolId), oddsCalculation, pdas);
 
       // Step 5: Migrate to LMSR if liquidity is sufficient
       if (marketplace.betAmountUsdc > 100) {
@@ -374,7 +374,7 @@ export class PolymarketCopier {
               `💸 Buying ${yesBuyAmount} usdc of LMSR shares for option 0 in pool ${poolId}`
             );
             const buyYesTx = await poolManager.buyLmsrShares(
-              poolId,
+              Number(poolId),
               0,
               yesBuyAmount,
               TokenType.Usdc
@@ -394,7 +394,7 @@ export class PolymarketCopier {
               `💸 Buying ${noBuyAmount} usdc of LMSR shares for option 1 in pool ${poolId}`
             );
             const buyNoTx = await poolManager.buyLmsrShares(
-              poolId,
+              Number(poolId),
               1,
               noBuyAmount,
               TokenType.Usdc
@@ -417,7 +417,7 @@ export class PolymarketCopier {
             `💸 Selling ${sharesToSell} of LMSR shares for option 1 in pool ${poolId}`
           );
           const sellTx = await poolManager.sellLmsrShares(
-            poolId,
+            Number(poolId),
             1, // Sell NO shares
             sharesToSell,
             TokenType.Usdc
