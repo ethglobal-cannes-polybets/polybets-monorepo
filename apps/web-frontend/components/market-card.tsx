@@ -25,6 +25,7 @@ export interface Market {
   title: string
   percentage: number
   volume: string
+  marketplaceId: number
 }
 
 interface MarketCardProps {

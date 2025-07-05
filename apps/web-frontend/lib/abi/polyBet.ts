@@ -978,4 +978,4 @@ export const polyBetAbi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-] as const;
+];

@@ -10,10 +10,8 @@ import { mockBinaryMarketData, mockPriceData } from "@/mockData/market-data"
 import type { MarketData } from "@/mockData/market-data"
 import { BarChart3, TrendingUp, Users, DollarSign, ArrowLeft } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
-import { BettingSidebar } from "@/components/betting-sidebar"
-import type {
-  Market as SidebarMarket,
-} from "@/components/betting-sidebar"
+import { BettingSidebar } from "@/components/betting-sidebar/betting-sidebar"
+import type { Market as SidebarMarket } from "@/hooks/use-place-bet"
 import { mockBetSlips } from "@/mockData/portfolio-data"
 
 type BetData = Parameters<
@@ -103,8 +101,13 @@ export default function BinaryMarketPage() {
   }
 
   const sidebarRelatedMarkets: SidebarMarket[] = marketData.platforms.map((p) => ({
-    ...p,
+    id: Number(p.id),
     marketplaceId: p.platform,
+    platform: p.platform,
+    title: p.title,
+    yesPrice: p.yesPrice,
+    noPrice: p.noPrice,
+    liquidity: p.liquidity,
     selected: false,
   }))
 
