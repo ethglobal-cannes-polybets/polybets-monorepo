@@ -4,6 +4,8 @@ import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { headers } from "next/headers";
+import { AppKitProvider } from "@/providers/appkit-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,16 +29,21 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const cookies = headersList.get("cookie");
+
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${spaceMono.variable} font-sans bg-background text-foreground`}
       >
-        <div className="flex min-h-screen flex-col">
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+        <AppKitProvider cookies={cookies}>
+          <div className="flex min-h-screen flex-col">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+        </AppKitProvider>
       </body>
     </html>
   );
