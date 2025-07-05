@@ -52,6 +52,7 @@ export interface PolymarketMarket {
   question: string;
   conditionId: string;
   slug: string;
+  url?: string;
   twitterCardImage?: string;
   endDate: string;
   category: string;
