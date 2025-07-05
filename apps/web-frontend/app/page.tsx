@@ -236,6 +236,60 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
     await Promise.all(pricePromises)
   );
 
+  // --- Fetch trading volume for each external market (pool) in parallel ---
+  // For LMSR-based Solana markets the `marketId` field inside price_lookup_params corresponds
+  // to the on-chain pool_id that is also referenced by the `shares_*_all` views. We can therefore
+  // derive the 24h volume by summing the `payment_amount` column across both the
+  // `shares_bought_all` and `shares_sold_all` views for the given pool.
+  async function fetchPoolVolume(poolId: number): Promise<number> {
+    // Fetch buy-side volume
+    const { data: buyRows, error: buyErr } = await supabase
+      .from("shares_bought_all")
+      .select("payment_amount")
+      .eq("pool_id", poolId);
+
+    if (buyErr) throw new Error(buyErr.message);
+
+    // Fetch sell-side volume
+    const { data: sellRows, error: sellErr } = await supabase
+      .from("shares_sold_all")
+      .select("payment_amount")
+      .eq("pool_id", poolId);
+
+    if (sellErr) throw new Error(sellErr.message);
+
+    const sum = (rows: { payment_amount: number | null }[] | null) =>
+      (rows ?? []).reduce((acc, row) => acc + (row.payment_amount ?? 0), 0);
+
+    return sum(buyRows) + sum(sellRows);
+  }
+
+  type VolumeResult = readonly [number, number]; // [externalMarketId, volumeUSD]
+
+  const volumePromises: Promise<VolumeResult>[] = externalMarkets.map(async (ext) => {
+    const params = ext.price_lookup_params as
+      | { marketplaceId?: number | null; marketId?: number | null }
+      | null
+      | undefined;
+
+    // Validate presence of pool id
+    if (!params || params.marketId == null || Number.isNaN(Number(params.marketId))) {
+      return [ext.id, 0] as const;
+    }
+
+    try {
+      const volume = await fetchPoolVolume(Number(params.marketId));
+      return [ext.id, volume] as const;
+    } catch (error) {
+      console.error("Failed to fetch volume for external market", ext.id, error);
+      return [ext.id, 0] as const;
+    }
+  });
+
+  const volumeByExternalId = new Map<number, number>(
+    await Promise.all(volumePromises)
+  );
+
   // Debug logs can be re-enabled during development if needed
 
   const groupedMarkets: GroupedMarket[] = markets.map((marketRow) => {
@@ -284,11 +338,13 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
           Math.round((prices[0] / (prices[0] + prices[1])) * 100 * 10) / 10; // round to 1 decimal
       }
 
+      const volumeNumeric = volumeByExternalId.get(ext.id) ?? 0;
+
       marketEntries.push({
         platform,
         title: ext.question,
         percentage: yesPercentage,
-        volume: formatUsd(0), // TODO: replace with real volume when available
+        volume: formatUsd(volumeNumeric),
       });
     });
 
@@ -304,7 +360,18 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
                 10
             ) / 10
           : 50,
-      totalVolume: formatUsd(0), // TODO: replace with aggregated volume when available
+      totalVolume: formatUsd(
+        marketEntries.reduce((sum, m) => {
+          // Extract numeric value back from formatted string is error-prone; instead we use
+          // the `volumeByExternalId` map that holds the raw numbers.
+          return (
+            sum +
+            (volumeByExternalId.get(
+              relatedExternal.find((ext) => ext.question === m.title)?.id ?? 0
+            ) ?? 0)
+          );
+        }, 0)
+      ),
       category: "General", // TODO(fake): replace with real category once available
       markets: marketEntries,
     } satisfies GroupedMarket;

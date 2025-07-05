@@ -23,6 +23,18 @@ export const metadata: Metadata = {
   title: "Polybet - The Prediction Market Aggregator",
   description: "Bet on anything, anywhere. Your alpha, protected.",
   generator: "v0.dev",
+  icons: {
+    icon: [
+      { url: "/polybet-icon.png", type: "image/png", sizes: "32x32" },
+      { url: "/polybet-icon.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: [
+      { url: "/polybet-icon.png", type: "image/png", sizes: "32x32" },
+    ],
+    apple: [
+      { url: "/polybet-icon.png", type: "image/png", sizes: "180x180" },
+    ],
+  },
 };
 
 export default async function RootLayout({
