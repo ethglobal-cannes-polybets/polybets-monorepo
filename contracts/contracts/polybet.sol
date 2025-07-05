@@ -159,7 +159,7 @@ contract PolyBet is SiweAuth {
 
   function addMarketplace(uint64 chainId, ChainFamily family, string memory name, string memory marketplaceProxy) public {
     uint256 marketplaceId = nextMarketplaceId;
-    ++nextMarketplaceId;
+    ++nextMarketplaceId;    
     marketplaces.push(Marketplace({
       warpRouterId: 0,
       chainId: chainId,
