@@ -1,11 +1,15 @@
 async function main() {
-  const txHash = "0xa8cd3c9ba236a0e12fd7ac49c7577b01dc5349a7c02d54bd6e290836e7d68397";
+  const txHash = "0x8a7116a26acef1cd91546131e1d29551e0931d21e0c144dd27e2004bd1e1f82c";
   
   console.log(`Fetching transaction: ${txHash}`);
   
   const tx = await ethers.provider.getTransaction(txHash);
   
   if (tx) {
+    console.log("\nRaw Transaction (hex):");
+    console.log("==================");
+    console.log(tx);
+    
     console.log("\nTransaction Details:");
     console.log("==================");
     console.log(`Hash: ${tx.hash}`);
