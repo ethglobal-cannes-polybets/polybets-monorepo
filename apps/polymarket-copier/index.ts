@@ -93,7 +93,7 @@ export class PolymarketCopier {
               .insert({
                 common_question: market.question,
                 options: JSON.parse(market.outcomes),
-                url: market.url,
+                // TODO Add url here, should be the url to OUR app
               })
               .select()
               .single();
@@ -137,6 +137,7 @@ export class PolymarketCopier {
                       marketplaceId: marketplaceId,
                       marketId: creation.poolId,
                     },
+                    // URL will be for the external market, see notes, only Polymarket is going to be tricky
                   });
 
                 if (externalMarketError) {
