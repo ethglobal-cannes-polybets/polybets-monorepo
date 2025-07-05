@@ -1,7 +1,8 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const POLYBET_ADDRESS = process.env.POLYBET_ADDRESS || "0x633D59F15e588c4a5D8F2E35e4d65041191517AA";
+  const POLYBET_ADDRESS =
+    process.env.POLYBET_ADDRESS || "0xaecDA91C878735D6a24A53EbE9C2F7b6c47C9454";
   const MUSDC_ADDRESS = process.env.MUSDC_ADDRESS || "0xa65FAB615E26e84c51940259aD4BDba6B386d35E";
 
   console.log("Setting collateral token...");
