@@ -25,7 +25,7 @@ export default function Navbar() {
   const isPortfolioActive = pathname === "/portfolio";
 
   return (
-    <header className="sticky top-0 z-50 w-full ">
+    <header className="sticky top-0 z-10 w-full ">
       <div className="container mx-auto mt-4 flex h-20 items-center px-4 py-2 border border-foreground/20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex w-full items-center justify-between">
           {/* Left side - Logo */}
