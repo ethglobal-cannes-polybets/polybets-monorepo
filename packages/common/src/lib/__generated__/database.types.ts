@@ -118,6 +118,13 @@ export type Database = {
             foreignKeyName: "bonding_curve_bets_pool_id_fkey"
             columns: ["pool_id"]
             isOneToOne: false
+            referencedRelation: "pool_lmsr_data_view"
+            referencedColumns: ["pool_id"]
+          },
+          {
+            foreignKeyName: "bonding_curve_bets_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
             referencedRelation: "pools"
             referencedColumns: ["id"]
           },
@@ -201,6 +208,13 @@ export type Database = {
             foreignKeyName: "lmsr_payout_claimed_events_pool_id_fkey"
             columns: ["pool_id"]
             isOneToOne: false
+            referencedRelation: "pool_lmsr_data_view"
+            referencedColumns: ["pool_id"]
+          },
+          {
+            foreignKeyName: "lmsr_payout_claimed_events_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
             referencedRelation: "pools"
             referencedColumns: ["id"]
           },
@@ -252,6 +266,13 @@ export type Database = {
             columns: ["pool_id"]
             isOneToOne: false
             referencedRelation: "pool_details_view"
+            referencedColumns: ["pool_id"]
+          },
+          {
+            foreignKeyName: "lmsr_shares_bought_events_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pool_lmsr_data_view"
             referencedColumns: ["pool_id"]
           },
           {
@@ -315,6 +336,13 @@ export type Database = {
             foreignKeyName: "lmsr_shares_sold_events_pool_id_fkey"
             columns: ["pool_id"]
             isOneToOne: false
+            referencedRelation: "pool_lmsr_data_view"
+            referencedColumns: ["pool_id"]
+          },
+          {
+            foreignKeyName: "lmsr_shares_sold_events_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
             referencedRelation: "pools"
             referencedColumns: ["id"]
           },
@@ -322,6 +350,7 @@ export type Database = {
       }
       marketplaces: {
         Row: {
+          active: boolean | null
           address: string
           chain_family: string | null
           chain_id: number | null
@@ -333,6 +362,7 @@ export type Database = {
           warp_router_id: string | null
         }
         Insert: {
+          active?: boolean | null
           address: string
           chain_family?: string | null
           chain_id?: number | null
@@ -344,6 +374,7 @@ export type Database = {
           warp_router_id?: string | null
         }
         Update: {
+          active?: boolean | null
           address?: string
           chain_family?: string | null
           chain_id?: number | null
@@ -583,6 +614,23 @@ export type Database = {
       }
     }
     Views: {
+      bought_events_all: {
+        Row: {
+          created_at: number | null
+          fee_paid: number | null
+          id: string | null
+          lmsr_token_mint: string | null
+          lmsr_tokens_minted: number | null
+          option_index: number | null
+          payment_amount: number | null
+          payment_token_type: string | null
+          pool_id: number | null
+          source_schema: string | null
+          transaction_hash: string | null
+          user_address: string | null
+        }
+        Relationships: []
+      }
       pool_details_view: {
         Row: {
           bc_fee_paid: number | null
@@ -621,6 +669,72 @@ export type Database = {
           status: Database["public"]["Enums"]["poolstatus"] | null
           token_type: Database["public"]["Enums"]["tokentype"] | null
           winning_option: number | null
+        }
+        Relationships: []
+      }
+      pool_lmsr_data_view: {
+        Row: {
+          lmsr_no_token_supply: number | null
+          lmsr_no_tokens_burned: number | null
+          lmsr_no_tokens_minted: number | null
+          lmsr_no_usdc_initial_liquidity: number | null
+          lmsr_yes_token_supply: number | null
+          lmsr_yes_tokens_burned: number | null
+          lmsr_yes_tokens_minted: number | null
+          lmsr_yes_usdc_initial_liquidity: number | null
+          pool_id: number | null
+          status: Database["public"]["Enums"]["poolstatus"] | null
+        }
+        Relationships: []
+      }
+      shares_bought_all: {
+        Row: {
+          created_at: number | null
+          fee_paid: number | null
+          id: string | null
+          lmsr_token_mint: string | null
+          lmsr_tokens_minted: number | null
+          option_index: number | null
+          payment_amount: number | null
+          payment_token_type: string | null
+          pool_id: number | null
+          source_schema: string | null
+          transaction_hash: string | null
+          user_address: string | null
+        }
+        Relationships: []
+      }
+      shares_sold_all: {
+        Row: {
+          created_at: number | null
+          fee_paid: number | null
+          id: string | null
+          lmsr_token_mint: string | null
+          lmsr_tokens_burned: number | null
+          option_index: number | null
+          payment_amount: number | null
+          payment_token_type: string | null
+          pool_id: number | null
+          source_schema: string | null
+          transaction_hash: string | null
+          user_address: string | null
+        }
+        Relationships: []
+      }
+      sold_events_all: {
+        Row: {
+          created_at: number | null
+          fee_paid: number | null
+          id: string | null
+          lmsr_token_mint: string | null
+          lmsr_tokens_burned: number | null
+          option_index: number | null
+          payment_amount: number | null
+          payment_token_type: string | null
+          pool_id: number | null
+          source_schema: string | null
+          transaction_hash: string | null
+          user_address: string | null
         }
         Relationships: []
       }

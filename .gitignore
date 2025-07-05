@@ -10,7 +10,7 @@ node_modules
 
 # hardhat generated files
 contracts/cache
-contracts/artifacts
+#contracts/artifacts
 contracts/typechain-types
 package-lock.json
 bun.lock
