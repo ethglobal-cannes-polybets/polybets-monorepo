@@ -366,6 +366,7 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
         title: ext.question,
         percentage: yesPercentage,
         volume: formatUsd(volumeNumeric),
+        marketplaceId: params?.marketplaceId ?? 0,
       });
     });
 

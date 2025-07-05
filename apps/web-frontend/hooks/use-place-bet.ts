@@ -2,7 +2,7 @@ import { polyBetAbi } from "@/lib/abi/polyBet";
 import { wagmiAdapter } from "@/lib/wagmi";
 import { useMutation } from "@tanstack/react-query";
 import { polybetsContractAddress } from "polybets-common/src/config";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { erc20Abi, Hex, pad, parseUnits } from "viem";
 import {
@@ -15,6 +15,7 @@ import {
   waitForTransactionReceipt,
   writeContract as writeContractAction,
 } from "wagmi/actions";
+import React from "react";
 
 export interface Market {
   id: number;
@@ -39,6 +40,7 @@ export interface PlaceBetParams {
 
 export interface UsePlaceBetOptions {
   onError?: (error: Error) => void;
+  onSuccess?: (txHash: string) => void;
 }
 
 // Minimal ABI to read the MUSDC token address from the PolyBet contract
@@ -52,24 +54,29 @@ const polyBetReadAbi = [
   },
 ] as const;
 
-export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
-  const successToastShown = useRef(false);
+export function usePlaceBet({ onError, onSuccess }: UsePlaceBetOptions = {}) {
   const { address } = useAccount();
+  const [isActuallyApproving, setIsActuallyApproving] = useState(false);
+  const [isWaitingForSignature, setIsWaitingForSignature] = useState(false);
+  const successToastShown = useRef(false);
 
-  // Wagmi hooks for contract interaction
   const {
+    writeContract,
     data: txHash,
     isPending: isWritePending,
-    writeContract,
   } = useWriteContract({
     mutation: {
       onSuccess: (hash) => {
-        toast.success("Transaction Submitted", {
-          description: `Transaction hash: ${hash}`,
+        setIsWaitingForSignature(false);
+        console.log("Transaction Sent", hash);
+        toast.success("Transaction Sent", {
+          description: "Your bet transaction has been sent to the blockchain.",
         });
       },
       onError: (error) => {
-        toast.error("Transaction Failed", {
+        setIsWaitingForSignature(false);
+        console.error("Transaction Error", error);
+        toast.error("Transaction Error", {
           description: error.message,
         });
         onError?.(error);
@@ -80,6 +87,8 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
   const {
     isLoading: isTxConfirming,
     isSuccess: isTxConfirmed,
+    isError: isTxFailed,
+    error: txError,
     data: txReceipt,
   } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -92,18 +101,35 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
   });
 
   // Show success toast when transaction is confirmed (only once)
-  if (isTxConfirmed && txReceipt && !successToastShown.current) {
-    console.log("Transaction Confirmed", txReceipt);
-    successToastShown.current = true;
-    toast.success("Transaction Confirmed", {
-      description: `Your bet has been placed successfully! Block: ${txReceipt.blockNumber}`,
-    });
-  }
+  React.useEffect(() => {
+    if (isTxConfirmed && txReceipt && !successToastShown.current && txHash) {
+      console.log("Transaction Confirmed", txReceipt);
+      successToastShown.current = true;
+      toast.success("Transaction Confirmed", {
+        description: `Your bet has been placed successfully! Block: ${txReceipt.blockNumber}`,
+      });
+      onSuccess?.(txHash);
+    }
+  }, [isTxConfirmed, txReceipt, txHash, onSuccess]);
+
+  // Handle transaction failures
+  React.useEffect(() => {
+    if (isTxFailed && txError && txHash) {
+      console.error("Transaction Failed", txError);
+      const errorMessage = txError.message || "Transaction failed";
+      toast.error("Transaction Failed", {
+        description: errorMessage.includes("reverted") ? "Transaction was reverted by the contract" : errorMessage,
+      });
+      onError?.(new Error(errorMessage));
+    }
+  }, [isTxFailed, txError, txHash, onError]);
 
   // Reset the success toast flag when a new transaction starts
-  if (txHash && !isTxConfirmed && successToastShown.current) {
-    successToastShown.current = false;
-  }
+  React.useEffect(() => {
+    if (txHash && !isTxConfirmed && successToastShown.current) {
+      successToastShown.current = false;
+    }
+  }, [txHash, isTxConfirmed]);
 
   /* ----------------------------------------------------------------------
    * Approval mutation – checks allowance and sends approve tx if needed
@@ -135,7 +161,13 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
         ],
       })) as bigint;
 
-      if (currentAllowance >= totalCollateralAmount) return; // already approved
+      if (currentAllowance >= totalCollateralAmount) {
+        // Already approved, no need to show approval UI
+        return;
+      }
+
+      // Now we actually need approval - set the state
+      setIsActuallyApproving(true);
 
       toast.info("Approving mUSDC spend", {
         description: "Confirm the approval transaction in your wallet.",
@@ -157,18 +189,22 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
         hash: approveHash,
       });
 
+      setIsActuallyApproving(false);
+
       toast.success("Token approved", {
         description: "mUSDC approval confirmed.",
       });
     },
     onError: (error: Error) => {
+      setIsActuallyApproving(false);
       toast.error("Approval failed", { description: error.message });
     },
   });
 
-  // Derive loading state (includes approval mutation)
-  const isPlacingBet =
-    approveMutation.isPending || isWritePending || isTxConfirming;
+  // Derive granular loading states
+  const isApproving = isActuallyApproving;
+  const isSigning = isWaitingForSignature;
+  const isPlacingBet = isApproving || isSigning || isWritePending || isTxConfirming;
 
   // Helper to encode number/string to bytes32 (left-padded)
   const toBytes32 = (value: number | bigint | string): Hex => {
@@ -229,6 +265,11 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
       // Place bet now that allowance is sufficient
       // -----------------------------------------------------------------------
 
+      setIsWaitingForSignature(true);
+      toast.info("Sign Transaction", {
+        description: "Please sign the bet transaction in your wallet.",
+      });
+
       writeContract({
         address: polybetsContractAddress,
         abi: polyBetAbi,
@@ -244,6 +285,7 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
     } catch (error) {
       console.log("Error", error);
 
+      setIsWaitingForSignature(false);
       const err =
         error instanceof Error ? error : new Error("Failed to place bet");
       toast.error("Error", {
@@ -256,7 +298,10 @@ export function usePlaceBet({ onError }: UsePlaceBetOptions = {}) {
   return {
     placeBet,
     isPlacingBet,
+    isApproving,
+    isSigning,
     txHash,
     isTxConfirmed,
+    isTxFailed,
   };
 }

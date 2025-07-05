@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import MarketCard from "@/components/market-card";
 import type { Market, Platform } from "@/components/market-card";
 import { SearchIcon, ArrowRight } from "lucide-react";
-import { BettingSidebar } from "@/components/betting-sidebar";
+import { BettingSidebar } from "@/components/betting-sidebar/betting-sidebar";
 import type { Market as SidebarMarket } from "@/hooks/use-place-bet";
 import { useState, useEffect } from "react";
 import { GroupedMarket } from "@/types/markets";
@@ -66,7 +66,7 @@ export default function HomeClient({ groupedMarkets }: HomeClientProps) {
   const sidebarRelatedMarkets: SidebarMarket[] = selectedMarket
     ? selectedMarket.markets.map((m: Market) => ({
         id: selectedMarket.id,
-        marketplaceId: (m.platform as Platform).name,
+        marketplaceId: m.marketplaceId.toString(),
         platform: (m.platform as Platform).name,
         title: m.title,
         yesPrice: m.percentage / 100,

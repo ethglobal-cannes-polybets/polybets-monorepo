@@ -64,6 +64,8 @@ export function useActiveBetSlips() {
     })),
   });
 
+  console.log("betSlipResults", betSlipResults);
+
   /* --------------------------------------------------
    * 3) Combine ID + struct into a richer object array
    * -------------------------------------------------- */
