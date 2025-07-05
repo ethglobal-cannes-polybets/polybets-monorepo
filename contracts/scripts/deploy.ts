@@ -13,6 +13,8 @@ async function main() {
   const polybetAddress = await polybet.getAddress();
   console.log(`PolyBet deployed to: ${polybetAddress}`);
 
+  // Important that the array indices align with the Supabase integer ID
+  // because we embrace entropy
   const marketplaces = [
     {
       name: "Blank market to get around index misalign",
@@ -37,6 +39,18 @@ async function main() {
       chainId: 0, // Solana, chainId not used
       chainFamily: ChainFamily.SVM,
       marketplaceProxy: "9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY",
+    },
+    {
+      name: "Degen Execution Chamber",
+      chainId: 0, // Solana, chainId not used
+      chainFamily: ChainFamily.SVM,
+      marketplaceProxy: "4x33dYAwq2fprVaiakJjrGwxdu36JhJUCoegximvALyy",
+    },
+    {
+      name: "Nihilistic Prophet Syndicate",
+      chainId: 0, // Solana, chainId not used
+      chainFamily: ChainFamily.SVM,
+      marketplaceProxy: "EWwuoaLcycGPMQWg8Xbyg5x2HVdNWgPF5AwZNRPibeWz",
     },
   ];
 

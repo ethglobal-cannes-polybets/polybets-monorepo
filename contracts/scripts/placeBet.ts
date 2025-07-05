@@ -7,13 +7,16 @@ enum BetSlipStrategy {
 }
 
 // Generate random collateral amount between 1-10 USDC (in wei, USDC has 6 decimals)
-function getRandomCollateralAmount(): number {
+function getRandomCollateralAmount(): bigint {
   const min = 1_000_000; // 1 USDC
   const max = 10_000_000; // 10 USDC
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  return BigInt(Math.floor(Math.random() * (max - min + 1)) + min);
 }
 
 async function main() {
+  const musdcAddress =
+    process.env.SAPPHIRETESTNET_MUSDC_ADDRESS ||
+    "0xa65FAB615E26e84c51940259aD4BDba6B386d35E";
   // Get all signers (accounts)
   const signers = await ethers.getSigners();
 
@@ -21,8 +24,18 @@ async function main() {
     throw new Error("Need at least 4 accounts configured in hardhat.config.ts");
   }
 
+  // signers[0] is the mint authority for MUSDC
+  const mintAuthority = signers[0];
+
   // Use accounts 1, 2, and 3 (test accounts)
   const testAccounts = [signers[1], signers[2], signers[3]];
+
+  // Get mUSDC contract instance with mint authority
+  const musdcContract = await ethers.getContractAt(
+    "MockUSDC",
+    musdcAddress,
+    mintAuthority
+  );
 
   // Parameters for placeBet
   const strategy = BetSlipStrategy.MaximizeShares; // 0 - maximize shares strategy
@@ -53,11 +66,73 @@ async function main() {
 
     console.log(`\nAccount ${accountIndex} (${account.address}):`);
     console.log(
-      `Random Collateral Amount: ${totalCollateralAmount / 1_000_000} USDC`
+      `Random Collateral Amount: ${Number(totalCollateralAmount) / 1_000_000} USDC`
     );
 
     try {
-      // Get the contract instance for this specific account
+      // Get mUSDC contract instance for this user
+      const userMusdcContract = await ethers.getContractAt(
+        "MockUSDC",
+        musdcAddress,
+        account
+      );
+
+      // 1. Check user's MUSDC balance
+      const userBalance = await userMusdcContract.balanceOf(account.address);
+      console.log(
+        `Current MUSDC balance: ${Number(userBalance) / 1_000_000} USDC`
+      );
+
+      // 2. If they don't have enough, mint them the amount they need
+      if (userBalance < totalCollateralAmount) {
+        const amountToMint = totalCollateralAmount - userBalance;
+        console.log(
+          `Insufficient balance. Minting ${Number(amountToMint) / 1_000_000} USDC...`
+        );
+
+        const mintTx = await musdcContract.mint(account.address, amountToMint);
+        await mintTx.wait();
+        console.log("Minted successfully!");
+
+        // Verify new balance
+        const newBalance = await userMusdcContract.balanceOf(account.address);
+        console.log(
+          `New MUSDC balance: ${Number(newBalance) / 1_000_000} USDC`
+        );
+      }
+
+      // 3. Check the user's approved amount for the PolyBet contract
+      const currentAllowance = await userMusdcContract.allowance(
+        account.address,
+        polybetsContractAddress
+      );
+      console.log(
+        `Current allowance: ${Number(currentAllowance) / 1_000_000} USDC`
+      );
+
+      // 4. If their approval is too low, approve 10x the amount they want to bet
+      if (currentAllowance < totalCollateralAmount) {
+        const approvalAmount = totalCollateralAmount * 10n; // 10x the bet amount
+        console.log(
+          `Insufficient allowance. Approving ${Number(approvalAmount) / 1_000_000} USDC...`
+        );
+
+        const approveTx = await userMusdcContract.approve(
+          polybetsContractAddress,
+          approvalAmount
+        );
+        await approveTx.wait();
+        console.log("Approved successfully!");
+
+        // Verify new allowance
+        const newAllowance = await userMusdcContract.allowance(
+          account.address,
+          polybetsContractAddress
+        );
+        console.log(`New allowance: ${Number(newAllowance) / 1_000_000} USDC`);
+      }
+
+      // 5. Get the PolyBet contract instance for this specific account and place the bet
       const polybet = await ethers.getContractAt(
         "PolyBet",
         polybetsContractAddress,
