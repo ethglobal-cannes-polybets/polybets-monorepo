@@ -10,11 +10,19 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "Where dreams get butchered and only the most ruthless degenerates survive. Your portfolio's funeral starts here.",
     programId: "Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb", // Variant 1 program ID
     keypair:
+<<<<<<< HEAD
+      process.env.OPERATIONS_KEYPAIR ||
+      "/Users/adoll/.config/solana/canibeton-cannes.json",
+    authorityKeypair:
+      process.env.MIGRATE_KEYPAIR ||
+      "/Users/adoll/.config/solana/canibeton.json",
+=======
       // process.env.OPERATIONS_KEYPAIR ||
       "~/.config/solana/canibeton-cannes.json",
     authorityKeypair:
       // process.env.MIGRATE_KEYPAIR ||
       "~/.config/solana/canibeton.json",
+>>>>>>> main
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||

@@ -106,4 +106,6 @@ const terminalDegenRoutes = createMarketplaceRoutes(
 app.route("/slaughterhouse-predictions", slaughterhouseRoutes);
 app.route("/terminal-degenerecy-labs", terminalDegenRoutes);
 
+export type AppType = typeof slaughterhouseRoutes & typeof terminalDegenRoutes;
+
 export default app;
