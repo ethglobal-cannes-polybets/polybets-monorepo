@@ -16,8 +16,19 @@ const slaughterhouseConfig = marketplaceConfigs.find(
 const terminalDegenConfig = marketplaceConfigs.find(
   (c) => c.name === "Terminal Degeneracy Labs"
 );
+const degenExecutionChamberConfig = marketplaceConfigs.find(
+  (c) => c.name === "Degen Execution Chamber"
+);
+const nihilisticProphetSyndicateConfig = marketplaceConfigs.find(
+  (c) => c.name === "Nihilistic Prophet Syndicate"
+);
 
-if (!slaughterhouseConfig || !terminalDegenConfig) {
+if (
+  !slaughterhouseConfig ||
+  !terminalDegenConfig ||
+  !degenExecutionChamberConfig ||
+  !nihilisticProphetSyndicateConfig
+) {
   throw new Error("Marketplace configurations not found");
 }
 
@@ -26,6 +37,12 @@ const slaughterhouseAdapter = new SolanaMarketplaceAdapter(
   slaughterhouseConfig
 );
 const terminalDegenAdapter = new SolanaMarketplaceAdapter(terminalDegenConfig);
+const degenExecutionChamberAdapter = new SolanaMarketplaceAdapter(
+  degenExecutionChamberConfig
+);
+const nihilisticProphetSyndicateAdapter = new SolanaMarketplaceAdapter(
+  nihilisticProphetSyndicateConfig
+);
 
 // Zod Schemas for validation
 const BuySharesSchema = z.object({
@@ -102,10 +119,18 @@ const terminalDegenRoutes = createMarketplaceRoutes(
   "/terminal-degenerecy-labs",
   terminalDegenAdapter
 );
+const degenExecutionChamberRoutes = createMarketplaceRoutes(
+  "/degen-execution-chamber",
+  degenExecutionChamberAdapter
+);
+const nihilisticProphetSyndicateRoutes = createMarketplaceRoutes(
+  "/nihilistic-prophet-syndicate",
+  nihilisticProphetSyndicateAdapter
+);
 
 app.route("/slaughterhouse-predictions", slaughterhouseRoutes);
 app.route("/terminal-degenerecy-labs", terminalDegenRoutes);
-
-export type AppType = typeof slaughterhouseRoutes & typeof terminalDegenRoutes;
+app.route("/degen-execution-chamber", degenExecutionChamberRoutes);
+app.route("/nihilistic-prophet-syndicate", nihilisticProphetSyndicateRoutes);
 
 export default app;

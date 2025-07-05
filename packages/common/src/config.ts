@@ -1,6 +1,7 @@
 import type { MarketplaceConfig } from "./types";
 
-export const polybetsContractAddress = "0x537E481a67df5e69f6C3c8AfA78079AA1E0E3ec3";
+export const polybetsContractAddress =
+  "0x537E481a67df5e69f6C3c8AfA78079AA1E0E3ec3";
 
 export const marketplaceConfigs: MarketplaceConfig[] = [
   {
@@ -31,8 +32,7 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "Weaponized spectrum energy meets financial nihilism. We don't just predict the future - we execute it with surgical precision while your hopes bleed out.",
     programId: "9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY", // Variant 2 program ID
     keypair:
-      process.env.VARIANT2_KEYPAIR ||
-      "~/.config/solana/canibeton-cannes.json",
+      process.env.VARIANT2_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
     authorityKeypair: "~/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
@@ -45,11 +45,46 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
     oddsVarianceRange: [0.2, 0.3], // 20-30% variance
     betAmountUsdc: 105,
   },
-  // {
-  // name: "Degen Execution Chamber",
-  // description: "Where financial suicide becomes an art form. Your losses fuel our algorithms while we feast on your liquidated dreams.",
-  // }
-  //  name: "Nihilistic Prophet Syndicate",
+  {
+    // Config is for Variant 3
+    name: "Degen Execution Chamber",
+    description:
+      "Where financial suicide becomes an art form. Your losses fuel our algorithms while we feast on your liquidated dreams.",
+    programId: "4x33dYAwq2fprVaiakJjrGwxdu36JhJUCoegximvALyy", // Variant 3 program ID
+    keypair:
+      process.env.VARIANT2_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
+    authorityKeypair: "~/.config/solana/canibeton.json",
+    rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
+    usdcMintAddress:
+      process.env.USDC_MINT_ADDRESS ||
+      "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+    bettingPoolsPda: process.env.CRYPTO_BETTING_POOLS_PDA || "",
+    authority: process.env.CRYPTO_AUTHORITY || "",
+    creatorName: "CryptoOracle",
+    creatorId: "crypto_admin",
+    oddsVarianceRange: [0.05, 0.1], // 5-10% variance
+    betAmountUsdc: 105,
+  },
+  {
+    // Config is for Variant 4
+    name: "Nihilistic Prophet Syndicate",
+    description:
+      "Sleep paralysis demons are real. We're here to help you navigate the dark side of the subconscious.",
+    programId: "EWwuoaLcycGPMQWg8Xbyg5x2HVdNWgPF5AwZNRPibeWz", // Variant 4 program ID
+    keypair:
+      process.env.VARIANT2_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
+    authorityKeypair: "~/.config/solana/canibeton.json",
+    rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
+    usdcMintAddress:
+      process.env.USDC_MINT_ADDRESS ||
+      "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
+    bettingPoolsPda: process.env.CRYPTO_BETTING_POOLS_PDA || "",
+    authority: process.env.CRYPTO_AUTHORITY || "",
+    creatorName: "CryptoOracle",
+    creatorId: "crypto_admin",
+    oddsVarianceRange: [0.05, 0.1], // 5-10% variance
+    betAmountUsdc: 105,
+  },
 ];
 
 export function loadMarketplaceConfigs(): MarketplaceConfig[] {

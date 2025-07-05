@@ -4,7 +4,8 @@
 CREATE TABLE markets (
     id SERIAL PRIMARY KEY,
     common_question TEXT NOT NULL,
-    options TEXT[2] NOT NULL DEFAULT ARRAY['Yes', 'No']
+    options TEXT[2] NOT NULL DEFAULT ARRAY['Yes', 'No'],
+    url TEXT
 );
 
 -- External markets table
@@ -13,7 +14,9 @@ CREATE TABLE external_markets (
     question TEXT NOT NULL,
     price_lookup_params JSONB,
     price_lookup_method TEXT CHECK (price_lookup_method IN ('canibeton-lmsr', 'polymarket-orderbook', 'limitless-orderbook')),
-    parent_market INTEGER REFERENCES markets(id) ON DELETE CASCADE
+    parent_market INTEGER REFERENCES markets(id) ON DELETE CASCADE,
+    marketplace_id INTEGER REFERENCES marketplaces(id) ON DELETE CASCADE,
+    url TEXT,
 );
 
 -- Marketplaces table
@@ -27,7 +30,7 @@ CREATE TABLE marketplaces (
     marketplace_proxy TEXT NOT NULL DEFAULT '0x0000000000000000000000000000000000000000',
     address TEXT NOT NULL,
     price_strategy TEXT CHECK (price_strategy IN ('orderbook', 'amm', 'lmsr')),
-    is_active BOOLEAN NOT NULL DEFAULT TRUE
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
 );
 
 -- Enable Row Level Security on all tables
@@ -72,8 +75,8 @@ INSERT INTO marketplaces (name, chain_id, chain_name, chain_family, address, pri
     ('PolyMarket', 137, 'polygon', 'evm', 'varied', 'orderbook'),
     ('Slaughterhouse Predictions', NULL, 'solana-devnet', 'solana', 'Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb', 'lmsr'),
     ('Terminal Degeneracy Labs', NULL, 'solana-devnet', 'solana', '9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY', 'lmsr'),
-    ('Degen Execution Chamber', NULL, 'solana-devnet', 'solana', '0x0000000000000000000000000000000000000000', 'lmsr'),
-    ('Nihilistic Prophet Syndicate', NULL, 'solana-devnet', 'solana', '0x0000000000000000000000000000000000000000', 'lmsr');
+    ('Degen Execution Chamber', NULL, 'solana-devnet', 'solana', '4x33dYAwq2fprVaiakJjrGwxdu36JhJUCoegximvALyy', 'lmsr'),
+    ('Nihilistic Prophet Syndicate', NULL, 'solana-devnet', 'solana', 'EWwuoaLcycGPMQWg8Xbyg5x2HVdNWgPF5AwZNRPibeWz', 'lmsr');
 
 
 -- View for all lmsr_shares_bought_events from all variants
@@ -108,7 +111,41 @@ SELECT
   lmsr_tokens_minted,
   transaction_hash,
   created_at
-FROM canibeton_variant2.lmsr_shares_bought_events;
+FROM canibeton_variant2.lmsr_shares_bought_events
+
+UNION ALL
+
+SELECT
+  'canibeton_variant3' AS source_schema,
+  id,
+  pool_id,
+  user_address,
+  option_index,
+  payment_token_type::TEXT AS payment_token_type,
+  payment_amount,
+  fee_paid,
+  lmsr_token_mint,
+  lmsr_tokens_minted,
+  transaction_hash,
+  created_at
+FROM canibeton_variant3.lmsr_shares_bought_events
+
+UNION ALL
+
+SELECT
+  'canibeton_variant4' AS source_schema,
+  id,
+  pool_id,
+  user_address,
+  option_index,
+  payment_token_type::TEXT AS payment_token_type,
+  payment_amount,
+  fee_paid,
+  lmsr_token_mint,
+  lmsr_tokens_minted,
+  transaction_hash,
+  created_at
+FROM canibeton_variant4.lmsr_shares_bought_events;
 
 -- View for all lmsr_shares_sold_events from all variants
 CREATE OR REPLACE VIEW public.shares_sold_all AS
@@ -142,4 +179,38 @@ SELECT
   lmsr_tokens_burned,
   transaction_hash,
   created_at
-FROM canibeton_variant2.lmsr_shares_sold_events;
+FROM canibeton_variant2.lmsr_shares_sold_events
+
+UNION ALL
+
+SELECT
+  'canibeton_variant3' AS source_schema,
+  id,
+  pool_id,
+  user_address,
+  option_index,
+  payment_token_type::TEXT AS payment_token_type,
+  payment_amount,
+  fee_paid,
+  lmsr_token_mint,
+  lmsr_tokens_burned,
+  transaction_hash,
+  created_at
+FROM canibeton_variant3.lmsr_shares_sold_events
+
+UNION ALL
+
+SELECT
+  'canibeton_variant4' AS source_schema,
+  id,
+  pool_id,
+  user_address,
+  option_index,
+  payment_token_type::TEXT AS payment_token_type,
+  payment_amount,
+  fee_paid,
+  lmsr_token_mint,
+  lmsr_tokens_burned,
+  transaction_hash,
+  created_at
+FROM canibeton_variant4.lmsr_shares_sold_events;

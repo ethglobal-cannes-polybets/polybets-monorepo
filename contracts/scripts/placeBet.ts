@@ -6,16 +6,26 @@ enum BetSlipStrategy {
   MaximizePrivacy,
 }
 
+// Generate random collateral amount between 1-10 USDC (in wei, USDC has 6 decimals)
+function getRandomCollateralAmount(): number {
+  const min = 1_000_000; // 1 USDC
+  const max = 10_000_000; // 10 USDC
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 async function main() {
-  // Get the deployed PolyBet contract
-  const polybet = await ethers.getContractAt(
-    "PolyBet",
-    polybetsContractAddress
-  );
+  // Get all signers (accounts)
+  const signers = await ethers.getSigners();
+
+  if (signers.length < 4) {
+    throw new Error("Need at least 4 accounts configured in hardhat.config.ts");
+  }
+
+  // Use accounts 1, 2, and 3 (test accounts)
+  const testAccounts = [signers[1], signers[2], signers[3]];
 
   // Parameters for placeBet
   const strategy = BetSlipStrategy.MaximizeShares; // 0 - maximize shares strategy
-  const totalCollateralAmount = 100_000_000; // 100 USDC (100*10^6)
 
   // Convert marketplace IDs to bytes32
   const marketplaceIds = [
@@ -29,32 +39,53 @@ async function main() {
     ethers.zeroPadValue(ethers.toBeHex(118), 32), // market id 118 for marketplace 3
   ];
 
-  console.log("Placing bet with parameters:");
+  console.log("Placing bets with parameters:");
   console.log(`Strategy: ${strategy} (MaximizeShares)`);
-  console.log(`Total Collateral Amount: ${totalCollateralAmount}`);
   console.log(`Marketplace IDs: [${marketplaceIds.join(", ")}]`);
   console.log(`Market IDs: [${marketIds.join(", ")}]`);
+  console.log("---");
 
-  try {
-    // Call placeBet function
-    const tx = await polybet.placeBet(
-      strategy,
-      totalCollateralAmount,
-      marketplaceIds,
-      marketIds
+  // Place bets for each test account
+  for (let i = 0; i < testAccounts.length; i++) {
+    const account = testAccounts[i];
+    const accountIndex = i + 1; // Account indices 1, 2, 3
+    const totalCollateralAmount = getRandomCollateralAmount();
+
+    console.log(`\nAccount ${accountIndex} (${account.address}):`);
+    console.log(
+      `Random Collateral Amount: ${totalCollateralAmount / 1_000_000} USDC`
     );
 
-    console.log("Transaction submitted, waiting for confirmation...");
-    console.log(`Transaction hash: ${tx.hash}`);
+    try {
+      // Get the contract instance for this specific account
+      const polybet = await ethers.getContractAt(
+        "PolyBet",
+        polybetsContractAddress,
+        account
+      );
 
-    await tx.wait();
+      // Call placeBet function
+      const tx = await polybet.placeBet(
+        strategy,
+        totalCollateralAmount,
+        marketplaceIds,
+        marketIds
+      );
 
-    console.log("Bet placed successfully!");
-    console.log(`Transaction confirmed in block`);
-  } catch (error) {
-    console.error("Error placing bet:", error);
-    process.exit(1);
+      console.log("Transaction submitted, waiting for confirmation...");
+      console.log(`Transaction hash: ${tx.hash}`);
+
+      await tx.wait();
+
+      console.log("Bet placed successfully!");
+      console.log(`Transaction confirmed`);
+    } catch (error) {
+      console.error(`Error placing bet for account ${accountIndex}:`, error);
+      // Continue with other accounts even if one fails
+    }
   }
+
+  console.log("\n=== All bets completed ===");
 }
 
 main()
