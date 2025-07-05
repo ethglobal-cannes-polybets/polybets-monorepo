@@ -26,7 +26,8 @@ CREATE TABLE marketplaces (
     warp_router_id TEXT,
     marketplace_proxy TEXT NOT NULL DEFAULT '0x0000000000000000000000000000000000000000',
     address TEXT NOT NULL,
-    price_strategy TEXT CHECK (price_strategy IN ('orderbook', 'amm', 'lmsr'))
+    price_strategy TEXT CHECK (price_strategy IN ('orderbook', 'amm', 'lmsr')),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 -- Enable Row Level Security on all tables

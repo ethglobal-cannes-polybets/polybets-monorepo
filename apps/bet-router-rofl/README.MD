@@ -1,6 +1,6 @@
 # Setup
 
-Oasis setup:
+## Oasis setup:
 ```shell
 curl -L -o oasis_cli_0.14.1_darwin_all.tar.gz https://github.com/oasisprotocol/cli/releases/download/v0.14.1/oasis_cli_0.14.1_darwin_all.tar.g
 tar -xzf oasis_cli_0.14.1_darwin_all.tar.gz
@@ -23,7 +23,7 @@ oasis wallet import ethglobal_cannes
 ~/p/polybets-monorepo/a/bet-rou
 ```
 
-Docker setup:
+## Docker setup:
 Create a personal access token (classic) on github, read:packages, write:packages, delete:packages for permissions. Set a short expiry date since lol-whats-opsec-brosis-we-only-have-32-hours-to-build-this
 ``` shell
 docker login ghcr.io -u ad0ll
@@ -31,4 +31,13 @@ docker login ghcr.io -u ad0ll
 docker image build -t ghcr.io/ethglobal-cannes-polybets/bet-router-rofl .;
 ```
 
-Docker image push 
+## Docker image push:
+```shell
+docker push ghcr.io/ethglobal-cannes-polybets/bet-router-rofl
+```
+
+## Local setup:
+```shell
+poetry install
+poetry run python main.py
+```

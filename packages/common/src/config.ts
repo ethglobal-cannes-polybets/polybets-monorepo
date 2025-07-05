@@ -1,7 +1,6 @@
 import type { MarketplaceConfig } from "./types";
 
-export const polybetsContractAddress =
-  "0x1ee1daee41fe4a5e9a45fff18bff206b9ed552d6";
+export const polybetsContractAddress = "0x537E481a67df5e69f6C3c8AfA78079AA1E0E3ec3";
 
 export const marketplaceConfigs: MarketplaceConfig[] = [
   {
@@ -11,11 +10,19 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "Where dreams get butchered and only the most ruthless degenerates survive. Your portfolio's funeral starts here.",
     programId: "Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb", // Variant 1 program ID
     keypair:
+<<<<<<< HEAD
       process.env.OPERATIONS_KEYPAIR ||
       "/Users/adoll/.config/solana/canibeton-cannes.json",
     authorityKeypair:
       process.env.MIGRATE_KEYPAIR ||
       "/Users/adoll/.config/solana/canibeton.json",
+=======
+      // process.env.OPERATIONS_KEYPAIR ||
+      "~/.config/solana/canibeton-cannes.json",
+    authorityKeypair:
+      // process.env.MIGRATE_KEYPAIR ||
+      "~/.config/solana/canibeton.json",
+>>>>>>> main
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||
@@ -34,10 +41,9 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "Weaponized spectrum energy meets financial nihilism. We don't just predict the future - we execute it with surgical precision while your hopes bleed out.",
     programId: "9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY", // Variant 2 program ID
     keypair:
-      process.env.OPERATIONS_KEYPAIR ||
-      "/Users/adoll/.config/solana/canibeton-cannes.json",
-    authorityKeypair:
-      process.env.MIGRATE_KEYPAIR || "/Users/adoll/.config/solana/canibeton.json",
+      process.env.VARIANT2_KEYPAIR ||
+      "~/.config/solana/canibeton-cannes.json",
+    authorityKeypair: "~/.config/solana/canibeton.json",
     rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||

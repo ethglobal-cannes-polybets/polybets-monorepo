@@ -1,0 +1,7 @@
+---
+globs: contracts/*.ts
+alwaysApply: false
+---
+The currently deployed PolyBet contract address can be found in the "polybets-common" package. You can access it with `import { polybetsContractAddress } from "polybets-common";`.
+
+Your hardhat commands should use "sapphiretestnet" as the network when you have the ability to specify the network

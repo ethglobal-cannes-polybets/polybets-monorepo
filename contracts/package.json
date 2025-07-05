@@ -11,7 +11,13 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@types/minimatch": "^6.0.0",
     "dotenv": "^17.0.1",
-    "ethers": "^6.15.0"
+    "ethers": "^6.15.0",
+    "polybets-common": "workspace:*"
+  },
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat ignition deploy --network sapphiretestnet --verify ./ignition/modules/polybet.ts"
   }
 }
