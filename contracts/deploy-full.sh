@@ -12,8 +12,8 @@ cd "$SCRIPT_DIR"
 echo "Script directory: $SCRIPT_DIR"
 
 echo "1. Cleaning Hardhat cache..."
-npx hardhat clean
-rm -rf ./ignition/deployments/
+#npx hardhat clean
+#rm -rf ./ignition/deployments/
 
 # IGNITION PATH, COMMENTED OUT BECAUSE IGNITION NOT WORKING WELL AGAINST OASIS
 echo -e "\n2. Deploying PolyBet contract to Sapphire Testnet..."
@@ -57,10 +57,15 @@ npx hardhat verify "${CONTRACT_ADDRESS}" --network sapphiretestnet
 
 echo -e "\n5. Updating contract address in common package..."
 CONFIG_FILE="${SCRIPT_DIR}/../packages/common/src/config.ts"
-# Using sed to replace the address. This works on macOS (darwin).
-# Handle both single-line and multi-line formats
-if sed -i '' -e "s/export const polybetsContractAddress = \"0x[a-fA-F0-9]\{40\}\"/export const polybetsContractAddress = \"${CONTRACT_ADDRESS}\"/" "${CONFIG_FILE}" || \
-   sed -i '' -e '/polybetsContractAddress =/!b' -e 'n' -e "s/\"0x[a-fA-F0-9]\{40\}\"/\"${CONTRACT_ADDRESS}\"/" "${CONFIG_FILE}"; then
+# Cross-platform sed handling
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS
+  sed -i '' -e "s/export const polybetsContractAddress = \"0x[a-fA-F0-9]\{40\}\"/export const polybetsContractAddress = \"${CONTRACT_ADDRESS}\"/" "${CONFIG_FILE}"
+else
+  # Linux
+  sed -i -e "s/export const polybetsContractAddress = \"0x[a-fA-F0-9]\{40\}\"/export const polybetsContractAddress = \"${CONTRACT_ADDRESS}\"/" "${CONFIG_FILE}"
+fi
+if [ $? -eq 0 ]; then
   echo "   => Updated ${CONFIG_FILE}"
 else
   echo "   => Error updating ${CONFIG_FILE}"
@@ -70,8 +75,15 @@ fi
 echo -e "\n6. Updating contract address in bet-router-rofl .env file..."
 ENV_FILE="${SCRIPT_DIR}/../apps/bet-router-rofl/.env"
 if [ -f "${ENV_FILE}" ]; then
-  if sed -i '' -e "s/^POLYBETS_CONTRACT_ADDRESS=.*/POLYBETS_CONTRACT_ADDRESS=\"${CONTRACT_ADDRESS}\"/" "${ENV_FILE}" || \
-     sed -i '' -e "s/^export POLYBETS_CONTRACT_ADDRESS=.*/export POLYBETS_CONTRACT_ADDRESS=\"${CONTRACT_ADDRESS}\"/" "${ENV_FILE}"; then
+  # Cross-platform sed handling
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    sed -i '' -e "s/^POLYBETS_CONTRACT_ADDRESS=.*/POLYBETS_CONTRACT_ADDRESS=\"${CONTRACT_ADDRESS}\"/" "${ENV_FILE}"
+  else
+    # Linux
+    sed -i -e "s/^POLYBETS_CONTRACT_ADDRESS=.*/POLYBETS_CONTRACT_ADDRESS=\"${CONTRACT_ADDRESS}\"/" "${ENV_FILE}"
+  fi
+  if [ $? -eq 0 ]; then
     echo "   => Updated ${ENV_FILE}"
   else
     echo "   => Error updating ${ENV_FILE}"
@@ -83,7 +95,15 @@ fi
 
 echo -e "\n7. Updating fallback address in bet-router-rofl main.py..."
 MAIN_PY_FILE="${SCRIPT_DIR}/../apps/bet-router-rofl/main.py"
-if sed -i '' -e '/POLYBETS_CONTRACT_ADDRESS/,/)/s/"0x[a-fA-F0-9]\{40\}"/"'"${CONTRACT_ADDRESS}"'"/' "${MAIN_PY_FILE}"; then
+# Cross-platform sed handling
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS
+  sed -i '' -e '/POLYBETS_CONTRACT_ADDRESS/,/)/s/"0x[a-fA-F0-9]\{40\}"/"'"${CONTRACT_ADDRESS}"'"/' "${MAIN_PY_FILE}"
+else
+  # Linux
+  sed -i -e '/POLYBETS_CONTRACT_ADDRESS/,/)/s/"0x[a-fA-F0-9]\{40\}"/"'"${CONTRACT_ADDRESS}"'"/' "${MAIN_PY_FILE}"
+fi
+if [ $? -eq 0 ]; then
   echo "   => Updated ${MAIN_PY_FILE}"
 else
   echo "   => Error updating ${MAIN_PY_FILE}"
