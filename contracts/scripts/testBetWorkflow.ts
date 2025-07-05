@@ -153,12 +153,53 @@ async function main() {
   betSlip = await polybet.getBetSlip(betSlipId);
   console.log(`\nBetSlip now has ${betSlip.proxiedBets.length} proxied bets`);
 
-  // Step 3: Simulate markets closing and recording outcomes
-  console.log("\n=== Step 3: Closing proxied bets (simulating market resolution) ===");
+  // Step 3: Test selling shares from one of the proxied bets
+  console.log("\n=== Step 3: Testing recordProxiedBetSold functionality ===");
+  
+  // Let's sell 20 shares from the first bet (which has 50 shares)
+  const betToSell = proxiedBets[0];
+  const sharesToSell = 20;
+  const sellValue = 16_000_000; // Selling 20 shares for 16 USDC
+  
+  console.log(`\nSelling ${sharesToSell} shares from bet ${betToSell.id.substring(0, 10)}...`);
+  console.log(`Original shares: ${betToSell.sharesBought}, selling: ${sharesToSell}`);
+  
+  // Record the partial sale
+  const sellTx1 = await polybet.recordProxiedBetSold(
+    betToSell.id,
+    sharesToSell,
+    sellValue
+  );
+  await sellTx1.wait();
+  console.log(`Sold ${sharesToSell} shares for ${ethers.formatUnits(sellValue, 6)} USDC`);
+  
+  // Check that the bet is still active (not fully sold)
+  betSlip = await polybet.getBetSlip(betSlipId);
+  console.log(`BetSlip status after partial sale: ${betSlip.status} (should still be 1=Placed)`);
+  
+  // Now sell the remaining 30 shares
+  const remainingShares = 30;
+  const remainingSellValue = 24_000_000; // Selling 30 shares for 24 USDC
+  
+  console.log(`\nSelling remaining ${remainingShares} shares...`);
+  const sellTx2 = await polybet.recordProxiedBetSold(
+    betToSell.id,
+    remainingShares,
+    remainingSellValue
+  );
+  await sellTx2.wait();
+  console.log(`Sold ${remainingShares} shares for ${ethers.formatUnits(remainingSellValue, 6)} USDC`);
+  
+  // Check that the bet is now marked as Sold
+  const proxiedBetData = await polybet.proxiedBets(betToSell.id);
+  console.log(`\nProxied bet outcome after full sale: ${proxiedBetData.outcome} (should be ${BetOutcome.Sold}=Sold)`);
+  console.log(`Total shares sold: ${proxiedBetData.sharesSold} (should equal ${betToSell.sharesBought})`);
 
-  // Let's say: bet 1 wins, bet 2 loses, bet 3 wins
+  // Step 4: Simulate markets closing and recording outcomes for remaining bets
+  console.log("\n=== Step 4: Closing remaining proxied bets (simulating market resolution) ===");
+
+  // Let's say: bet 2 loses, bet 3 wins (bet 1 was already sold)
   const outcomes = [
-    { betId: proxiedBets[0].id, outcome: BetOutcome.Won, winnings: 80_000_000 }, // Won 80 USDC
     { betId: proxiedBets[1].id, outcome: BetOutcome.Lost, winnings: 0 }, // Lost
     { betId: proxiedBets[2].id, outcome: BetOutcome.Won, winnings: 45_000_000 }, // Won 45 USDC
   ];
@@ -182,10 +223,10 @@ async function main() {
     `BetSlip final collateral: ${ethers.formatUnits(betSlip.finalCollateral, 6)} USDC`
   );
   console.log(
-    `Total winnings: ${(80_000_000 + 0 + 45_000_000) / 1_000_000} USDC`
+    `Total returns: ${(16_000_000 + 24_000_000 + 0 + 45_000_000) / 1_000_000} USDC (40 from sold bet + 45 from winning bet)`
   );
   console.log(
-    `Net profit/loss: ${(80_000_000 + 0 + 45_000_000 - 100_000_000) / 1_000_000} USDC`
+    `Net profit/loss: ${(16_000_000 + 24_000_000 + 0 + 45_000_000 - 100_000_000) / 1_000_000} USDC`
   );
 
   // Check user balance - On Oasis, even view functions need to be sent as transactions
