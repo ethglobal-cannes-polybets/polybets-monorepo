@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {SiweAuth} from "@oasisprotocol/sapphire-contracts/contracts/auth/SiweAuth.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Subcall} from "@oasisprotocol/sapphire-contracts/contracts/Subcall.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -10,6 +11,7 @@ contract PolyBet is SiweAuth, Ownable {
     using SafeERC20 for IERC20;
 
     IERC20 public musdcToken;
+    bytes21 public roflAppId;
 
     event BetSlipCreated(
         uint256 indexed betId,
@@ -260,6 +262,9 @@ contract PolyBet is SiweAuth, Ownable {
 
     function recordProxiedBetSold(
         bytes32 proxiedBetId, uint256 sharesSold, uint256 sharesSoldCollateralValue) public onlyOwner {
+        if (roflAppId != 0)
+          Subcall.roflEnsureAuthorizedOrigin(roflAppId);
+
         proxiedBets[proxiedBetId].sharesSold += sharesSold;
         require(proxiedBets[proxiedBetId].sharesBought >= proxiedBets[proxiedBetId].sharesSold,
                 "cannot sell more shares than bought");
@@ -275,6 +280,9 @@ contract PolyBet is SiweAuth, Ownable {
     }
 
     function recordProxiedBetPlaced(uint256 betSlipId, ProxiedBet memory proxiedBet) public onlyOwner {
+        if (roflAppId != 0)
+          Subcall.roflEnsureAuthorizedOrigin(roflAppId);
+
         betSlips[betSlipId].proxiedBets.push(proxiedBet.id);
         proxiedBets[proxiedBet.id] = proxiedBet;
     }
@@ -285,6 +293,9 @@ contract PolyBet is SiweAuth, Ownable {
     {
         require(outcome != BetOutcome.None && outcome != BetOutcome.Sold, "outcome cannot be none or sold");
         require(proxiedBets[proxiedBetId].outcome == BetOutcome.Placed, "invalid outcome transition");
+
+        if (roflAppId != 0)
+          Subcall.roflEnsureAuthorizedOrigin(roflAppId);
 
         proxiedBets[proxiedBetId].outcome = outcome;
         (uint256 betSlipId, BetSlip storage betSlip, address bettor) =
@@ -303,5 +314,9 @@ contract PolyBet is SiweAuth, Ownable {
     function setCollateralToken(address _musdcToken) public onlyOwner {
         require(_musdcToken != address(0), "invalid MUSDC token address");
         musdcToken = IERC20(_musdcToken);
+    }
+
+    function setRoflAppId(bytes21 appId) public onlyOwner {
+      roflAppId = appId;
     }
 }

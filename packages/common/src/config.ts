@@ -1,6 +1,6 @@
 import type { MarketplaceConfig } from "./types";
 
-export const polybetsContractAddress = "0x3Cb93DcFf7c38d0eFE5a86Dc50864eA6dd0D2927";
+export const polybetsContractAddress = "0xC89Bd1D65fE088583F8A5793d198e43Ef6E179C9";
 
 export const marketplaceConfigs: MarketplaceConfig[] = [
   {
