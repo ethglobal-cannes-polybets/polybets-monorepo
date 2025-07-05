@@ -38,15 +38,21 @@ async function main() {
   const strategy = BetSlipStrategy.MaximizeShares;
   const totalCollateralAmount = 100_000_000; // 100 USDC
 
-  // Approve mUSDC spending
-  console.log("Approving mUSDC spending...");
-  const approveTx = await musdc
-    .connect(testacct)
-    .approve(polybetsContractAddress, totalCollateralAmount);
-  await approveTx.wait();
-  console.log("Approval complete");
+  // Check current allowance and approve if needed
+  const currentAllowance = await musdc.allowance(testacct.address, polybetsContractAddress);
+  console.log(`Current mUSDC allowance: ${currentAllowance}`);
+  
+  if (currentAllowance < totalCollateralAmount) {
+    console.log("Approving mUSDC spending...");
+    const approveTx = await musdc
+      .connect(testacct)
+      .approve(polybetsContractAddress, totalCollateralAmount);
+    await approveTx.wait();
+    console.log("Approval complete");
+  } else {
+    console.log("Sufficient allowance already exists, skipping approval");
+  }
 
-  // This single bet will be split across 3 markets
   const marketplaceIds = [
     ethers.zeroPadValue(ethers.toBeHex(1), 32), // marketplace 1
     ethers.zeroPadValue(ethers.toBeHex(2), 32), // marketplace 2
@@ -68,26 +74,9 @@ async function main() {
 
   const receipt = await tx.wait();
   console.log("Bet placed successfully!");
-
-  // Get the betSlipId from the event
-  // In ethers v6, we need to parse the logs properly
-  let betSlipId;
-  for (const log of receipt.logs) {
-    try {
-      const parsedLog = polybet.interface.parseLog(log);
-      if (parsedLog?.name === "BetSlipCreated") {
-        betSlipId = parsedLog.args[0]; // First argument is the betId
-        console.log(`Created BetSlip ID: ${betSlipId}`);
-        break;
-      }
-    } catch (e) {
-      // Not our event, continue
-    }
-  }
-  
-  if (!betSlipId) {
-    throw new Error("Failed to get betSlipId from transaction receipt");
-  }
+  const parsedLog = polybet.interface.parseLog(receipt.logs[2]);
+  const betSlipId = parsedLog.args[0]; // First argument is the betId
+  console.log(`Created BetSlip ID: ${betSlipId}`);
   
   // Check initial bet slip state
   let betSlip = await polybet.getBetSlip(betSlipId);
