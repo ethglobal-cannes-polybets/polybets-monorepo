@@ -64,7 +64,6 @@ contract PolyBet is SiweAuth, Ownable {
 
     struct BetSlip {
         BetSlipStrategy strategy;
-        address bettor;
         uint256 initialCollateral; // The amount for the bet router to distribute to markets
         uint256 finalCollateral; // Informative field, updated when a proxied bet is sold/closed
         BetOutcome outcome;
@@ -96,9 +95,10 @@ contract PolyBet is SiweAuth, Ownable {
     uint256 collateralAmount;
     Marketplace[] public marketplaces;
     BetSlip[] public betSlips;
+    mapping(uint256 => address) private betslipsToBettor;
     mapping(address => uint256[]) public userActiveBetSlips;
     mapping(address => uint256[]) public userClosedBetSlips;
-    mapping(address => uint256) public userBalances;
+    mapping(address => uint256) private userBalances;
     mapping(bytes32 => ProxiedBet) public proxiedBets;
 
     constructor() SiweAuth("PolyBet") {
@@ -118,7 +118,6 @@ contract PolyBet is SiweAuth, Ownable {
         uint256 betSlipId = betSlips.length;
         betSlips.push(BetSlip({
             strategy: strategy,
-            bettor: msg.sender,
             initialCollateral: totalCollateralAmount,
             finalCollateral: 0,
             outcome: BetOutcome.None,
@@ -128,7 +127,7 @@ contract PolyBet is SiweAuth, Ownable {
             marketIds: marketIds,
             proxiedBets: new bytes32[](0)
         }));
-        // proxiedBets: new SubBet[](0),
+        betslipsToBettor[betSlipId] = msg.sender;
 
         collateralAmount += totalCollateralAmount;
         userActiveBetSlips[msg.sender].push(betSlipId);
@@ -230,13 +229,14 @@ contract PolyBet is SiweAuth, Ownable {
       uint256 winningsCollateralValue) public onlyOwner {
         require(outcome != BetOutcome.None && outcome != BetOutcome.Sold);
 
+        uint256 betSlipId = proxiedBets[proxiedBetId].betSlipId;
+        address bettor = betslipsToBettor[betSlipId];
+        BetSlip storage betSlip = betSlips[betSlipId];
+
         proxiedBets[proxiedBetId].outcome = outcome;
         proxiedBets[proxiedBetId].finalCollateralAmount = winningsCollateralValue;
-
-        uint256 betSlipId = proxiedBets[proxiedBetId].betSlipId;
-        BetSlip storage betSlip = betSlips[betSlipId];
         betSlip.finalCollateral += winningsCollateralValue;
-        userBalances[betSlip.bettor] += winningsCollateralValue;
+        userBalances[bettor] += winningsCollateralValue;
 
         for (uint256 i = 0; i < betSlip.proxiedBets.length; i++) {
           if (!isClosed(proxiedBets[betSlip.proxiedBets[i]].outcome)) {
@@ -245,7 +245,7 @@ contract PolyBet is SiweAuth, Ownable {
         }
         
         // Remove betSlipId from user's active bet slips
-        uint256[] storage activeBetSlips = userActiveBetSlips[betSlip.bettor];
+        uint256[] storage activeBetSlips = userActiveBetSlips[bettor];
         for (uint256 i = 0; i < activeBetSlips.length; i++) {
             if (activeBetSlips[i] == betSlipId) {
                 // Move last element to this position and remove last
@@ -256,7 +256,7 @@ contract PolyBet is SiweAuth, Ownable {
         }
         
         // Add betSlipId to user's closed bet slips
-        userClosedBetSlips[betSlip.bettor].push(betSlipId);
+        userClosedBetSlips[bettor].push(betSlipId);
     }
     
     // Withdraw function for users to claim their funds
