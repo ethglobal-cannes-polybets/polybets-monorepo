@@ -9,6 +9,15 @@ from web3 import Web3
 # Load environment variables from .env file
 load_dotenv()
 
+# --- Helper Functions ---
+def decode_bytes32_to_int(bytes32_value):
+    """Convert bytes32 to integer."""
+    return int.from_bytes(bytes32_value, byteorder='big')
+
+def decode_bytes32_array(bytes32_array):
+    """Convert array of bytes32 to array of integers."""
+    return [decode_bytes32_to_int(b) for b in bytes32_array]
+
 # --- Environment Variables ---
 SAPPHIRETESTNET_RPC_URL = (
     os.getenv("SAPPHIRETESTNET_RPC_URL")
@@ -82,11 +91,15 @@ def handle_event(event):
         print("\n=== Bet Slip Details ===")
         print(f"  Bet ID: {bet_slip_id}")
         print(f"  Strategy: {bet_slip_data[0]}")
-        print(f"  Initial Collateral: {bet_slip_data[1]}")
-        print(f"  Final Collateral: {bet_slip_data[2]}")
-        print(f"  Failure Reason: {bet_slip_data[3]}")
+        print(f"  Bettor: {bet_slip_data[1]}")
+        print(f"  Initial Collateral: {bet_slip_data[2]}")
+        print(f"  Final Collateral: {bet_slip_data[3]}")
         print(f"  Outcome: {bet_slip_data[4]}")
         print(f"  Status: {bet_slip_data[5]}")
+        print(f"  Failure Reason: {bet_slip_data[6]}")
+        print(f"  Marketplace IDs: {decode_bytes32_array(bet_slip_data[7])}")
+        print(f"  Market IDs: {decode_bytes32_array(bet_slip_data[8])}")
+        print(f"  Proxied Bets: {[bet_id.hex() for bet_id in bet_slip_data[9]]}")
         print("========================\n")
 
         # --- Update Bet Slip Status ---
