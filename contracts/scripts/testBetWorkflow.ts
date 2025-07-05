@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 import { polybetsContractAddress } from "polybets-common";
+import { SiweMessage } from 'siwe';
 
 enum BetSlipStrategy {
   MaximizeShares,
@@ -62,17 +63,30 @@ async function main() {
     marketplaceIds,
     marketIds
   );
-  
+
   const receipt = await tx.wait();
   console.log("Bet placed successfully!");
-  
-  // Get the betSlipId from the event
-  const betSlipCreatedEvent = receipt.logs.find(
-    (log: any) => log.eventName === "BetSlipCreated"
-  );
-  const betSlipId = betSlipCreatedEvent.args[0];
-  console.log(`Created BetSlip ID: ${betSlipId}`);
 
+  // Get the betSlipId from the event
+  // In ethers v6, we need to parse the logs properly
+  let betSlipId;
+  for (const log of receipt.logs) {
+    try {
+      const parsedLog = polybet.interface.parseLog(log);
+      if (parsedLog?.name === "BetSlipCreated") {
+        betSlipId = parsedLog.args[0]; // First argument is the betId
+        console.log(`Created BetSlip ID: ${betSlipId}`);
+        break;
+      }
+    } catch (e) {
+      // Not our event, continue
+    }
+  }
+  
+  if (!betSlipId) {
+    throw new Error("Failed to get betSlipId from transaction receipt");
+  }
+  
   // Check initial bet slip state
   let betSlip = await polybet.getBetSlip(betSlipId);
   console.log(`BetSlip status: ${betSlip.status} (0=Pending)`);
@@ -80,7 +94,7 @@ async function main() {
 
   // Step 2: Simulate BetRouter recording proxied bets
   console.log("\n=== Step 2: Recording proxied bets (simulating BetRouter) ===");
-  
+
   // In real scenario, BetRouter would split the 100 USDC across markets
   // Let's say it splits: 40 USDC, 35 USDC, 25 USDC
   const proxiedBets = [
@@ -144,7 +158,7 @@ async function main() {
 
   // Step 3: Simulate markets closing and recording outcomes
   console.log("\n=== Step 3: Closing proxied bets (simulating market resolution) ===");
-  
+
   // Let's say: bet 1 wins, bet 2 loses, bet 3 wins
   const outcomes = [
     { betId: proxiedBets[0].id, outcome: BetOutcome.Won, winnings: 80_000_000 }, // Won 80 USDC
@@ -169,15 +183,61 @@ async function main() {
   console.log(`Total winnings: ${(80_000_000 + 0 + 45_000_000) / 1_000_000} USDC`);
   console.log(`Net profit/loss: ${((80_000_000 + 0 + 45_000_000) - 100_000_000) / 1_000_000} USDC`);
 
-  // Check user balance
-  const userBalance = await polybet.connect(testacct).getUserBalance();
-  console.log(`User balance: ${ethers.formatUnits(userBalance, 6)} USDC`);
-
-  // Check active vs closed bets
-  const activeBets = await polybet.connect(testacct).getUserActiveBetslips();
-  const closedBets = await polybet.connect(testacct).getUserClosedBets();
-  console.log(`Active betslips: ${activeBets.length}`);
-  console.log(`Closed betslips: ${closedBets.length}`);
+  // Check user balance - On Oasis, even view functions need to be sent as transactions
+  const siweMessage = new SiweMessage({
+    domain: "PolyBet",
+    address: testacct.address,
+    uri: "https://polybet.com",
+    version: "1",
+    chainId: 23295, // 0x5aff in decimal - Sapphire testnet
+  }).toMessage();
+  const signature = await testacct.signMessage(siweMessage);
+  const sig = ethers.Signature.from(signature);
+  try {
+    const token = await polybet.login(siweMessage, sig);
+    const userBalance = await polybet["getUserBalance(bytes)"](token);
+    console.log(`User balance: ${ethers.formatUnits(userBalance, 6)} USDC`);
+    
+    // Check that bet is no longer in active bets
+    console.log("\n=== Checking Bet Status ===");
+    const activeBets = await polybet["getUserActiveBetslips(bytes)"](token);
+    console.log(`Active bets count: ${activeBets.length}`);
+    if (activeBets.length > 0) {
+      console.log(`Active bet IDs: ${activeBets.join(', ')}`);
+    }
+    
+    // Check that bet is in closed bets
+    const closedBets = await polybet["getUserClosedBets(bytes)"](token);
+    console.log(`Closed bets count: ${closedBets.length}`);
+    if (closedBets.length > 0) {
+      console.log(`Closed bet IDs: ${closedBets.join(', ')}`);
+    }
+    
+    // Verify the bet has moved from active to closed
+    const isInActive = activeBets.includes(betSlipId);
+    const isInClosed = closedBets.includes(betSlipId);
+    console.log(`\nBet ${betSlipId} verification:`);
+    console.log(`- In active bets: ${isInActive} (should be false)`);
+    console.log(`- In closed bets: ${isInClosed} (should be true)`);
+    
+    if (!isInActive && isInClosed) {
+      console.log("✓ Bet successfully moved from active to closed");
+    } else if (isInActive && !isInClosed) {
+      console.log("✗ Bet is still active and not closed");
+    } else if (isInActive && isInClosed) {
+      console.log("✗ Bet is in both active and closed (invalid state)");
+    } else {
+      console.log("✗ Bet not found in either active or closed bets");
+    }
+  } catch (error: any) {
+    console.error("Login failed with error:", error.message || error);
+    if (error.reason) {
+      console.error("Error reason:", error.reason);
+    }
+    if (error.data) {
+      console.error("Error data:", error.data);
+    }
+  }
 }
 
 main()
