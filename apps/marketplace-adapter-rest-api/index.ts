@@ -116,7 +116,7 @@ const slaughterhouseRoutes = createMarketplaceRoutes(
   slaughterhouseAdapter
 );
 const terminalDegenRoutes = createMarketplaceRoutes(
-  "/terminal-degenerecy-labs",
+  "/terminal-degeneracy-labs",
   terminalDegenAdapter
 );
 const degenExecutionChamberRoutes = createMarketplaceRoutes(
@@ -129,7 +129,7 @@ const nihilisticProphetSyndicateRoutes = createMarketplaceRoutes(
 );
 
 app.route("/slaughterhouse-predictions", slaughterhouseRoutes);
-app.route("/terminal-degenerecy-labs", terminalDegenRoutes);
+app.route("/terminal-degeneracy-labs", terminalDegenRoutes);
 app.route("/degen-execution-chamber", degenExecutionChamberRoutes);
 app.route("/nihilistic-prophet-syndicate", nihilisticProphetSyndicateRoutes);
 
