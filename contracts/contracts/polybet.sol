@@ -2,8 +2,14 @@
 pragma solidity ^0.8.0;
 
 import {SiweAuth} from "@oasisprotocol/sapphire-contracts/contracts/auth/SiweAuth.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract PolyBet is SiweAuth {
+contract PolyBet is SiweAuth, Ownable {
+    using SafeERC20 for IERC20;
+    IERC20 public musdcToken;
+    
     event BetSlipCreated(
         uint256 indexed betId, uint256 totalCollateralAmount, bytes32[] marketplaceIds, bytes32[] marketIds
     );
@@ -11,7 +17,6 @@ contract PolyBet is SiweAuth {
     enum BetSlipStrategy {
         MaximizeShares, // (Default) Bet router places bets with consideration of price impact, and calculates the best way to maximize shares
         MaximizePrivacy // Bet router will put in pauses and rotate wallets to maximize privacy, user must pay a fee. Will only do non-functoinal PoC impl in hackathon.
-
     }
 
     enum BetSlipStatus {
@@ -20,7 +25,6 @@ contract PolyBet is SiweAuth {
         Failed, // BetSlip has been processed by BetRouter and failed
         Placed, // BetSlip has been processed by BetRouter and succeeded
         Closed // Set when all proxied bets in the bet slip are closed
-
     }
 
     enum BetOutcome {
@@ -60,20 +64,23 @@ contract PolyBet is SiweAuth {
 
     struct BetSlip {
         BetSlipStrategy strategy;
+        address bettor;
         uint256 initialCollateral; // The amount for the bet router to distribute to markets
         uint256 finalCollateral; // Informative field, updated when a proxied bet is sold/closed
-        string failureReason; // Gets populated if we can't handle the betslip in the bet router.
         BetOutcome outcome;
         BetSlipStatus status;
+        string failureReason; // Gets populated if we can't handle the betslip in the bet router.
+        bytes32[] marketplaceIds;
+        bytes32[] marketIds;
+        bytes32[] proxiedBets;   // The bets we actually placed on markets
     }
-    // SubBet[] proxiedBets;   // The bets we actually placed on markets
 
     struct ProxiedBet {
         //Immutable fields set on bet creation
         bytes32 id;
-        bytes32 betSlipId;
-        bytes32 marketplaceId;
-        bytes32 marketId;
+        uint256 betSlipId;
+        uint256 marketplaceId;
+        uint256 marketId;
         uint256 optionIndex;
         uint256 minimumShares; //Ignore this for the hackathon
         uint256 blockTimestamp; // Just for easier sorting when manually troubleshooting.
@@ -86,17 +93,16 @@ contract PolyBet is SiweAuth {
         string failureReason; // Gets populated if we can't handle the betslip in the bet router.
     }
 
-  Marketplace[] public marketplaces;
-  mapping(uint256 => uint256) public marketIdMapping;
-
-    uint256 private nextBetId;
-    mapping(uint256 => BetSlip) public betSlips;
+    uint256 collateralAmount;
+    Marketplace[] public marketplaces;
+    BetSlip[] public betSlips;
     mapping(address => uint256[]) public userActiveBetSlips;
     mapping(address => uint256[]) public userClosedBetSlips;
     mapping(address => uint256) public userBalances;
-    mapping(uint256 => ProxiedBet) public proxiedBets;
+    mapping(bytes32 => ProxiedBet) public proxiedBets;
 
-    constructor() SiweAuth("PolyBet") {}
+    constructor() SiweAuth("PolyBet") {
+    }
 
     function placeBet(
         BetSlipStrategy strategy,
@@ -105,22 +111,27 @@ contract PolyBet is SiweAuth {
         bytes32[] memory marketIds
     ) external {
         require(marketplaceIds.length == marketIds.length, "Array lengths must match");
+        require(totalCollateralAmount > 0, "Collateral amount must be greater than 0");
 
-        uint256 betSlipId = nextBetId;
-        nextBetId++;
-
-        betSlips[betSlipId] = BetSlip({
+        musdcToken.safeTransferFrom(msg.sender, address(this), totalCollateralAmount);
+        
+        uint256 betSlipId = betSlips.length;
+        betSlips.push(BetSlip({
             strategy: strategy,
+            bettor: msg.sender,
             initialCollateral: totalCollateralAmount,
             finalCollateral: 0,
-            failureReason: "",
             outcome: BetOutcome.None,
-            status: BetSlipStatus.Pending
-        });
+            status: BetSlipStatus.Pending,
+            failureReason: "",
+            marketplaceIds: marketplaceIds,
+            marketIds: marketIds,
+            proxiedBets: new bytes32[](0)
+        }));
         // proxiedBets: new SubBet[](0),
 
+        collateralAmount += totalCollateralAmount;
         userActiveBetSlips[msg.sender].push(betSlipId);
-        userBalances[msg.sender] += totalCollateralAmount;
         emit BetSlipCreated(betSlipId, totalCollateralAmount, marketplaceIds, marketIds);
     }
 
@@ -158,7 +169,7 @@ contract PolyBet is SiweAuth {
         return betSlips[betSlipId];
     }
 
-    function getProxiedBet(uint256 betId) external view returns (ProxiedBet memory) {
+    function getProxiedBet(bytes32 betId) external view returns (ProxiedBet memory) {
         return proxiedBets[betId];
     }
 
@@ -185,5 +196,79 @@ contract PolyBet is SiweAuth {
     function updateBetSlipStatus(uint256 betSlipId, BetSlipStatus status) external {
         //TODO In the prod version require this to come from BetRouter ROFL https://github.com/oasisprotocol/oasis-sdk/blob/main/examples/runtime-sdk/rofl-oracle/oracle/contracts/Oracle.sol#L32
         betSlips[betSlipId].status = status;
+    }
+
+    function isClosed(BetOutcome outcome) internal pure returns (bool) {
+      return outcome != BetOutcome.None && outcome != BetOutcome.Placed;
+    }
+
+    function initiateSellProxiedBets(
+      BetSlipStrategy, 
+      uint,
+      uint,
+      bool) public view onlyOwner {
+        revert("not implemented");
+    }
+
+    function recordProxiedBetPlaced(
+      uint betSlipId,
+      ProxiedBet memory proxiedBet) public onlyOwner {
+        betSlips[betSlipId].proxiedBets.push(proxiedBet.id);
+        proxiedBets[proxiedBet.id] = proxiedBet;
+    }
+
+    function recordProxiedBetSold(
+      uint,
+      uint,
+      uint) public view onlyOwner {
+        revert("not implemented");
+    }
+
+    function recordProxiedBetClosed(
+      bytes32 proxiedBetId,
+      BetOutcome outcome,
+      uint256 winningsCollateralValue) public onlyOwner {
+        require(outcome != BetOutcome.None && outcome != BetOutcome.Sold);
+
+        proxiedBets[proxiedBetId].outcome = outcome;
+        proxiedBets[proxiedBetId].finalCollateralAmount = winningsCollateralValue;
+
+        uint256 betSlipId = proxiedBets[proxiedBetId].betSlipId;
+        BetSlip storage betSlip = betSlips[betSlipId];
+        betSlip.finalCollateral += winningsCollateralValue;
+        userBalances[betSlip.bettor] += winningsCollateralValue;
+
+        for (uint256 i = 0; i < betSlip.proxiedBets.length; i++) {
+          if (!isClosed(proxiedBets[betSlip.proxiedBets[i]].outcome)) {
+            return;
+          }
+        }
+        
+        // Remove betSlipId from user's active bet slips
+        uint256[] storage activeBetSlips = userActiveBetSlips[betSlip.bettor];
+        for (uint256 i = 0; i < activeBetSlips.length; i++) {
+            if (activeBetSlips[i] == betSlipId) {
+                // Move last element to this position and remove last
+                activeBetSlips[i] = activeBetSlips[activeBetSlips.length - 1];
+                activeBetSlips.pop();
+                break;
+            }
+        }
+        
+        // Add betSlipId to user's closed bet slips
+        userClosedBetSlips[betSlip.bettor].push(betSlipId);
+    }
+    
+    // Withdraw function for users to claim their funds
+    function withdrawWinnings(uint256 amount) external {
+        require(amount > 0, "Amount must be greater than 0");
+        require(userBalances[msg.sender] >= amount, "Insufficient balance");
+        userBalances[msg.sender] -= amount;
+        musdcToken.safeTransfer(msg.sender, amount);
+    }
+
+    function setCollateralToken(address _musdcToken) public onlyOwner {
+        require(_musdcToken != address(0), "Invalid MUSDC token address");
+        musdcToken = IERC20(_musdcToken);
     }
 }
