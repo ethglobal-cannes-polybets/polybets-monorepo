@@ -125,17 +125,34 @@ def handle_event(event):
         print(f"🚨 Error processing bet slip: {e}")
 
 
-async def log_loop(event_filter, poll_interval):
+async def log_loop(poll_interval):
     """
     Asynchronously listens for new events and passes them to the handler.
     """
+    last_processed_block = w3.eth.block_number
+    print(f"Starting event listener from block: {last_processed_block}")
+
     while True:
-        for event in event_filter.get_new_entries():
-            handle_event(event)
+        current_block = w3.eth.block_number
+
+        if current_block > last_processed_block:
+            # Get logs for BetSlipCreated events from the last processed block to current block
+            try:
+                logs = contract.events.BetSlipCreated.get_logs(
+                    from_block=last_processed_block + 1, to_block=current_block
+                )
+
+                for log in logs:
+                    handle_event(log)
+
+                last_processed_block = current_block
+            except Exception as e:
+                print(f"Error fetching logs: {e}")
+
         await asyncio.sleep(poll_interval)
 
 
-def main():
+async def main():
     """
     Main function to start the event listener loop.
     """
@@ -143,17 +160,15 @@ def main():
     print(
         f"Listening for 'BetSlipCreated' events on contract: {POLYBETS_CONTRACT_ADDRESS}"
     )
+    print(f"Using RPC URL: {SAPPHIRETESTNET_RPC_URL}")
     print("Press Ctrl+C to stop.")
 
-    # Start the asynchronous event loop
-    loop = asyncio.get_event_loop()
+    # Start the event listener
     try:
-        loop.run_until_complete(asyncio.gather(log_loop(poll_interval=2)))
+        await log_loop(poll_interval=2)
     except KeyboardInterrupt:
         print("\n🛑 Shutting down listener.")
-    finally:
-        loop.close()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
