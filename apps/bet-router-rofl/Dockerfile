@@ -12,6 +12,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY main.py .
 COPY client.py .
+COPY bet_execution/ ./bet_execution/
+COPY handlers/ ./handlers/
+
+# Copy contract ABI file
+COPY contracts/ ./contracts/
 
 # The entrypoint is the main script.
 # Arguments like --marketplace-id and --market-id will be passed at runtime.
