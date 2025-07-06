@@ -158,17 +158,27 @@ class BetExecutor:
             response = self.session.post(url, json=payload, timeout=self.timeout)
             
             if response.status_code == 200 or response.status_code == 201:
+                # Safe JSON parsing with error handling
+                try:
+                    response_data = response.json() if response.content else {}
+                except ValueError:
+                    response_data = {"error": "Invalid JSON response", "raw_response": response.text}
+                
                 return BetResponse(
                     success=True,
                     market_id=bet_request.market_id,
                     option_index=bet_request.option_index,
                     collateral_amount=bet_request.collateral_amount,
                     endpoint_name=bet_request.endpoint_name,
-                    response_data=response.json() if response.content else {},
+                    response_data=response_data,
                     status_code=response.status_code
                 )
             else:
-                error_data = response.json() if response.content else {"error": "No response body"}
+                # Safe JSON parsing with error handling
+                try:
+                    error_data = response.json() if response.content else {"error": "No response body"}
+                except ValueError:
+                    error_data = {"error": "Invalid JSON response", "raw_response": response.text}
                 return BetResponse(
                     success=False,
                     market_id=bet_request.market_id,

@@ -2,22 +2,23 @@
 """
 Bet Router ROFL - Event Listener and Bet Executor
 
-This module listens for BetSlipCreated events from the PolyBet smart contract,
-executes optimal betting strategies via marketplace APIs, and records the results
-back to the contract.
+This module listens for BetSlipCreated and BetSlipSellingStateUpdate events from the 
+PolyBet smart contract, executes optimal betting strategies via marketplace APIs, and 
+records the results back to the contract.
 
 PROCESS FLOW:
-1. Listen for BetSlipCreated events from PolyBet contract
-2. Extract bet slip data (markets, marketplaces, collateral amount)
-3. Create pool configurations for optimal betting
-4. Execute optimal bet allocation across multiple pools/marketplaces
-5. Record successful bets as ProxiedBets on the smart contract
-6. Update bet slip status based on execution results
+1. Listen for BetSlipCreated and BetSlipSellingStateUpdate events from PolyBet contract
+2. Route to appropriate flow based on event type:
+   - BetSlipCreated → BUY FLOW (new bet placements)
+   - BetSlipSellingStateUpdate → SELL FLOW (existing bet sales)
+3. Buy Flow: Create pool configurations, execute optimal bet allocation, record bets
+4. Sell Flow: Execute sell orders for existing proxied bets, record sales
+5. Update bet slip status based on execution results
 
 KEY COMPONENTS:
-- Event Listener: Monitors blockchain for new bet slips
+- Event Listener: Monitors blockchain for new bet slips and selling state updates
 - Bet Executor: Executes optimal betting strategies via API calls
-- Contract Recorder: Records successful bets back to the smart contract
+- Contract Recorder: Records successful bets and sales back to the smart contract
 - Error Handling: Comprehensive error handling and logging
 
 ENVIRONMENT VARIABLES REQUIRED:
@@ -38,6 +39,7 @@ import os
 import time
 import sys
 import uuid
+import requests
 from typing import List, Dict, Any
 
 from dotenv import load_dotenv
@@ -52,7 +54,8 @@ from bet_execution.bet_executor import (
     execute_optimal_bet, 
     OptimizationMethod, 
     BetResponse,
-    get_marketplace_id_from_endpoint
+    get_marketplace_id_from_endpoint,
+    get_schema_from_marketplace_id
 )
 
 
@@ -93,6 +96,7 @@ def extract_shares_from_api_response(response_data: Dict[str, Any], collateral_a
     
     # Try different possible field names for shares
     shares_bought = (
+        response_data.get('sharesMinted') or  # New primary field
         response_data.get('shares') or
         response_data.get('sharesBought') or
         response_data.get('shares_bought') or
@@ -130,7 +134,7 @@ SAPPHIRETESTNET_RPC_URL = (
 )
 POLYBETS_CONTRACT_ADDRESS = (
     os.getenv("POLYBETS_CONTRACT_ADDRESS")
-    or "0xaecDA91C878735D6a24A53EbE9C2F7b6c47C9454"
+    or "0xb6efB7885279Ebb7032bB096799ff6b29ccf280f"
 )
 POLYBETS_CONTRACT_ABI_PATH = (
     os.getenv("POLYBETS_CONTRACT_ABI_PATH")
@@ -303,16 +307,15 @@ def record_proxied_bet_on_contract(
 
 
 # --- Event Handling ---
-def handle_event(event):
+def handle_bet_slip_created_event(event):
     """
     Callback function to handle a new BetSlipCreated event.
     
+    BetSlipCreated events are always for new bet placements (BUY FLOW).
+    
     PROCESSING FLOW:
     1. Extract bet slip data from blockchain event
-    2. Create pool configurations from market/marketplace data
-    3. Execute optimal betting strategy across pools
-    4. Record successful bets as ProxiedBets on the contract
-    5. Update bet slip status based on execution results
+    2. Route directly to buy flow for bet placement
     
     Args:
         event: The BetSlipCreated event from the smart contract
@@ -329,27 +332,91 @@ def handle_event(event):
         bet_slip_data = contract.functions.getBetSlip(bet_slip_id).call()
         print("\n=== Bet Slip Details ===")
         print(f"  Bet ID: {bet_slip_id}")
+        print(f"  Raw bet slip data: {bet_slip_data}")
+        print(f"  Data length: {len(bet_slip_data)}")
         print(f"  Strategy: {bet_slip_data[0]}")
         print(f"  Initial Collateral: {bet_slip_data[1]}")
         print(f"  Final Collateral: {bet_slip_data[2]}")
         print(f"  Outcome: {bet_slip_data[3]}")
-        print(f"  Status: {bet_slip_data[4]}")
-        print(f"  Failure Reason: {bet_slip_data[5]}")
-        print(f"  Marketplace IDs: {decode_bytes32_array(bet_slip_data[6])}")
-        print(f"  Market IDs: {decode_bytes32_array(bet_slip_data[7])}")
-        print(f"  Proxied Bets: {[bet_id.hex() for bet_id in bet_slip_data[8]]}")
+        print(f"  Parent ID: {bet_slip_data[4]}")
+        print(f"  Instant Arbitrage: {bet_slip_data[5]}")
+        print(f"  Status: {bet_slip_data[6]}")
+        print(f"  Failure Reason: {bet_slip_data[7]}")
+        print(f"  Marketplace IDs: {decode_bytes32_array(bet_slip_data[8])}")
+        print(f"  Market IDs: {decode_bytes32_array(bet_slip_data[9])}")
+        print(f"  Proxied Bets: {[bet_id.hex() for bet_id in bet_slip_data[10]]}")
         print("========================\n")
 
-        # STEP 2: Execute optimal betting strategy
-        print(f"⚡ Executing bets for BetSlip ID: {bet_slip_id}...")
+        # STEP 2: Route directly to buy flow (new bet placement)
+        print(f"💰 BUY EVENT - Processing new bet placement...")
+        handle_buy_flow(bet_slip_id, bet_slip_data)
+
+    except Exception as e:
+        print(f"🚨 Error processing bet slip: {e}")
+
+
+def handle_bet_slip_selling_state_update_event(event):
+    """
+    Callback function to handle a BetSlipSellingStateUpdate event.
+    
+    This event is specifically emitted when a bet slip is updated to selling state,
+    so we can directly route to the sell flow without checking the status.
+    
+    Args:
+        event: The BetSlipSellingStateUpdate event from the smart contract
+    """
+    print("-----------------------------------")
+    print(f"🔄 BetSlipSellingStateUpdate event detected!")
+    print(f"Transaction Hash: {event['transactionHash'].hex()}")
+
+    bet_slip_id = event["args"]["betId"]
+    print(f"🔍 Fetching details for BetSlip ID: {bet_slip_id}...")
+
+    try:
+        # STEP 1: Fetch bet slip data from contract
+        bet_slip_data = contract.functions.getBetSlip(bet_slip_id).call()
+        print("\n=== Bet Slip Details ===")
+        print(f"  Bet ID: {bet_slip_id}")
+        print(f"  Strategy: {bet_slip_data[0]}")
+        print(f"  Initial Collateral: {bet_slip_data[1]}")
+        print(f"  Final Collateral: {bet_slip_data[2]}")
+        print(f"  Outcome: {bet_slip_data[3]}")
+        print(f"  Parent ID: {bet_slip_data[4]}")
+        print(f"  Instant Arbitrage: {bet_slip_data[5]}")
+        print(f"  Status: {bet_slip_data[6]}")
+        print(f"  Failure Reason: {bet_slip_data[7]}")
+        print(f"  Marketplace IDs: {decode_bytes32_array(bet_slip_data[8])}")
+        print(f"  Market IDs: {decode_bytes32_array(bet_slip_data[9])}")
+        print(f"  Proxied Bets: {[bet_id.hex() for bet_id in bet_slip_data[10]]}")
+        print("========================\n")
+
+        # STEP 2: Route directly to sell flow since this is a selling state update
+        proxied_bet_ids = bet_slip_data[10]  # Array of proxied bet IDs
+        print(f"💸 SELLING STATE UPDATE - Processing sell orders...")
+        handle_sell_flow(bet_slip_id, bet_slip_data, proxied_bet_ids)
+
+    except Exception as e:
+        print(f"🚨 Error processing selling state update: {e}")
+
+
+def handle_buy_flow(bet_slip_id: int, bet_slip_data):
+    """
+    Handle the buy flow - execute optimal betting strategy and record bets.
+    
+    Args:
+        bet_slip_id: The bet slip ID
+        bet_slip_data: The bet slip data from the contract
+    """
+    try:
+        print(f"⚡ Executing BUY flow for BetSlip ID: {bet_slip_id}...")
         
         # Initialize execution variables
         failure_reason = ""
         execution_result = None
         
         # Extract market and marketplace data with corrected indexing
-        market_ids = decode_bytes32_array(bet_slip_data[7])  # marketIds at index 7
-        marketplace_ids = decode_bytes32_array(bet_slip_data[6])  # marketplaceIds at index 6
+        market_ids = decode_bytes32_array(bet_slip_data[9])  # marketIds at index 9
+        marketplace_ids = decode_bytes32_array(bet_slip_data[8])  # marketplaceIds at index 8
         initial_collateral = bet_slip_data[1]  # initialCollateral at index 1
         
         # Convert wei to USDC (assuming 6 decimals)
@@ -361,15 +428,13 @@ def handle_event(event):
         
         # STEP 3: Create pool configurations for optimal betting
         pool_configs = create_pool_configs_from_market_data(market_ids, marketplace_ids)
-        # print(f"  Pool configs: {pool_configs}")
         
         if isinstance(pool_configs, Exception):
             print(f"  ❌ Error creating pool configs: {pool_configs}")
             failure_reason = f"Pool config error: {pool_configs}"
         else:
             # Execute optimal bet allocation
-            # For now, assume option 0 (YES) - this could be made configurable
-            option = bet_slip_data[3] # outcomeIndex is a typo
+            option = bet_slip_data[3]  # outcomeIndex
             
             print(f"  Executing optimal allocation across {len(pool_configs)} pools...")
             execution_result = execute_optimal_bet(
@@ -415,45 +480,238 @@ def handle_event(event):
                 
                 failure_reason = "" if execution_result.success_rate > 0 else "All bets failed"
 
-        # --- Update Bet Slip Status ---
+        # Update Bet Slip Status
+        update_bet_slip_status(bet_slip_id, pool_configs, execution_result, failure_reason)
+
+    except Exception as e:
+        print(f"🚨 Error in buy flow: {e}")
+
+
+def handle_sell_flow(bet_slip_id: int, bet_slip_data, proxied_bet_ids: list):
+    """
+    Handle the sell flow - execute sell orders for the specified proxied bets.
+    
+    Args:
+        bet_slip_id: The bet slip ID
+        bet_slip_data: The bet slip data from the contract
+        proxied_bet_ids: List of proxied bet IDs that need to be sold
+    """
+    try:
+        print(f"💸 Executing SELL flow for BetSlip ID: {bet_slip_id}...")
+        print(f"  Selling {len(proxied_bet_ids)} proxied bets...")
+        
+        successful_sales = 0
+        
+        for bet_id in proxied_bet_ids:
+            try:
+                # Get proxied bet details
+                proxied_bet_data = contract.functions.getProxiedBet(bet_id).call()
+                
+                marketplace_id = proxied_bet_data[2]  # marketplaceId at index 2
+                market_id = proxied_bet_data[3]       # marketId at index 3
+                shares_to_sell = proxied_bet_data[9]  # sharesBought at index 9
+                option_index = proxied_bet_data[4]    # optionIndex at index 4
+                
+                print(f"  📤 Selling bet {bet_id.hex()[:8]}...")
+                print(f"     Market: {market_id} on marketplace {marketplace_id}")
+                print(f"     Shares to sell: {shares_to_sell}")
+                print(f"     Option: {'YES' if option_index == 0 else 'NO'}")
+                
+                # Get marketplace schema and endpoint
+                schema = get_schema_from_marketplace_id(marketplace_id)
+                if isinstance(schema, Exception):
+                    print(f"     ❌ Error getting schema: {schema}")
+                    continue
+                
+                # Map schema to endpoint
+                if schema == "canibeton_variant1":
+                    endpoint_name = "slaughterhouse-predictions"
+                elif schema == "canibeton_variant2":
+                    endpoint_name = "terminal-degeneracy-labs"
+                else:
+                    print(f"     ❌ Unknown schema: {schema}")
+                    continue
+                
+                # Execute sell order via API
+                sell_url = f"{BET_EXECUTION_BASE_URL}/{endpoint_name}/sell-shares"
+                sell_payload = {
+                    "marketId": market_id,
+                    "optionIndex": option_index,
+                    "amount": shares_to_sell
+                }
+                
+                print(f"     Making sell request to: {sell_url}")
+                print(f"     Payload: {sell_payload}")
+                response = requests.post(sell_url, json=sell_payload, timeout=30)
+                
+                print(f"     Response status: {response.status_code}")
+                print(f"     Response headers: {dict(response.headers)}")
+                print(f"     Response content: {response.text}")
+                
+                if response.status_code == 200 or response.status_code == 201:
+                    # Safe JSON parsing with error handling
+                    try:
+                        response_data = response.json() if response.content else {}
+                    except ValueError as json_error:
+                        print(f"     ❌ Invalid JSON response: {json_error}")
+                        print(f"     Raw response: {response.text}")
+                        continue
+                    
+                    print(f"     ✅ Sell successful: {response_data}")
+                    
+                    # Extract collateral received from sell
+                    # New API format returns {"transactionId": "...", "collateralReceived": 3.536336}
+                    collateral_received = response_data.get('collateralReceived', 0)
+                    if not collateral_received:
+                        # Fallback estimation
+                        collateral_received = shares_to_sell  # Rough estimate
+                    
+                    # Record the sell on the contract using recordProxiedBetSold
+                    if record_proxied_bet_sold(bet_id, shares_to_sell, collateral_received):
+                        successful_sales += 1
+                        print(f"     ✅ Recorded sell on contract")
+                    else:
+                        print(f"     ❌ Failed to record sell on contract")
+                else:
+                    # Handle error responses
+                    try:
+                        error_data = response.json() if response.content else {"error": "Empty response"}
+                    except ValueError:
+                        error_data = {"error": "Invalid JSON response", "raw_response": response.text}
+                    
+                    print(f"     ❌ Sell failed: HTTP {response.status_code}: {error_data}")
+                    
+                    # Log slippage errors but don't retry with parameters that don't exist in the API
+                    if "SlippageToleranceExceeded" in response.text or "slippage" in response.text.lower():
+                        print(f"     ⚠️  Slippage tolerance exceeded - this is handled by the API internally")
+            except Exception as bet_error:
+                print(f"     🚨 Error selling bet {bet_id.hex()}: {bet_error}")
+        
+        print(f"  ✅ Successfully sold {successful_sales}/{len(proxied_bet_ids)} bets")
+        
+        # Update bet slip status to "Closed" after successful selling
+        if successful_sales > 0:
+            print(f"  📝 Updating bet slip status to 'Closed'...")
+            update_bet_slip_status_to_closed(bet_slip_id)
+        else:
+            print(f"  ❌ No successful sales, keeping current status")
+
+    except Exception as e:
+        print(f"🚨 Error in sell flow: {e}")
+
+
+def record_proxied_bet_sold(bet_id: bytes, shares_sold: int, collateral_received: float) -> bool:
+    """
+    Record a successful proxied bet sale on the smart contract.
+    
+    Args:
+        bet_id: The proxied bet ID
+        shares_sold: Number of shares sold
+        collateral_received: Collateral amount received from the sale
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        print(f"  📝 Recording proxied bet sale on contract...")
+        print(f"     Bet ID: {bet_id.hex()}")
+        print(f"     Shares sold: {shares_sold}")
+        print(f"     Collateral received: ${collateral_received:.2f}")
+        
+        # Convert collateral to wei (USDC has 6 decimals)
+        collateral_received_wei = int(collateral_received * 1_000_000)
+        
+        # Get current nonce and gas info
+        nonce = w3.eth.get_transaction_count(account.address)
+        gas_price = w3.eth.gas_price
+        
+        # Build transaction
+        record_tx = contract.functions.recordProxiedBetSold(
+            bet_id,
+            int(shares_sold),
+            int(collateral_received_wei)
+        ).build_transaction({
+            "nonce": nonce,
+            "gasPrice": gas_price,
+            "gas": 300000,
+            "chainId": w3.eth.chain_id,
+        })
+        
+        # Sign and send transaction
+        signed_tx = w3.eth.account.sign_transaction(record_tx, private_key=PRIVATE_KEY)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        
+        print(f"     Transaction sent. Tx Hash: {tx_hash.hex()}")
+        
+        # Wait for transaction to be mined
+        try:
+            receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
+            
+            if receipt.status == 1:
+                print(f"     ✅ Proxied bet sale recorded successfully!")
+                print(f"     Gas used: {receipt.gasUsed}")
+                return True
+            else:
+                print(f"     ❌ Transaction failed! Receipt: {receipt}")
+                return False
+                
+        except Exception as receipt_error:
+            print(f"     ❌ Error waiting for transaction receipt: {receipt_error}")
+            return False
+            
+    except Exception as e:
+        print(f"  🚨 Error recording proxied bet sale: {e}")
+        return False
+
+
+def update_bet_slip_status(bet_slip_id: int, pool_configs, execution_result, failure_reason: str):
+    """
+    Update the bet slip status based on execution results.
+    
+    Args:
+        bet_slip_id: The bet slip ID
+        pool_configs: Pool configurations (or Exception if failed)
+        execution_result: Execution result (or Exception if failed)
+        failure_reason: Failure reason string
+    """
+    try:
         print(f"⏳ Updating status for BetSlip ID: {bet_slip_id}...")
 
+        # BetSlipStatus enum values:
+        # Pending(0), Processing(1), Placed(2), Selling(3), Failed(4), Closed(5)
+        
         # Determine status based on execution results
         if isinstance(pool_configs, Exception):
             # Failed to create pool configs
-            new_status = 2  # Failed
+            new_status = 4  # Failed
             status_name = "Failed"
         elif execution_result is None or isinstance(execution_result, Exception):
             # Bet execution failed or didn't run
-            new_status = 2  # Failed
+            new_status = 4  # Failed
             status_name = "Failed"
-        elif execution_result.success_rate > 0:
+        elif hasattr(execution_result, 'success_rate') and execution_result.success_rate > 0:
             # At least some bets succeeded
-            new_status = 3  # Placed
+            new_status = 2  # Placed
             status_name = "Placed"
         else:
             # All bets failed
-            new_status = 2  # Failed
+            new_status = 4  # Failed
             status_name = "Failed"
 
         print(f"  Setting status to: {status_name} ({new_status})")
 
         nonce = w3.eth.get_transaction_count(account.address)
-
-        # Get gas price for Oasis Sapphire (legacy transaction format)
         gas_price = w3.eth.gas_price
 
-        # Build transaction with legacy parameters (no EIP-1559)
+        # Build transaction
         update_tx = contract.functions.updateBetSlipStatus(
             bet_slip_id, new_status
-        ).build_transaction(
-            {
-                "nonce": nonce,
-                "gasPrice": gas_price,
-                "gas": 200000,  # Set a reasonable gas limit
-                "chainId": w3.eth.chain_id,
-            }
-        )
+        ).build_transaction({
+            "nonce": nonce,
+            "gasPrice": gas_price,
+            "gas": 200000,
+            "chainId": w3.eth.chain_id,
+        })
 
         # Sign and send transaction
         signed_tx = w3.eth.account.sign_transaction(update_tx, private_key=PRIVATE_KEY)
@@ -465,38 +723,97 @@ def handle_event(event):
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
         if receipt.status == 1:
-            print(
-                f"  ✅ Transaction successful! Status for BetSlip ID {bet_slip_id} is now '{status_name}'."
-            )
+            print(f"  ✅ Transaction successful! Status for BetSlip ID {bet_slip_id} is now '{status_name}'.")
         else:
-            print(
-                f"  ❌ Transaction failed! Could not update status for BetSlip ID {bet_slip_id}."
-            )
+            print(f"  ❌ Transaction failed! Could not update status for BetSlip ID {bet_slip_id}.")
             print(f"  Receipt: {receipt}")
 
     except Exception as e:
-        print(f"🚨 Error processing bet slip: {e}")
+        print(f"🚨 Error updating bet slip status: {e}")
+
+
+def update_bet_slip_status_to_closed(bet_slip_id: int):
+    """
+    Update the bet slip status to Closed (enum value 5).
+    
+    Args:
+        bet_slip_id: The bet slip ID
+    """
+    try:
+        print(f"⏳ Updating status to 'Closed' for BetSlip ID: {bet_slip_id}...")
+
+        # BetSlipStatus.Closed = 5
+        new_status = 5
+        status_name = "Closed"
+
+        print(f"  Setting status to: {status_name} ({new_status})")
+
+        nonce = w3.eth.get_transaction_count(account.address)
+        gas_price = w3.eth.gas_price
+
+        # Build transaction
+        update_tx = contract.functions.updateBetSlipStatus(
+            bet_slip_id, new_status
+        ).build_transaction({
+            "nonce": nonce,
+            "gasPrice": gas_price,
+            "gas": 200000,
+            "chainId": w3.eth.chain_id,
+        })
+
+        # Sign and send transaction
+        signed_tx = w3.eth.account.sign_transaction(update_tx, private_key=PRIVATE_KEY)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+
+        print(f"  Transaction sent to update status. Tx Hash: {tx_hash.hex()}")
+
+        # Wait for the transaction to be mined
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+        if receipt.status == 1:
+            print(f"  ✅ Transaction successful! Status for BetSlip ID {bet_slip_id} is now '{status_name}'.")
+        else:
+            print(f"  ❌ Transaction failed! Could not update status for BetSlip ID {bet_slip_id}.")
+            print(f"  Receipt: {receipt}")
+
+    except Exception as e:
+        print(f"🚨 Error updating bet slip status to closed: {e}")
 
 
 async def log_loop(poll_interval):
     """
-    Asynchronously listens for new events and passes them to the handler.
+    Asynchronously listens for new events and passes them to the appropriate handlers.
+    
+    Event Routing:
+    - BetSlipCreated → BUY FLOW (new bet placements)
+    - BetSlipSellingStateUpdate → SELL FLOW (sell order processing)
     """
     last_processed_block = w3.eth.block_number
     print(f"Starting event listener from block: {last_processed_block}")
+    print(f"Event Routing: BetSlipCreated→BUY, BetSlipSellingStateUpdate→SELL")
 
     while True:
         current_block = w3.eth.block_number
 
         if current_block > last_processed_block:
-            # Get logs for BetSlipCreated events from the last processed block to current block
             try:
-                logs = contract.events.BetSlipCreated.get_logs(
+                # Get logs for BetSlipCreated events
+                bet_slip_created_logs = contract.events.BetSlipCreated.get_logs(
                     from_block=last_processed_block + 1, to_block=current_block
                 )
 
-                for log in logs:
-                    handle_event(log)
+                # Get logs for BetSlipSellingStateUpdate events
+                bet_slip_selling_logs = contract.events.BetSlipSellingStateUpdate.get_logs(
+                    from_block=last_processed_block + 1, to_block=current_block
+                )
+
+                # Process BetSlipCreated events
+                for log in bet_slip_created_logs:
+                    handle_bet_slip_created_event(log)
+
+                # Process BetSlipSellingStateUpdate events
+                for log in bet_slip_selling_logs:
+                    handle_bet_slip_selling_state_update_event(log)
 
                 last_processed_block = current_block
             except Exception as e:
@@ -511,7 +828,7 @@ async def main():
     """
     print("🚀 Starting Bet-Router-ROFL Event Listener...")
     print(
-        f"Listening for 'BetSlipCreated' events on contract: {POLYBETS_CONTRACT_ADDRESS}"
+        f"Listening for 'BetSlipCreated' and 'BetSlipSellingStateUpdate' events on contract: {POLYBETS_CONTRACT_ADDRESS}"
     )
     print(f"Using RPC URL: {SAPPHIRETESTNET_RPC_URL}")
     print("Press Ctrl+C to stop.")

@@ -13,6 +13,41 @@ function getRandomCollateralAmount(): bigint {
   return BigInt(Math.floor(Math.random() * (max - min + 1)) + min);
 }
 
+// Helper function to extract bet slip ID from transaction receipt
+async function extractBetSlipId(txReceipt: any, contract: any): Promise<bigint | null> {
+  try {
+    // Parse the logs to find BetSlipCreated event
+    const betSlipCreatedEvent = contract.interface.parseLog(txReceipt.logs[2]);
+    
+    if (betSlipCreatedEvent && betSlipCreatedEvent.name === "BetSlipCreated") {
+      return betSlipCreatedEvent.args.betId;
+    }
+    
+    // If first log isn't the event, search through all logs
+    for (const log of txReceipt.logs) {
+      try {
+        const parsedLog = contract.interface.parseLog(log);
+        if (parsedLog && parsedLog.name === "BetSlipCreated") {
+          return parsedLog.args.betId;
+        }
+      } catch {
+        // Skip logs that can't be parsed by this contract
+        continue;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error extracting bet slip ID:", error);
+    return null;
+  }
+}
+
+// Helper function to wait for specified seconds
+function sleep(seconds: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+}
+
 async function main() {
   const musdcAddress =
     process.env.SAPPHIRETESTNET_MUSDC_ADDRESS ||
@@ -28,7 +63,7 @@ async function main() {
   const mintAuthority = signers[0];
 
   // Use accounts 1, 2, and 3 (test accounts)
-  const testAccounts = [signers[1], signers[2], signers[3]];
+  const testAccounts = [signers[0]];
 
   // Get mUSDC contract instance with mint authority
   const musdcContract = await ethers.getContractAt(
@@ -48,8 +83,8 @@ async function main() {
 
   // Convert market IDs to bytes32
   const marketIds = [
-    ethers.zeroPadValue(ethers.toBeHex(124), 32), // market id 124 for marketplace 2
-    ethers.zeroPadValue(ethers.toBeHex(118), 32), // market id 118 for marketplace 3
+    ethers.zeroPadValue(ethers.toBeHex(190), 32), // market id 190 for marketplace 2
+    ethers.zeroPadValue(ethers.toBeHex(185), 32), // market id 185 for marketplace 3
   ];
 
   console.log("Placing bets with parameters:");
@@ -57,6 +92,9 @@ async function main() {
   console.log(`Marketplace IDs: [${marketplaceIds.join(", ")}]`);
   console.log(`Market IDs: [${marketIds.join(", ")}]`);
   console.log("---");
+
+  // Array to store bet slip IDs for selling later
+  const betSlipIds: bigint[] = [];
 
   // Place bets for each test account
   for (let i = 0; i < testAccounts.length; i++) {
@@ -146,23 +184,78 @@ async function main() {
         totalCollateralAmount,
         outcomeIndex,
         marketplaceIds,
-        marketIds
+        marketIds,
+        true,
+        0
       );
 
       console.log("Transaction submitted, waiting for confirmation...");
       console.log(`Transaction hash: ${tx.hash}`);
 
-      await tx.wait();
+      const receipt = await tx.wait();
 
       console.log("Bet placed successfully!");
       console.log(`Transaction confirmed`);
+
+      // Extract bet slip ID from the transaction receipt
+      const betSlipId = await extractBetSlipId(receipt, polybet);
+      if (betSlipId) {
+        console.log(`Bet Slip ID: ${betSlipId}`);
+        betSlipIds.push(betSlipId);
+      } else {
+        console.log("Warning: Could not extract bet slip ID from transaction");
+      }
+
     } catch (error) {
       console.error(`Error placing bet for account ${accountIndex}:`, error);
       // Continue with other accounts even if one fails
     }
   }
 
-  console.log("\n=== All bets completed ===");
+  console.log("\n=== All bets placed ===");
+  
+  // Now initiate selling process for all placed bets
+  if (betSlipIds.length > 0) {
+    console.log(`\n🕐 Waiting 1 minute before initiating sell orders...`);
+    await sleep(60); // Wait 1 minute (60 seconds)
+    
+    console.log(`\n💰 Initiating sell orders for ${betSlipIds.length} bet slips...`);
+    
+    // Use the first test account for selling (you could also use the same account that placed each bet)
+    const sellingAccount = testAccounts[0];
+    const polybet = await ethers.getContractAt(
+      "PolyBet",
+      polybetsContractAddress,
+      sellingAccount
+    );
+    
+    for (let i = 0; i < betSlipIds.length; i++) {
+      const betSlipId = betSlipIds[i];
+      console.log(`\nInitiating sell for Bet Slip ID: ${betSlipId}`);
+      
+      try {
+        const sellTx = await polybet.initiateSellProxiedBets(betSlipId);
+        console.log(`Sell transaction submitted: ${sellTx.hash}`);
+        
+        const sellReceipt = await sellTx.wait();
+        if (sellReceipt) {
+          console.log(`✅ Sell initiated successfully for Bet Slip ID: ${betSlipId}`);
+          console.log(`Gas used: ${sellReceipt.gasUsed}`);
+        } else {
+          console.log(`⚠️  Sell transaction receipt is null for Bet Slip ID: ${betSlipId}`);
+        }
+        
+      } catch (error) {
+        console.error(`❌ Error initiating sell for Bet Slip ID ${betSlipId}:`, error);
+      }
+    }
+    
+    console.log("\n=== All sell orders initiated ===");
+  } else {
+    console.log("\n⚠️  No bet slip IDs found to sell");
+  }
+
+  console.log("\n=== Script completed ===");
 }
 
 main()
