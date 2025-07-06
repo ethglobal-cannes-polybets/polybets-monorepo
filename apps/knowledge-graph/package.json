@@ -1,0 +1,38 @@
+{
+  "name": "polybets-knowledge-graph",
+  "version": "1.0.0",
+  "description": "GRC-20 knowledge graph for PolyBets betting markets",
+  "main": "index.js",
+  "scripts": {
+    "setup": "bun run create-wallet.ts",
+    "create-space": "bun run create-space.ts",
+    "publish": "bun run publish-entities.ts",
+    "dev": "bun run create-entities.ts",
+    "query": "bun run query-knowledge-graph.ts",
+    "overview": "bun run query-knowledge-graph.ts overview",
+    "entities": "bun run query-knowledge-graph.ts entities",
+    "export": "bun run query-knowledge-graph.ts export-all"
+  },
+  "keywords": [
+    "grc-20",
+    "knowledge-graph",
+    "betting",
+    "polybets",
+    "the-graph"
+  ],
+  "author": "PolyBets Team",
+  "license": "MIT",
+  "dependencies": {
+    "@graphprotocol/grc-20": "^0.21.4",
+    "viem": "^2.21.54",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.6",
+    "typescript": "5.7.3",
+    "bun-types": "1.2.18"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

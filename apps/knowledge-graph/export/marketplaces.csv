@@ -1,0 +1,6 @@
+id,name,chain_id,chain_name,chain_family,warp_router_id,marketplace_proxy,address,price_strategy,active
+1,PolyMarket,137,polygon,evm,,0x0000000000000000000000000000000000000000,varied,orderbook,False
+2,Slaughterhouse Predictions,,solana-devnet,solana,,0x0000000000000000000000000000000000000000,Bh2UXpftCKHCqM4sQwHUtY8DMBQ35fxaBrLyHadaUpVb,lmsr,True
+3,Terminal Degeneracy Labs,,solana-devnet,solana,,0x0000000000000000000000000000000000000000,9Mfat3wrfsciFoi4kUTt7xVxvgYJietFTbAoZ1U6sUPY,lmsr,True
+4,Degen Execution Chamber,,solana-devnet,solana,,0x0000000000000000000000000000000000000000,4XVwcwETMmcFcV33uBp66gQLd3AJpxd2qz7E2JTn5Jkm,lmsr,True
+5,Nihilistic Prophet Syndicate,,solana-devnet,solana,,0x0000000000000000000000000000000000000000,EWwuoaLcycGPMQWg8Xbyg5x2HVdNWgPF5AwZNRPibeWz,lmsr,True

@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-07-06T05:29:14.631Z",
+  "spaceId": "0e99e2a7-16e2-40a1-a751-8d45b02b9789",
+  "spaceResult": {
+    "id": "0e99e2a7-16e2-40a1-a751-8d45b02b9789"
+  },
+  "editorAddress": "0x69F5fA13C39B2Ef64bc3b923164bEe43e1d9a74D",
+  "name": "PolyBets Markets Knowledge Graph",
+  "description": "A comprehensive knowledge graph mapping the PolyBets prediction market ecosystem including core markets, marketplace platforms, and external market instances",
+  "network": "TESTNET",
+  "status": "created"
+}
