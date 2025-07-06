@@ -1,15 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
-import { slugify } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Clock,
-  CheckCircle,
-  Loader2,
-} from "lucide-react";
+import { Clock, CheckCircle, Loader2 } from "lucide-react";
 import { useActiveBetSlips } from "@/hooks/use-betslips";
 
 const statusConfig = {
@@ -92,7 +86,10 @@ export default function PortfolioPage() {
       const slip = raw as OnChainSlip & EnrichedSlipStruct;
 
       // Basic runtime check to ensure required fields are present
-      if (typeof slip.status === "undefined" || typeof slip.initialCollateral === "undefined") {
+      if (
+        typeof slip.status === "undefined" ||
+        typeof slip.initialCollateral === "undefined"
+      ) {
         return [];
       }
 
@@ -104,9 +101,9 @@ export default function PortfolioPage() {
       else statusGroup = "closed"; // 2 Failed and 4 Closed treated as closed
 
       const marketTitle =
-        (slip.marketsMeta?.[0]?.market.common_question ??
-          slip.parentMarket?.common_question ??
-          "Unknown Market");
+        slip.marketsMeta?.[0]?.market.common_question ??
+        slip.parentMarket?.common_question ??
+        "Unknown Market";
       const marketplaceName =
         slip.marketsMeta?.[0]?.marketplace?.name ??
         slip.marketplace?.name ??
@@ -116,7 +113,8 @@ export default function PortfolioPage() {
       const platforms: PlatformInfo[] = (slip.marketsMeta ?? []).map((pm) => ({
         marketplace: pm.marketplace?.name ?? "Unknown",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        question: (pm as any).question ?? pm.market.common_question ?? "Unknown",
+        question:
+          (pm as any).question ?? pm.market.common_question ?? "Unknown",
       }));
 
       return {
@@ -157,11 +155,9 @@ export default function PortfolioPage() {
         <CardHeader className="p-5 pb-3">
           <div className="flex items-start justify-between mb-3">
             <div className="space-y-2 flex-1">
-              <Link href={`/market/${slugify(betSlip.market)}`} passHref>
-                <CardTitle className="text-lg font-bold uppercase font-sans hover:underline leading-tight">
-                  {betSlip.market}
-                </CardTitle>
-              </Link>
+              <CardTitle className="text-lg font-bold uppercase font-sans  leading-tight">
+                {betSlip.market}
+              </CardTitle>
               <div className="text-xs uppercase text-muted-foreground tracking-wide">
                 {betSlip.marketplaceName}
               </div>
@@ -169,13 +165,17 @@ export default function PortfolioPage() {
                 Position:{" "}
                 <span
                   className={`font-bold ${
-                    betSlip.position === "Yes" ? "text-green-600" : "text-red-600"
+                    betSlip.position === "Yes"
+                      ? "text-green-600"
+                      : "text-red-600"
                   }`}
                 >
                   {betSlip.position.toUpperCase()}
                 </span>
                 {betSlip.avgPrice !== undefined && (
-                  <span className="ml-2 font-heading">@{betSlip.avgPrice}¢ avg.</span>
+                  <span className="ml-2 font-heading">
+                    @{betSlip.avgPrice}¢ avg.
+                  </span>
                 )}
               </div>
             </div>
@@ -184,22 +184,41 @@ export default function PortfolioPage() {
           {/* Summary grid */}
           <div className="grid grid-cols-4 gap-4 p-3 bg-accent/30 border border-foreground/10 rounded-lg">
             <div className="text-center">
-              <div className="text-xs text-muted-foreground uppercase mb-1">Cost</div>
-              <div className="font-bold font-heading">{formatCurrency(betSlip.totalCost)}</div>
+              <div className="text-xs text-muted-foreground uppercase mb-1">
+                Cost
+              </div>
+              <div className="font-bold font-heading">
+                {formatCurrency(betSlip.totalCost)}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-muted-foreground uppercase mb-1">Current Value</div>
-              <div className="font-bold font-heading text-muted-foreground">—</div>
+              <div className="text-xs text-muted-foreground uppercase mb-1">
+                Current Value
+              </div>
+              <div className="font-bold font-heading text-muted-foreground">
+                —
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-muted-foreground uppercase mb-1">{betSlip.statusGroup === "closed" ? "P&L" : "If Wins"}</div>
-              <div className={"font-bold font-heading " + (betSlip.failed ? "text-red-600" : "text-primary")}>{
-                betSlip.failed ? "Error" : "—"
-              }</div>
+              <div className="text-xs text-muted-foreground uppercase mb-1">
+                {betSlip.statusGroup === "closed" ? "P&L" : "If Wins"}
+              </div>
+              <div
+                className={
+                  "font-bold font-heading " +
+                  (betSlip.failed ? "text-red-600" : "text-primary")
+                }
+              >
+                {betSlip.failed ? "Error" : "—"}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-muted-foreground uppercase mb-1">Shares</div>
-              <div className="font-bold font-heading">{betSlip.totalShares}</div>
+              <div className="text-xs text-muted-foreground uppercase mb-1">
+                Shares
+              </div>
+              <div className="font-bold font-heading">
+                {betSlip.totalShares}
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -209,9 +228,14 @@ export default function PortfolioPage() {
               Platform Breakdown
             </div>
             {betSlip.platforms.map((p, idx) => (
-              <div key={idx} className="flex items-start justify-between p-3 bg-background border border-foreground/5 rounded-md">
+              <div
+                key={idx}
+                className="flex items-start justify-between p-3 bg-background border border-foreground/5 rounded-md"
+              >
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm truncate">{p.marketplace}</div>
+                  <div className="font-medium text-sm truncate">
+                    {p.marketplace}
+                  </div>
                   <div className="text-xs text-muted-foreground truncate">
                     {p.question}
                   </div>
@@ -223,7 +247,9 @@ export default function PortfolioPage() {
               </div>
             ))}
             {betSlip.failed && (
-              <p className="text-sm text-red-600 font-semibold mt-1">Execution failed – funds returned</p>
+              <p className="text-sm text-red-600 font-semibold mt-1">
+                Execution failed – funds returned
+              </p>
             )}
           </CardContent>
         )}
