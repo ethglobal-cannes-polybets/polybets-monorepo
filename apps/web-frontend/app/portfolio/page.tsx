@@ -6,6 +6,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, CheckCircle, Loader2 } from "lucide-react";
 import { useActiveBetSlips } from "@/hooks/use-betslips";
 
+// BetSlipStatus enum matching the smart contract
+enum BetSlipStatus {
+  Pending = 0,
+  Processing = 1,
+  Placed = 2,
+  Selling = 3,
+  Failed = 4,
+  Closed = 5,
+}
+
 const statusConfig = {
   processing: {
     label: "Processing",
@@ -96,9 +106,19 @@ export default function PortfolioPage() {
       // Map status enum ⇒ UI group
       const statusEnum = Number(slip.status);
       let statusGroup: "processing" | "open" | "closed";
-      if (statusEnum === 0 || statusEnum === 1) statusGroup = "processing";
-      else if (statusEnum === 3) statusGroup = "open";
-      else statusGroup = "closed"; // 2 Failed and 4 Closed treated as closed
+      if (
+        statusEnum === BetSlipStatus.Pending ||
+        statusEnum === BetSlipStatus.Processing
+      ) {
+        statusGroup = "processing";
+      } else if (
+        statusEnum === BetSlipStatus.Selling ||
+        statusEnum === BetSlipStatus.Placed
+      ) {
+        statusGroup = "open";
+      } else {
+        statusGroup = "closed"; // Placed, Failed, and Closed treated as closed
+      }
 
       const marketTitle =
         slip.marketsMeta?.[0]?.market.common_question ??
@@ -127,7 +147,7 @@ export default function PortfolioPage() {
         avgPrice: undefined,
         marketplaceName,
         platforms,
-        failed: statusEnum === 2,
+        failed: statusEnum === BetSlipStatus.Failed,
       };
     });
   }, [onChainBetSlips]);
