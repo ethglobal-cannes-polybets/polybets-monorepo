@@ -1,0 +1,11 @@
+services:
+  marketplace-adapter-rest-api:
+    build:
+      context: .
+      dockerfile: ./apps/marketplace-adapter-rest-api/Dockerfile
+    ports:
+      - "3013:3000"
+    volumes:
+      - .:/app
+    env_file:
+      - ./packages/common/.env

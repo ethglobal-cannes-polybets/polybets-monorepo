@@ -89,6 +89,15 @@ export class SolanaMarketplaceAdapter
       .toNumber();
     const current_q_A = poolState.yesUsdcCurrentSupply.toNumber();
     const current_q_B = poolState.noUsdcCurrentSupply.toNumber();
+    console.log("----- getPrices -----");
+    console.log("initial_liquidity_A RAW", poolState.initialLiquidityYesUsdc);
+    console.log("initial_liquidity_A PROCESSED", initial_liquidity_A);
+    console.log("iinitial_liquidity_B RAW", poolState.initialLiquidityNoUsdc);
+    console.log("initial_liquidity_B PROCESSED", initial_liquidity_B);
+    console.log("current_q_A RAW", poolState.yesUsdcCurrentSupply);
+    console.log("current_q_A PROCESSED", current_q_A);
+    console.log("current_q_B RAW", poolState.noUsdcCurrentSupply);
+    console.log("current_q_B PROCESSED", current_q_B);
 
     return calculateCurrentPrices(
       initial_liquidity_A,
