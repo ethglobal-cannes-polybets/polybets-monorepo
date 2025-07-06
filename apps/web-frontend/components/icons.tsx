@@ -60,6 +60,50 @@ const TelegramIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
+const SlaughterhouseIcon = (
+  props: React.ImgHTMLAttributes<HTMLImageElement>,
+) => (
+  <img
+    src="/slaughterhouse-predictions.png"
+    alt="Slaughterhouse Predictions"
+    className="h-4 w-4 invert"
+    {...props}
+  />
+)
+
+const TerminalDegenIcon = (
+  props: React.ImgHTMLAttributes<HTMLImageElement>,
+) => (
+  <img
+    src="/terminal-degeneracy-labs.png"
+    alt="Terminal Degeneracy Labs"
+    className="h-4 w-4 invert"
+    {...props}
+  />
+)
+
+const DegenExecutionIcon = (
+  props: React.ImgHTMLAttributes<HTMLImageElement>,
+) => (
+  <img
+    src="/degen-execution-chamber.png"
+    alt="Degen Execution Chamber"
+    className="h-4 w-4 invert"
+    {...props}
+  />
+)
+
+const NihilisticProphetIcon = (
+  props: React.ImgHTMLAttributes<HTMLImageElement>,
+) => (
+  <img
+    src="/nihilistic-prophet-syndicate.png"
+    alt="Nihilistic Prophet Syndicate"
+    className="h-4 w-4 invert"
+    {...props}
+  />
+)
+
 export const Icons = {
   poly: PolyIcon,
   limitless: LimitlessIcon,
@@ -69,4 +113,8 @@ export const Icons = {
   x: XIcon,
   discord: DiscordIcon,
   telegram: TelegramIcon,
+  slaughterhousePredictions: SlaughterhouseIcon,
+  terminalDegeneracyLabs: TerminalDegenIcon,
+  degenExecutionChamber: DegenExecutionIcon,
+  nihilisticProphetSyndicate: NihilisticProphetIcon,
 }

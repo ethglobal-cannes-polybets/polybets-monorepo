@@ -156,12 +156,20 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
     polymarket: <Icons.poly />,
     limitless: <Icons.limitless />,
     kalshi: <Icons.kalshi />,
+    "slaughterhouse predictions": <Icons.slaughterhousePredictions />,
+    "terminal degeneracy labs": <Icons.terminalDegeneracyLabs />,
+    "degen execution chamber": <Icons.degenExecutionChamber />,
+    "nihilistic prophet syndicate": <Icons.nihilisticProphetSyndicate />,
   };
 
   const colorMap: Record<string, string> = {
     polymarket: "bg-purple-600",
-    limitless: "bg-green-600",
+    limitless: "bg-emerald-600",
     kalshi: "bg-indigo-600",
+    "slaughterhouse predictions": "bg-rose-700",
+    "terminal degeneracy labs": "bg-amber-500",
+    "degen execution chamber": "bg-fuchsia-600",
+    "nihilistic prophet syndicate": "bg-teal-600",
   };
 
   // Fallback platform map based on price_lookup_method when marketplace metadata missing
