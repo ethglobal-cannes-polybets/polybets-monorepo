@@ -1,0 +1,33 @@
+id,common_question,options,url
+59,Will Donald Trump win Nobel Peace Prize in 2025?,"['Yes', 'No']",https://localhost:3001/markets/will-donald-trump-win-nobel-peace-prize-in-2025
+60,Jay-Z & Beyoncé divorce in 2025?,"['Yes', 'No']",https://localhost:3001/markets/jayz-beyonc-divorce-in-2025
+61,Will Donald Trump win Nobel Peace Prize in 2025?,"['Yes', 'No']",https://localhost:3001/markets/will-donald-trump-win-nobel-peace-prize-in-2025
+62,Jay-Z & Beyoncé divorce in 2025?,"['Yes', 'No']",https://localhost:3001/markets/jayz-beyonc-divorce-in-2025
+63,Bird flu vaccine in 2025?,"['Yes', 'No']",https://localhost:3001/markets/bird-flu-vaccine-in-2025
+64,Trump divorce in 2025?,"['Yes', 'No']",https://localhost:3001/markets/trump-divorce-in-2025
+65,Harry & Meghan divorce in 2025?,"['Yes', 'No']",https://localhost:3001/markets/harry-meghan-divorce-in-2025
+66,Will Kim Jong Un visit US in 2025?,"['Yes', 'No']",https://localhost:3001/markets/will-kim-jong-un-visit-us-in-2025
+67,Will 2025 be the hottest year on record?,"['Yes', 'No']",https://localhost:3001/markets/will-2025-be-the-hottest-year-on-record
+68,US national Bitcoin reserve in 2025?,"['Yes', 'No']",https://localhost:3001/markets/us-national-bitcoin-reserve-in-2025
+69,"Will Gold close at $3,200 or more at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-at-3200-or-more-at-the-end-of-2025
+70,"Will Gold close at $3,100-3,200 at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-at-31003200-at-the-end-of-2025
+71,"Will Gold close at $3,000-3,100 at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-at-30003100-at-the-end-of-2025
+72,"Will Gold close at $2,900-3,000 at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-at-29003000-at-the-end-of-2025
+73,"Will Gold close at $2,800-2,900 at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-at-28002900-at-the-end-of-2025
+74,"Will Gold close at $2,700-2,800 at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-at-27002800-at-the-end-of-2025
+75,"Will Gold close at $2,600-2,700 at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-at-26002700-at-the-end-of-2025
+76,"Will Gold close at $2,500-2,600 at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-at-25002600-at-the-end-of-2025
+77,"Will Gold close under $2,500 at the end of 2025?","['Yes', 'No']",https://localhost:3001/markets/will-gold-close-under-2500-at-the-end-of-2025
+78,MicroStrategy sells any Bitcoin in 2025?,"['Yes', 'No']",https://localhost:3001/markets/microstrategy-sells-any-bitcoin-in-2025
+79,Will the US confirm that aliens exist in 2025?,"['Yes', 'No']",https://localhost:3001/markets/will-the-us-confirm-that-aliens-exist-in-2025
+80,Doge ETF approved in 2025?,"['Yes', 'No']",https://localhost:3001/markets/doge-etf-approved-in-2025
+81,New pandemic in 2025?,"['Yes', 'No']",https://localhost:3001/markets/new-pandemic-in-2025
+82,Ripple ETF approved in 2025?,"['Yes', 'No']",https://localhost:3001/markets/ripple-etf-approved-in-2025
+83,Taylor Swift and Travis Kelce engaged in 2025?,"['Yes', 'No']",https://localhost:3001/markets/taylor-swift-and-travis-kelce-engaged-in-2025
+84,Selena Gomez married in 2025?,"['Yes', 'No']",https://localhost:3001/markets/selena-gomez-married-in-2025
+85,Nara & Lucky divorce in 2025?,"['Yes', 'No']",https://localhost:3001/markets/nara-lucky-divorce-in-2025
+86,Britney Spears tour in 2025?,"['Yes', 'No']",https://localhost:3001/markets/britney-spears-tour-in-2025
+87,"Will Ethereum hit $4,000 by December 31?","['Yes', 'No']",https://localhost:3001/markets/will-ethereum-hit-4000-by-december-31
+88,"Will Ethereum hit $5,000 by December 31?","['Yes', 'No']",https://localhost:3001/markets/will-ethereum-hit-5000-by-december-31
+89,"Will Ethereum hit $6,000 by December 31?","['Yes', 'No']",https://localhost:3001/markets/will-ethereum-hit-6000-by-december-31
+90,"Will Ethereum hit $7,000 by December 31?","['Yes', 'No']",https://localhost:3001/markets/will-ethereum-hit-7000-by-december-31

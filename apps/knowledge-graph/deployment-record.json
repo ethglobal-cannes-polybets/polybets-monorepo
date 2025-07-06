@@ -1,0 +1,91 @@
+{
+  "timestamp": "2025-07-06T05:32:33.861Z",
+  "network": "TESTNET",
+  "spaceId": "0e99e2a7-16e2-40a1-a751-8d45b02b9789",
+  "cid": "ipfs://bafkreihjshcs5eptkqurji33wafkmyzxqqqkzbl7t6yhng42vnhnutfxwe",
+  "txHash": "0x8ceb2d010af862fdb084b6e3da0febc5025d096c10657da9cb1a1b2dc735c08a",
+  "entitiesCount": 18,
+  "operationsCount": 18,
+  "entities": {
+    "coreMarkets": [
+      {
+        "id": "c5e35c68-6f8f-4025-af74-1c4fe5c896af",
+        "name": "Trump Nobel Prize Market"
+      },
+      {
+        "id": "d53ee79d-8de8-409f-9a6d-07428719a484",
+        "name": "Jay-Z Beyoncé Divorce Market"
+      },
+      {
+        "id": "bf63d6f9-dce9-4012-bd38-a45feb35e9f7",
+        "name": "Bird Flu Vaccine Market"
+      },
+      {
+        "id": "05d16353-2044-4cdc-975f-3ef1eca52b5a",
+        "name": "Ethereum $4K Market"
+      },
+      {
+        "id": "81bbd49c-b7cc-489a-aa66-f23420eb5906",
+        "name": "US Bitcoin Reserve Market"
+      },
+      {
+        "id": "3c66f670-5425-4b49-94a7-63e12caef590",
+        "name": "Gold $3200+ Market"
+      }
+    ],
+    "marketplaces": [
+      {
+        "id": "d44101d0-ec51-434a-a76a-c6902e4530c0",
+        "name": "PolyMarket"
+      },
+      {
+        "id": "d3f50f6d-dd72-4d4a-b546-e2c6e20a81bc",
+        "name": "Slaughterhouse Predictions"
+      },
+      {
+        "id": "5201f768-2bb5-4843-9cea-a6024ce6ad07",
+        "name": "Terminal Degeneracy Labs"
+      },
+      {
+        "id": "45e88840-a0a9-4272-92cd-1f9779864d1f",
+        "name": "Degen Execution Chamber"
+      },
+      {
+        "id": "cd4a8866-0eeb-4d23-8b8c-bfa643d66351",
+        "name": "Nihilistic Prophet Syndicate"
+      }
+    ],
+    "externalMarkets": [
+      {
+        "id": "4791d3f5-9d77-4c82-9672-8b24afee3fd6",
+        "name": "Trump Nobel on Slaughterhouse"
+      },
+      {
+        "id": "a1e2986f-884a-4def-a40e-7de3b4178b9f",
+        "name": "Trump Nobel on Terminal Degeneracy"
+      },
+      {
+        "id": "5290364f-70fa-44b3-892a-2c84ea5c70ba",
+        "name": "Jay-Z Divorce on Terminal Degeneracy"
+      },
+      {
+        "id": "79845070-ee0b-40f3-9664-ee953cec039c",
+        "name": "Bird Flu Vaccine on Degen Execution"
+      },
+      {
+        "id": "ba870677-b194-4992-b929-39d26ed3dc20",
+        "name": "Ethereum $4K on Slaughterhouse"
+      },
+      {
+        "id": "733e948a-27de-4217-9c20-dfc53dd3785d",
+        "name": "Bitcoin Reserve on Terminal Degeneracy"
+      }
+    ],
+    "summary": [
+      {
+        "id": "ac80e1a0-759e-4efa-99b7-acf8822be9a5",
+        "name": "PolyBets Knowledge Graph Summary"
+      }
+    ]
+  }
+}
