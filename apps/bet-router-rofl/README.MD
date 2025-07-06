@@ -2,10 +2,11 @@
 
 ## Oasis setup:
 ```shell
-curl -L -o oasis_cli_0.14.1_darwin_all.tar.gz https://github.com/oasisprotocol/cli/releases/download/v0.14.1/oasis_cli_0.14.1_darwin_all.tar.g
-tar -xzf oasis_cli_0.14.1_darwin_all.tar.gz
-sudo mv oasis_cli_0.14.1_darwin_all/oasis /usr/local/bin/
-rm -rf oasis_cli_0.14.1_darwin_all.tar.gz oasis_cli_0.14.1_darwin_all/
+
+curl -L -o oasis_cli_0.14.1_linux_amd64.tar.gz https://github.com/oasisprotocol/cli/releases/download/v0.14.1/oasis_cli_0.14.1_linux_amd64.tar.gz
+tar -xzf oasis_cli_0.14.1_linux_amd64.tar.gz
+sudo mv oasis_cli_0.14.1_linux_amd64/oasis /usr/local/bin/
+rm -rf oasis_cli_0.14.1_linux_amd64.tar.gz oasis_cli_0.14.1_linux_amd64/
 
 oasis wallet import ethglobal_cannes
 ? Kind: private key

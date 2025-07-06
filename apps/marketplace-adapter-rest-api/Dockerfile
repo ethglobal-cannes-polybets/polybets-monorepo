@@ -26,8 +26,8 @@ RUN mkdir -p ~/.config/solana
 RUN cp /app/apps/marketplace-adapter-rest-api/keypairs/canibeton-cannes.json ~/.config/solana/canibeton-cannes.json
 RUN cp /app/apps/marketplace-adapter-rest-api/keypairs/canibeton.json ~/.config/solana/canibeton.json
 
-WORKDIR /app/apps/marketplace-adapter-rest-api
+WORKDIR /app
 
 EXPOSE 3000
 
-CMD ["bun", "index.ts"] 
+CMD ["bun", "apps/marketplace-adapter-rest-api/index.ts"] 

@@ -33,6 +33,11 @@ function getLmsrPrice(
   b: number,
   is_option_A: boolean
 ): number {
+  console.log("----- getLmsrPrice -----");
+  console.log("q_A", q_A);
+  console.log("q_B", q_B);
+  console.log("b", b);
+  console.log("is_option_A", is_option_A);
   const exp_q_A = fastExp(q_A / b);
   const exp_q_B = fastExp(q_B / b);
   const sum = exp_q_A + exp_q_B;
@@ -237,6 +242,12 @@ export function calculateCurrentPrices(
   // Calculate current q values by adding to initial values
   const total_q_A = params.initial_q_A + current_q_A;
   const total_q_B = params.initial_q_B + current_q_B;
+  console.log("----- calculateCurrentPrices -----");
+  console.log("total_q_A", total_q_A);
+  console.log("total_q_B", total_q_B);
+  console.log("params.b", params.b);
+  console.log("current_q_A", current_q_A);
+  console.log("current_q_B", current_q_B);
   // Calculate current prices
   const current_price_A = getLmsrPrice(total_q_A, total_q_B, params.b, true);
   const current_price_B = getLmsrPrice(total_q_A, total_q_B, params.b, false);

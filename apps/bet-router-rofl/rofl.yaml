@@ -21,6 +21,7 @@ deployments:
     network: testnet
     paratime: sapphire
     admin: ethglobal_cannes
+    oci_repository: rofl.sh/3b9fd18b-2a44-4a8c-b5ca-bca2f28f4c68:1751768601
     trust_root:
       height: 27356094
       hash: 4977717904dd65366b08252d882f922a9eff705dff232c5a9707926c76f31904
@@ -31,9 +32,29 @@ deployments:
           min_tcb_evaluation_data_number: 18
           tdx: {}
       enclaves:
-        - id: UAcGOV2wKL9gmMXxF2O9mjHx0d9cvrqvPlxqMC4rnCIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
-        - id: IQ0jBrXWggXo8/PyS0XLdZjzzFU1peU2D577MrMRNVgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: Fo3NlhTkrT4HmRoXD7la+UOFIv6K6xn6OzI0MMgPDAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        - id: 87CAIPIOQOn+lYynzFzLVevVW2UXKGsl8Z9MqBA+aV8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
       endorsements:
         - any: {}
       fees: endorsing_node
       max_expiration: 3
+    secrets:
+      - name: TOKEN
+        value: pGJwa1ggdDMHANpTE+MddoSlws2unC9GxR4QISzoxwP1aAz2elpkbmFtZVX3XCdGCJmE9jvJ9FtwWZXr/sjYAnVlbm9uY2VPOPa0uk9b/+p4VS6TgiojZXZhbHVlWQJdRGBFQ14G1Gi+p0PKe40KkmhVlkHhWC2cJxafpND5BLq+QHcWS7meGFhMEtuPf6TqfmL7L3G3JYG+QNZMuSDmBmvfEaf3MnfoaFhbfw2L7FAgUr88RJ+6oRg9KUJi7zmGgesjoVu9scrRemuXB+yBKwJ5zhydH9nlHHmIki5vyfrQ3r7NiZ56SYqV7qnoKbTdQXy7Ix26yvBULCOxHo9JUPaDRT12zZWCqrjFZsxwrtVtlLpQIdyT+Tmz5DmqZCeAyZPUHVJfCwEp1kp6flqgtbQUw3WgLoDdw0Znl+ao9sLm+6JReO5ewfHlOM6kpV+vqemS6ZyxKOwrbH0hBZBL9coVKPZ8m7fT/2VILQSQ6c40ZJuRZ9ujYMXOQww9dvqdkklvuTnVDgjWVr6P4XfOa9Y96+kv229iaKHo/181AuUd/mp6UnwCeV2fT/e3UAhZMCQEvR+8fJlEkYCwxsv6LURQYbCrk2yYnS+5F3+MBVDCqBSP5bg5QHlk6ZAJYD2ZiJOOI78TR41Sm5J2678/Vs+QKRqw/jy3qpzDK4kRYKZ9Bg+xbB0/zj5ZDxufi1sTU3kIUgRCvMe828Nj3ATUmXQ76lZCfzf0uNl1GRMnJ5eD6hY54P4b5ruXTjWE37xmUeGzOia76+HGiaFGNcYYctQHS4dhrr99vTASozqKruUkneCv65wraqKNEJN5M5sukMTchQVTtoUfLTWQfLCejCO6MtkTyOHHH8PY/JDPnGOW7TWT4UGE8FnZ46KROn7IlRyd7DYEYpxgeZ3r+U+L/u/3f+1UXwjMACkeRws=
+      - name: BASE_URL
+        value: pGJwa1ggsm4RskBlmOCyorJzn4jlT8D/fhk9mAAipRJx7NkergxkbmFtZVgYegQg+hGmT1SqiiuDIaVfsr1dLPeNxZbaZW5vbmNlTxmFx9F1etol8HYjompB/mV2YWx1ZVgljjhtMWNk+CIiuaj8V2OBxRMW/QVavIzZ0sDgc6dnVGP4sJ7LgQ==
+      - name: BET_EXECUTION_BASE_URL
+        value: pGJwa1ggo3bwjIt5sxISFAWMdBJEw7E3pzGhmZkUhRwAWq1JiEVkbmFtZVgmvD80j25UA2KMSf5kfYYhQ0oJEJ1q+5ZgWSPJwH1/HxBT1l9/SyFlbm9uY2VPCYZFY9feJHiBOSPs/b3mZXZhbHVlWCWg2XGLlgHbzsgWSJnQXbZnmz0YhrL1++VSp9cfOtuiuxTTSFaz
+      - name: PRIVATE_KEY
+        value: pGJwa1gg4qNbVT+FtknuDwh57z52wtijl21Ok7KG7RI65u54ckVkbmFtZVgbhbIKItpXLHTRZpDpzXTjugDxIpJJQrqEjh58ZW5vbmNlTwTLRomZoq6fTP1bq511mGV2YWx1ZVhSrZHytZhf8PJuxljBzSelnu2jDK3FUtnORez9jheU44ths5bKL0agSvPfRFIROI7LtCYFB2PFkq/N1QCNao2EFZl4lbg+gT/Mqt5ohSd372fv5g==
+      - name: SAPPHIRETESTNET_RPC_URL
+        value: pGJwa1gga8xUljg1F+3s3EQl2xw6DqA25zMQMUqfvjxjD+OWUyNkbmFtZVgnFZ4KD0RwKoEVArv+lS+E5iM7DudT6JaprFW/7mRp4fLMzqNEE+zhZW5vbmNlT9fPp2dTMefwwLqP2JjblGV2YWx1ZVhj2R8UvGD5CZ9D/UNhb29JvIQhM9Yj6PEZ7e/ZKPNgEU8boT2BgeTqwMYUxRriSLC0PZgubiQ3VBFEEPdRSaoNx1F5j9aP070bvH/VViRYtJ6oaTkAuPIgRm0Zvtk0QkTKXqZQ
+      - name: POLYBETS_CONTRACT_ADDRESS
+        value: pGJwa1ggohl7Omq3Wx5NpdCAVDdnfb9YgrrJ25I68tsts31Zi0pkbmFtZVgpaZIZqiwOcqZ7u5ZEK8AcpCcJV3rJMjfeNBvr5dncMRxzO6LapkBoCFllbm9uY2VPUHixyzTKfChwTgSBzXxYZXZhbHVlWDqLURt08F5h/6JmmHorKyFPe/WErFIzgSg0l0mwg9yqzDL8ihJ95ylp1l+DC5oATMO/dJiBZdlwuOIz
+      - name: POLYBETS_CONTRACT_ABI_PATH
+        value: pGJwa1ggTDnUGI4lEFV96dOQd+k9S38GCPn7iW4fvBZNxnxAeiNkbmFtZVgqe3AURR6VasDuZVAekfKu6qYU+FPZjkR+K4M33f/s29S91M7aHv+t+fd/ZW5vbmNlT0YhowsDlDYno+QDRCDYPmV2YWx1ZVgofo0brdHjOcRGZs8ADrG5TVq3FF8l8pnYA5nU3loeUTCLA2g8qz3Scw==
+    machines:
+      default:
+        provider: oasis1qp2ens0hsp7gh23wajxa4hpetkdek3swyyulyrmz
+        offer: playground_short
+        id: "0000000000000169"
