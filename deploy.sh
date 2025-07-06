@@ -30,9 +30,9 @@ docker compose up -d"
 echo "Deployment completed successfully!"
 
 
-echo -n "$BASE_URL" | oasis rofl secret set BASE_URL -
-echo -n "$BET_EXECUTION_BASE_URL" | oasis rofl secret set BET_EXECUTION_BASE_URL -
-echo -n "$PRIVATE_KEY" | oasis rofl secret set PRIVATE_KEY -
-echo -n "$SAPPHIRETESTNET_RPC_URL" | oasis rofl secret set SAPPHIRETESTNET_RPC_URL -
-echo -n "$POLYBETS_CONTRACT_ADDRESS" | oasis rofl secret set POLYBETS_CONTRACT_ADDRESS -
-echo -n "$POLYBETS_CONTRACT_ABI_PATH" | oasis rofl secret set POLYBETS_CONTRACT_ABI_PATH -
+# oasis rofl secret rm BASE_URL && echo -n "$BASE_URL" | oasis rofl secret set BASE_URL -
+# oasis rofl secret rm BET_EXECUTION_BASE_URL && echo -n "$BET_EXECUTION_BASE_URL" | oasis rofl secret set BET_EXECUTION_BASE_URL -
+# oasis rofl secret rm PRIVATE_KEY && echo -n "$PRIVATE_KEY" | oasis rofl secret set PRIVATE_KEY -
+# oasis rofl secret rm SAPPHIRETESTNET_RPC_URL && echo -n "$SAPPHIRETESTNET_RPC_URL" | oasis rofl secret set SAPPHIRETESTNET_RPC_URL -
+# oasis rofl secret rm POLYBETS_CONTRACT_ADDRESS && echo -n "$POLYBETS_CONTRACT_ADDRESS" | oasis rofl secret set POLYBETS_CONTRACT_ADDRESS -
+# oasis rofl secret rm POLYBETS_CONTRACT_ABI_PATH && echo -n "$POLYBETS_CONTRACT_ABI_PATH" | oasis rofl secret set POLYBETS_CONTRACT_ABI_PATH -

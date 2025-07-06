@@ -19,7 +19,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/package.json ./
 COPY --from=dependencies /app/bun.lockb ./
 COPY --from=dependencies /app/turbo.json ./
-COPY --from=dependencies /app/packages/common ./packages/common
+COPY --from=dependencies /app/packages ./packages
 COPY --from=dependencies /app/apps/marketplace-adapter-rest-api ./apps/marketplace-adapter-rest-api
 
 RUN mkdir -p ~/.config/solana
