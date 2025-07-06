@@ -308,7 +308,8 @@ contract PolyBet is SiweAuth, Ownable {
         _checkAndUpdateFinishedBetSlip(betSlipId, betSlip, bettor);
 
         if (betSlip.instantArbitrage && outcome == BetOutcome.Lost && winningsCollateralValue == 0) {
-          initiateSellProxiedBets(betSlipId);
+            betSlip.status = BetSlipStatus.Selling;
+            emit BetSlipSellingStateUpdate(betSlipId);
         }
     }
 

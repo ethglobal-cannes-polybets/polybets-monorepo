@@ -70,7 +70,9 @@ async function main() {
     totalCollateralAmount,
     0,
     marketplaceIds,
-    marketIds
+    marketIds,
+    false, // instantArbitrage disabled
+    0 // parentId
   );
 
   const receipt = await tx.wait();

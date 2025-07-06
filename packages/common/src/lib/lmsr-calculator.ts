@@ -116,13 +116,29 @@ export function calculateInitialLmsrParams(
     Math.abs(test_price_A - initial_price_A) > error_tolerance ||
     Math.abs(test_price_B - initial_price_B) > error_tolerance
   ) {
-    // Make small adjustments to q values
+    // Make small adjustments to q values with bounds checking
     if (initial_price_A >= initial_price_B) {
       const error_factor = initial_price_A / test_price_A;
-      initial_q_B = initial_q_B * error_factor;
+      // Clamp error factor to prevent exponential growth
+      const clamped_factor = Math.max(0.1, Math.min(10.0, error_factor));
+      initial_q_B = initial_q_B * clamped_factor;
+      
+      // Additional bounds check to prevent overflow
+      if (Math.abs(initial_q_B) > 1e10) {
+        console.warn("Q value overflow detected, breaking adjustment loop");
+        break;
+      }
     } else {
       const error_factor = initial_price_B / test_price_B;
-      initial_q_A = initial_q_A * error_factor;
+      // Clamp error factor to prevent exponential growth
+      const clamped_factor = Math.max(0.1, Math.min(10.0, error_factor));
+      initial_q_A = initial_q_A * clamped_factor;
+      
+      // Additional bounds check to prevent overflow
+      if (Math.abs(initial_q_A) > 1e10) {
+        console.warn("Q value overflow detected, breaking adjustment loop");
+        break;
+      }
     }
 
     // Recalculate test prices
@@ -174,13 +190,29 @@ export function calculateInitialLmsrParams(
       Math.abs(test_price_A - initial_price_A) > error_tolerance ||
       Math.abs(test_price_B - initial_price_B) > error_tolerance
     ) {
-      // Make small adjustments to q values
+      // Make small adjustments to q values with bounds checking
       if (initial_price_A >= initial_price_B) {
         const error_factor = initial_price_A / test_price_A;
-        initial_q_B = initial_q_B * error_factor;
+        // Clamp error factor to prevent exponential growth
+        const clamped_factor = Math.max(0.1, Math.min(10.0, error_factor));
+        initial_q_B = initial_q_B * clamped_factor;
+        
+        // Additional bounds check to prevent overflow
+        if (Math.abs(initial_q_B) > 1e10) {
+          console.warn("Q value overflow detected, breaking adjustment loop");
+          break;
+        }
       } else {
         const error_factor = initial_price_B / test_price_B;
-        initial_q_A = initial_q_A * error_factor;
+        // Clamp error factor to prevent exponential growth
+        const clamped_factor = Math.max(0.1, Math.min(10.0, error_factor));
+        initial_q_A = initial_q_A * clamped_factor;
+        
+        // Additional bounds check to prevent overflow
+        if (Math.abs(initial_q_A) > 1e10) {
+          console.warn("Q value overflow detected, breaking adjustment loop");
+          break;
+        }
       }
 
       // Recalculate test prices
