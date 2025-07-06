@@ -46,11 +46,13 @@ interface EnrichedSlipStruct {
   marketsMeta?: PairMeta[];
   parentMarket?: MarketRow | null;
   marketplace?: MarketplaceRow | null;
+  proxiedBetsData?: ProxiedBetData[];
 }
 
 interface PlatformInfo {
   marketplace: string;
   question: string;
+  shares?: number;
 }
 
 interface TransformedSlip {
@@ -68,8 +70,18 @@ interface TransformedSlip {
 
 // Minimal local type aliases to satisfy compiler without bringing full DB types
 type MarketRow = { common_question?: string };
-type MarketplaceRow = { name?: string };
+type MarketplaceRow = { id?: number; name?: string };
 type PairMeta = { market: MarketRow; marketplace: MarketplaceRow | null };
+
+// Minimal representation of on-chain ProxiedBet (subset of fields we need)
+interface ProxiedBetData {
+  marketplaceId: bigint;
+  marketId: bigint;
+  sharesBought: bigint;
+  sharesSold: bigint;
+  // Allow other fields but we only care for the above
+  [key: string]: unknown;
+}
 
 export default function PortfolioPage() {
   const [activeTab, setActiveTab] = useState<"processing" | "open" | "closed">(
@@ -129,13 +141,54 @@ export default function PortfolioPage() {
         slip.marketplace?.name ??
         "Unknown";
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const platforms: PlatformInfo[] = (slip.marketsMeta ?? []).map((pm) => ({
-        marketplace: pm.marketplace?.name ?? "Unknown",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        question:
-          (pm as any).question ?? pm.market.common_question ?? "Unknown",
-      }));
+      // Build platform list. If the slip is OPEN we only list platforms that
+      // have a corresponding proxied bet. Otherwise we fall back to all
+      // available meta entries.
+
+      const platforms: PlatformInfo[] = (() => {
+        const meta = slip.marketsMeta ?? [];
+
+        // Build quick lookup by marketplaceId for meta ➞ faster lookup
+        const metaByMarketplace = new Map<number, PairMeta>();
+        meta.forEach((pm) => {
+          const id = pm.marketplace?.id;
+          if (typeof id === "number") metaByMarketplace.set(id, pm);
+        });
+
+        // If we have proxied bets data, derive directly from them so we can
+        // include shares. OTHERWISE fall back to meta list.
+        if (
+          Array.isArray(slip.proxiedBetsData) &&
+          slip.proxiedBetsData.length
+        ) {
+          return slip.proxiedBetsData.map((pb) => {
+            const pm = metaByMarketplace.get(Number(pb.marketplaceId));
+            const sharesBought =
+              Number(pb.sharesBought ?? 0) - Number(pb.sharesSold ?? 0);
+
+            return {
+              marketplace: pm?.marketplace?.name ?? "Unknown",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              question:
+                (pm as any)?.question ??
+                pm?.market.common_question ??
+                "Unknown",
+              shares: sharesBought,
+            };
+          });
+        }
+
+        // Helper fallback converter
+        const toPlatform = (pm: PairMeta): PlatformInfo => ({
+          marketplace: pm.marketplace?.name ?? "Unknown",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          question:
+            (pm as any).question ?? pm.market.common_question ?? "Unknown",
+          shares: undefined,
+        });
+
+        return meta.map(toPlatform);
+      })();
 
       return {
         id: slip.id.toString(),
@@ -143,7 +196,18 @@ export default function PortfolioPage() {
         statusGroup,
         position: slip.outcomeIndex === BigInt(0) ? "Yes" : "No",
         totalCost: Number(slip.initialCollateral) / 1_000_000,
-        totalShares: slip.totalShares,
+        // Use precomputed totalShares if available otherwise sum from proxied bets
+        totalShares:
+          slip.totalShares ??
+          (Array.isArray(slip.proxiedBetsData)
+            ? slip.proxiedBetsData.reduce(
+                (sum, pb) =>
+                  sum +
+                  Number(pb.sharesBought ?? 0) -
+                  Number(pb.sharesSold ?? 0),
+                0
+              )
+            : undefined),
         avgPrice: undefined,
         marketplaceName,
         platforms,
@@ -212,12 +276,12 @@ export default function PortfolioPage() {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-xs text-muted-foreground uppercase mb-1">
+              {/* <div className="text-xs text-muted-foreground uppercase mb-1">
                 Current Value
               </div>
               <div className="font-bold font-heading text-muted-foreground">
                 —
-              </div>
+              </div> */}
             </div>
             <div className="text-center">
               <div className="text-xs text-muted-foreground uppercase mb-1">
@@ -229,7 +293,12 @@ export default function PortfolioPage() {
                   (betSlip.failed ? "text-red-600" : "text-primary")
                 }
               >
-                {betSlip.failed ? "Error" : "—"}
+                {betSlip.failed
+                  ? "Error"
+                  : betSlip.statusGroup === "open" &&
+                      betSlip.totalShares !== undefined
+                    ? formatCurrency(betSlip.totalShares)
+                    : "—"}
               </div>
             </div>
             <div className="text-center">
@@ -261,8 +330,9 @@ export default function PortfolioPage() {
                   </div>
                 </div>
                 <div className="text-right text-xs font-heading text-muted-foreground">
-                  <div>—</div>
-                  <div>—</div>
+                  <div>
+                    {p.shares !== undefined ? `${p.shares} shares` : "—"}
+                  </div>
                 </div>
               </div>
             ))}

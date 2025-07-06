@@ -93,7 +93,58 @@ export function useActiveBetSlips() {
   }, [betSlipResults, ids]);
 
   /* --------------------------------------------------
-   * 4)   Fetch Supabase metadata for first marketId of each betslip
+   * 4) Fetch proxied bets data for each bet slip
+   * -------------------------------------------------- */
+
+  // Collect all proxied bet IDs from all bet slips
+  const proxiedBetIds = useMemo(() => {
+    const allIds: `0x${string}`[] = [];
+    betSlips.forEach((bs) => {
+      const proxiedBets =
+        (bs as { proxiedBets?: readonly string[] }).proxiedBets ?? [];
+      proxiedBets.forEach((id) => {
+        if (id && typeof id === "string") {
+          allIds.push(id as `0x${string}`);
+        }
+      });
+    });
+    return allIds;
+  }, [betSlips]);
+
+  const {
+    data: proxiedBetsResults,
+    isLoading: areProxiedBetsLoading,
+    error: proxiedBetsError,
+  } = useReadContracts({
+    allowFailure: true,
+    query: {
+      enabled: proxiedBetIds.length > 0,
+    },
+    contracts: proxiedBetIds.map((id) => ({
+      address: polybetsContractAddress as `0x${string}`,
+      abi: polyBetAbi as Abi,
+      functionName: "getProxiedBet" as const,
+      args: [id],
+    })),
+  });
+
+  // Build a map of proxied bet ID to proxied bet data
+  const proxiedBetsMap = useMemo(() => {
+    const map = new Map<string, ProxiedBetData>();
+    if (!proxiedBetsResults) return map;
+
+    proxiedBetsResults.forEach((result, idx) => {
+      if (result.status === "success" && result.result) {
+        const proxiedBetId = proxiedBetIds[idx];
+        map.set(proxiedBetId, result.result as ProxiedBetData);
+      }
+    });
+
+    return map;
+  }, [proxiedBetsResults, proxiedBetIds]);
+
+  /* --------------------------------------------------
+   * 5) Fetch Supabase metadata for first marketId of each betslip
    * -------------------------------------------------- */
 
   // Collect unique parentMarketIds from betslip.parentId
@@ -126,6 +177,8 @@ export function useActiveBetSlips() {
             external_markets (
               marketplace_id,
               question,
+              price_lookup_params,
+              price_lookup_method,
               marketplaces!inner(id,name,active)
             )
           `
@@ -137,8 +190,6 @@ export function useActiveBetSlips() {
       return (data ?? []) as MarketJoinRow[];
     },
   });
-
-  console.log("marketsData", marketsData);
 
   // Build lookup map keyed by parentId to parent market & marketplace row
   const metaByParentId = useMemo(() => {
@@ -163,7 +214,7 @@ export function useActiveBetSlips() {
   }, [marketsData]);
 
   /* --------------------------------------------------
-   * 5)   Enrich bet-slips with market metadata
+   * 6) Enrich bet-slips with market metadata and proxied bets
    * -------------------------------------------------- */
 
   const enrichedBetSlips = useMemo(() => {
@@ -174,23 +225,58 @@ export function useActiveBetSlips() {
       const pairMeta: PairMeta[] = metaByParentId.get(parentId) ?? [];
       const firstMeta = pairMeta[0] ?? null;
 
+      // Get proxied bets for this bet slip
+      const proxiedBetIds =
+        (bs as { proxiedBets?: readonly string[] }).proxiedBets ?? [];
+      const proxiedBetsData = proxiedBetIds
+        .map((id) => {
+          const proxiedBet = proxiedBetsMap.get(id);
+          return proxiedBet ? proxiedBet : null;
+        })
+        .filter((bet): bet is NonNullable<typeof bet> => bet !== null);
+
       return {
         ...bs,
         marketsMeta: pairMeta,
         parentMarket: firstMeta?.market ?? null,
         marketplace: firstMeta?.marketplace ?? null,
+        proxiedBetsData,
       } as const;
     });
-  }, [betSlips, metaByParentId]);
+  }, [betSlips, metaByParentId, proxiedBetsMap]);
+
+  console.log("enrichedBetSlips", enrichedBetSlips);
 
   return {
     betSlips: enrichedBetSlips,
-    isLoading: isIdsLoading || areSlipsLoading || areMarketsLoading,
-    error: idsError ?? slipsError ?? marketsError ?? undefined,
+    isLoading:
+      isIdsLoading ||
+      areSlipsLoading ||
+      areMarketsLoading ||
+      areProxiedBetsLoading,
+    error:
+      idsError ?? slipsError ?? marketsError ?? proxiedBetsError ?? undefined,
   } as const;
 }
 
+// ---- Type definitions ----
 
+// ProxiedBet data structure based on the contract ABI
+interface ProxiedBetData {
+  id: string;
+  betSlipId: bigint;
+  marketplaceId: bigint;
+  marketId: bigint;
+  optionIndex: bigint;
+  minimumShares: bigint;
+  blockTimestamp: bigint;
+  originalCollateralAmount: bigint;
+  finalCollateralAmount: bigint;
+  sharesBought: bigint;
+  sharesSold: bigint;
+  outcome: bigint;
+  failureReason: string;
+}
 
 // ---- Supabase row helpers ----
 type MarketRow = Database["public"]["Tables"]["markets"]["Row"];
