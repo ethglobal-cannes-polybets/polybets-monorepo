@@ -3,3 +3,4 @@ python-dotenv
 web3
 psycopg2-binary
 numpy
+psycopg2

@@ -26,24 +26,32 @@ from .optimal_betting import (
 # Schema to endpoint mapping
 SCHEMA_TO_ENDPOINT = {
     "canibeton_variant1": "slaughterhouse-predictions",
-    "canibeton_variant2": "terminal-degeneracy-labs"
+    "canibeton_variant2": "terminal-degeneracy-labs",
+    "canibeton_variant3": "degen-execution-chamber",
+    "canibeton_variant4": "nihilistic-prophet-syndicate",
 }
 
 # Marketplace ID to schema mapping
 MARKETPLACE_ID_TO_SCHEMA = {
     2: "canibeton_variant1",
-    3: "canibeton_variant2"
+    3: "canibeton_variant2",
+    4: "canibeton_variant3",
+    5: "canibeton_variant4"
 }
 
 # Reverse mappings for convenience
 ENDPOINT_TO_SCHEMA = {
     "slaughterhouse-predictions": "canibeton_variant1",
-    "terminal-degeneracy-labs": "canibeton_variant2"
+    "terminal-degeneracy-labs": "canibeton_variant2",
+    "degen-execution-chamber": "canibeton_variant3",
+    "nihilistic-prophet-syndicate": "canibeton_variant4"
 }
 
 SCHEMA_TO_MARKETPLACE_ID = {
     "canibeton_variant1": 2,
-    "canibeton_variant2": 3
+    "canibeton_variant2": 3,
+    "canibeton_variant3": 4,
+    "canibeton_variant4": 5
 }
 
 def get_marketplace_id_from_endpoint(endpoint_name: str) -> int:
@@ -96,7 +104,7 @@ class BetRequest:
     option_index: int
     collateral_amount: float
     endpoint_name: str
-    
+
 @dataclass
 class BetResponse:
     success: bool

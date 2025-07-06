@@ -1,5 +1,5 @@
 async function main() {
-  const contractAddress = "0xaecDA91C878735D6a24A53EbE9C2F7b6c47C9454";
+  const contractAddress = "0xd474F5ec5e1E7B14E0639F388A42637129D068Be";
   const betSlipId = 14;
 
   console.log(
