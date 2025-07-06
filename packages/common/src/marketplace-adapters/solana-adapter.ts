@@ -48,7 +48,9 @@ export class SolanaMarketplaceAdapter
     return pda;
   }
 
-  async buyShares(args: SolanaBuySharesArgs): Promise<any> {
+  async buyShares(
+    args: SolanaBuySharesArgs
+  ): Promise<{ transactionId: string; sharesMinted: number }> {
     return this.client.buyLmsrShares(
       args.marketId,
       args.optionIndex,
@@ -57,7 +59,9 @@ export class SolanaMarketplaceAdapter
     );
   }
 
-  async sellShares(args: SolanaSellSharesArgs): Promise<any> {
+  async sellShares(
+    args: SolanaSellSharesArgs
+  ): Promise<{ transactionId: string; collateralReceived: number }> {
     return this.client.sellLmsrShares(
       args.marketId,
       args.optionIndex,

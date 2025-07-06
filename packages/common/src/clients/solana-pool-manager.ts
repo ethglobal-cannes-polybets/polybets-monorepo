@@ -1,4 +1,10 @@
-import { AnchorProvider, BN, Program, Wallet } from "@coral-xyz/anchor";
+import {
+  AnchorProvider,
+  BN,
+  EventParser,
+  Program,
+  Wallet,
+} from "@coral-xyz/anchor";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
@@ -385,7 +391,10 @@ export class SolanaPoolManager {
         .add(computeBudgetIx)
         .add(priorityFeeIx)
         .add(createPoolIx);
-      const tx = await this.provider.sendAndConfirm(transaction);
+      const tx = await this.provider.sendAndConfirm(transaction, [], {
+        commitment: "finalized",
+        preflightCommitment: "finalized",
+      });
 
       const poolId = parseInt(nextPoolId.toString());
 
@@ -580,7 +589,10 @@ export class SolanaPoolManager {
       .add(computeBudgetIx)
       .add(priorityFeeIx)
       .add(placeBetIx);
-    const tx = await this.provider.sendAndConfirm(transaction);
+    const tx = await this.provider.sendAndConfirm(transaction, [], {
+      commitment: "finalized",
+      preflightCommitment: "finalized",
+    });
 
     console.log(`💸 Bet placed: ${amount} USDC on option ${optionIndex}`);
     console.log(`📄 Transaction: ${tx}`);
@@ -948,7 +960,10 @@ export class SolanaPoolManager {
         .add(computeBudgetIx)
         .add(priorityFeeIx)
         .add(migrateIx);
-      const tx = await migrationProvider.sendAndConfirm(transaction);
+      const tx = await migrationProvider.sendAndConfirm(transaction, [], {
+        commitment: "finalized",
+        preflightCommitment: "finalized",
+      });
 
       console.log(`✅ Pool migrated to LMSR successfully: ${poolId}`);
       console.log(`   Transaction: ${tx}`);
@@ -966,7 +981,7 @@ export class SolanaPoolManager {
     optionIndex: number,
     amount: number, // in USDC or points
     tokenType: TokenType
-  ): Promise<string> {
+  ): Promise<{ transactionId: string; sharesMinted: number }> {
     if (!this.program) {
       throw new Error("Program not initialized");
     }
@@ -1048,10 +1063,75 @@ export class SolanaPoolManager {
       .add(computeBudgetIx)
       .add(priorityFeeIx)
       .add(ix);
-    const tx = await this.provider.sendAndConfirm(transaction);
+    const tx = await this.provider.sendAndConfirm(transaction, [], {
+      commitment: "finalized",
+      preflightCommitment: "finalized",
+    });
 
     console.log(`✅ Successfully bought LMSR shares. Transaction: ${tx}`);
-    return tx;
+
+    try {
+      let parsedTx = null;
+      const maxRetries = 5;
+      const retryDelay = 2000; // 2 seconds
+
+      for (let i = 0; i < maxRetries; i++) {
+        parsedTx = await this.connection.getTransaction(tx, {
+          commitment: "finalized",
+          maxSupportedTransactionVersion: 0,
+        });
+
+        if (parsedTx) {
+          break;
+        }
+
+        console.log(
+          `Attempt ${i + 1}/${maxRetries}: Transaction not found, retrying in ${
+            retryDelay / 1000
+          }s...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+
+      if (!parsedTx || !parsedTx.meta || !parsedTx.meta.logMessages) {
+        console.warn(
+          `Could not retrieve transaction logs for ${tx} after ${maxRetries} retries.`
+        );
+        return { transactionId: tx, sharesMinted: 0 };
+      }
+
+      const eventParser = new EventParser(
+        this.program.programId,
+        this.program.coder
+      );
+      const logs = parsedTx.meta.logMessages;
+      console.log("Full transaction logs:", JSON.stringify(logs, null, 2));
+
+      let sharesMintedLamports: BN | undefined;
+      const events = Array.from(eventParser.parseLogs(logs));
+      console.log("Parsed events:", JSON.stringify(events, null, 2));
+      for (const event of events) {
+        if (event.name === "lmsrSharesBought") {
+          console.log("LMSR shares bought event found");
+          sharesMintedLamports = event.data.lmsrTokensMinted as BN;
+          break;
+        }
+      }
+
+      console.log("Shares minted lamports:", sharesMintedLamports);
+      if (!sharesMintedLamports || sharesMintedLamports.isZero()) {
+        console.warn(`lmsrSharesBought event not found in transaction ${tx}.`);
+        return { transactionId: tx, sharesMinted: 0 };
+      }
+
+      const sharesMinted = this.lamportsToTokens(sharesMintedLamports);
+      console.log(`💎 Minted ${sharesMinted} LMSR shares.`);
+
+      return { transactionId: tx, sharesMinted };
+    } catch (e) {
+      console.warn(`Error parsing transaction logs for ${tx}:`, e);
+      return { transactionId: tx, sharesMinted: 0 };
+    }
   }
 
   async sellLmsrShares(
@@ -1059,7 +1139,7 @@ export class SolanaPoolManager {
     optionIndex: number,
     amount: number, // in LMSR shares
     tokenType: TokenType
-  ): Promise<string> {
+  ): Promise<{ transactionId: string; collateralReceived: number }> {
     if (!this.program) {
       throw new Error("Program not initialized");
     }
@@ -1157,10 +1237,74 @@ export class SolanaPoolManager {
       .add(computeBudgetIx)
       .add(priorityFeeIx)
       .add(ix);
-    const tx = await this.provider.sendAndConfirm(transaction);
+    const tx = await this.provider.sendAndConfirm(transaction, [], {
+      commitment: "finalized",
+      preflightCommitment: "finalized",
+    });
 
     console.log(`✅ Successfully sold LMSR shares. Transaction: ${tx}`);
-    return tx;
+
+    try {
+      let parsedTx = null;
+      const maxRetries = 5;
+      const retryDelay = 2000; // 2 seconds
+
+      for (let i = 0; i < maxRetries; i++) {
+        parsedTx = await this.connection.getTransaction(tx, {
+          commitment: "finalized",
+          maxSupportedTransactionVersion: 0,
+        });
+
+        if (parsedTx) {
+          break;
+        }
+
+        console.log(
+          `Attempt ${i + 1}/${maxRetries}: Transaction not found, retrying in ${
+            retryDelay / 1000
+          }s...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      }
+
+      if (!parsedTx || !parsedTx.meta || !parsedTx.meta.logMessages) {
+        console.warn(
+          `Could not retrieve transaction logs for ${tx} after ${maxRetries} retries.`
+        );
+        return { transactionId: tx, collateralReceived: 0 };
+      }
+
+      const eventParser = new EventParser(
+        this.program.programId,
+        this.program.coder
+      );
+      const logs = parsedTx.meta.logMessages;
+
+      let collateralReceivedLamports: BN | undefined;
+      const events = Array.from(eventParser.parseLogs(logs));
+
+      for (const event of events) {
+        if (event.name === "lmsrSharesSold") {
+          collateralReceivedLamports = event.data.collateralReceived as BN;
+          break;
+        }
+      }
+
+      if (!collateralReceivedLamports) {
+        console.warn(`lmsrSharesSold event not found in transaction ${tx}.`);
+        return { transactionId: tx, collateralReceived: 0 };
+      }
+
+      const collateralReceived = this.lamportsToTokens(
+        collateralReceivedLamports
+      );
+      console.log(`💎 Received ${collateralReceived} in collateral.`);
+
+      return { transactionId: tx, collateralReceived };
+    } catch (e) {
+      console.warn(`Error parsing transaction logs for ${tx}:`, e);
+      return { transactionId: tx, collateralReceived: 0 };
+    }
   }
 
   async getLmsrPoolState(poolPk: PublicKey): Promise<LmsrPool | null> {

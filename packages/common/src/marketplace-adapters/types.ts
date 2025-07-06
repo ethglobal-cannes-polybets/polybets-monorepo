@@ -29,8 +29,12 @@ export interface MarketplaceAdapter<
   TPrice extends GetPricesArgs<TMarket>,
   TClaim extends ClaimPayoutArgs<TMarket>,
 > {
-  buyShares(args: TBuy): Promise<any>;
-  sellShares(args: TSell): Promise<any>;
+  buyShares(
+    args: TBuy
+  ): Promise<{ transactionId: string; sharesMinted: number }>;
+  sellShares(
+    args: TSell
+  ): Promise<{ transactionId: string; collateralReceived: number }>;
   getPrices(args: TPrice): Promise<[number, number] | Error>;
   claimPayout(args: TClaim): Promise<any>;
 }
