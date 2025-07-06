@@ -49,7 +49,9 @@ async function main() {
     amount,
     0,
     marketplaceIds,
-    marketIds
+    marketIds,
+    false, // instantArbitrage disabled
+    0 // parentId
   );
   const betReceipt = await betTx.wait();
   
