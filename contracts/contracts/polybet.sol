@@ -75,6 +75,8 @@ contract PolyBet is SiweAuth, Ownable {
         uint256 initialCollateral; // The amount for the bet router to distribute to markets
         uint256 finalCollateral; // Informative field, updated when a proxied bet is sold/closed
         uint256 outcomeIndex; // The index of the outcome that the bettor chose, at the betslip level for now because the marketplaces we want to support (polymarket, limitless) are all binary where 0 is yes and 1 is no
+        uint256 parentId;
+        bool instantArbitrage;
         BetSlipStatus status;
         string failureReason; // Gets populated if we can't handle the betslip in the bet router.
         bytes32[] marketplaceIds;
@@ -116,7 +118,9 @@ contract PolyBet is SiweAuth, Ownable {
         uint256 totalCollateralAmount,
         uint256 outcomeIndex,
         bytes32[] memory marketplaceIds,
-        bytes32[] memory marketIds
+        bytes32[] memory marketIds,
+        bool instantArbitrage,
+        uint256 parentId
     ) external {
         require(marketplaceIds.length == marketIds.length, "array lengths must match");
         require(totalCollateralAmount > 0, "collateral amount must be greater than 0");
@@ -136,6 +140,8 @@ contract PolyBet is SiweAuth, Ownable {
                 initialCollateral: totalCollateralAmount,
                 finalCollateral: 0,
                 outcomeIndex: outcomeIndex,
+                parentId: parentId,
+                instantArbitrage: instantArbitrage,
                 status: BetSlipStatus.Pending,
                 failureReason: "",
                 marketplaceIds: marketplaceIds,
@@ -300,6 +306,10 @@ contract PolyBet is SiweAuth, Ownable {
         (uint256 betSlipId, BetSlip storage betSlip, address bettor) =
           _updateBettorBalance(proxiedBetId, winningsCollateralValue);
         _checkAndUpdateFinishedBetSlip(betSlipId, betSlip, bettor);
+
+        if (betSlip.instantArbitrage && outcome == BetOutcome.Lost && winningsCollateralValue == 0) {
+          initiateSellProxiedBets(betSlipId);
+        }
     }
 
     // Withdraw function for users to claim their funds
