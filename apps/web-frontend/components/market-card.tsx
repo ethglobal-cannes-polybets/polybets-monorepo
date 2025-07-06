@@ -13,7 +13,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
+<<<<<<< HEAD
 import Link from "next/link";
+=======
+>>>>>>> 40cc380 (Raw)
 import type React from "react";
 
 // Create formatters once per module – avoids re-creating on every render
@@ -57,6 +60,7 @@ export default function MarketCard({
   onBuyYes,
   onBuyNo,
 }: MarketCardProps) {
+<<<<<<< HEAD
   const slugify = (text: string) =>
     text
       .toString()
@@ -69,6 +73,8 @@ export default function MarketCard({
 
   const slug = slugify(groupedTitle);
 
+=======
+>>>>>>> 40cc380 (Raw)
   const handleBuyYes = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -82,6 +88,7 @@ export default function MarketCard({
   };
 
   return (
+<<<<<<< HEAD
     <Card className="flex h-full w-full flex-col border border-foreground/10 bg-background transition-shadow hover:border-foreground/30 hover:shadow-lg">
       <Link href={`/market/${slug}`} className="block">
         <CardHeader className="flex-shrink-0 p-4 pb-2 hover:bg-accent/50 transition-colors">
@@ -103,10 +110,29 @@ export default function MarketCard({
               <div className="text-xs uppercase text-muted-foreground">
                 chance
               </div>
+=======
+    <Card className="flex h-full w-full flex-col border border-foreground/10 bg-background transition-shadow ">
+      <CardHeader className="flex-shrink-0 p-4 pb-2 hover:bg-accent/50 transition-colors">
+        <div className="flex items-start justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            {icon && (
+              <div className="flex-shrink-0 text-muted-foreground">{icon}</div>
+            )}
+            <h3 className="line-clamp-2 text-sm font-medium leading-tight text-foreground font-sans">
+              {groupedTitle}
+            </h3>
+          </div>
+          <div className="ml-4 flex-shrink-0 text-right">
+            <div className="text-2xl font-bold text-primary font-heading">
+              {percentFormatter.format(aggregatedPercentage / 100)}
+            </div>
+            <div className="text-xs uppercase text-muted-foreground">
+              chance
+>>>>>>> 40cc380 (Raw)
             </div>
           </div>
-        </CardHeader>
-      </Link>
+        </div>
+      </CardHeader>
       <CardContent className="flex flex-1 items-end p-4 py-2">
         <div className="flex w-full gap-2">
           <Button
