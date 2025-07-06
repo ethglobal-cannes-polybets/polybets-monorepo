@@ -1,17 +1,17 @@
 "use client";
 
-import type React from "react";
-import Link from "next/link";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import MarketCard from "@/components/market-card";
-import type { Market, Platform } from "@/components/market-card";
-import { SearchIcon, ArrowRight } from "lucide-react";
 import { BettingSidebar } from "@/components/betting-sidebar/betting-sidebar";
-import type { Market as SidebarMarket } from "@/hooks/use-place-bet";
-import { useState, useEffect } from "react";
+import type { MarketCardMarket, Platform } from "@/components/market-card";
+import MarketCard from "@/components/market-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { SidebarMarket } from "@/hooks/use-place-bet";
 import { GroupedMarket } from "@/types/markets";
-import { motion, AnimatePresence } from "motion/react";
+import { ArrowRight, SearchIcon } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 interface HomeClientProps {
   groupedMarkets: GroupedMarket[];
@@ -35,8 +35,8 @@ export default function HomeClient({ groupedMarkets }: HomeClientProps) {
     };
   }, [sidebarOpen]);
 
-  const handleBuyYes = (markets: Market[]) => {
-    const market = groupedMarkets.find((m) => m.markets === markets);
+  const handleBuyYes = (markets: MarketCardMarket[]) => {
+    const market = groupedMarkets.find((m) => m.externalMarkets === markets);
     if (market) {
       setSelectedMarket(market);
       setSelectedOutcome("yes");
@@ -44,8 +44,8 @@ export default function HomeClient({ groupedMarkets }: HomeClientProps) {
     }
   };
 
-  const handleBuyNo = (markets: Market[]) => {
-    const market = groupedMarkets.find((m) => m.markets === markets);
+  const handleBuyNo = (markets: MarketCardMarket[]) => {
+    const market = groupedMarkets.find((m) => m.externalMarkets === markets);
     if (market) {
       setSelectedMarket(market);
       setSelectedOutcome("no");
@@ -64,8 +64,9 @@ export default function HomeClient({ groupedMarkets }: HomeClientProps) {
   ];
 
   const sidebarRelatedMarkets: SidebarMarket[] = selectedMarket
-    ? selectedMarket.markets.map((m: Market) => ({
+    ? selectedMarket.externalMarkets.map((m) => ({
         id: selectedMarket.id,
+        theActualExternalMarketMarketId: m.theActualExternalMarketMarketId,
         marketplaceId: m.marketplaceId.toString(),
         platform: (m.platform as Platform).name,
         title: m.title,
@@ -174,6 +175,7 @@ export default function HomeClient({ groupedMarkets }: HomeClientProps) {
             <BettingSidebar
               key="sidebar"
               currentMarket={{
+                marketsTableIdNotToBeConfusedWithTheActualExternalMarketMarketIdAkaTheParentMarketId: selectedMarket.id,
                 title: selectedMarket.groupedTitle,
                 yesPrice: selectedMarket.aggregatedPercentage / 100,
                 noPrice: 1 - selectedMarket.aggregatedPercentage / 100,

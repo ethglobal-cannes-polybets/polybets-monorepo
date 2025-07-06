@@ -1,23 +1,45 @@
 import HomeClient from "@/components/home-client";
 import { Icons } from "@/components/icons";
-import type { Market, Platform } from "@/components/market-card";
-import type { GroupedMarket } from "@/types/markets";
-import type { Database } from "polybets-common";
-import type React from "react";
+import type { MarketCardMarket, Platform } from "@/components/market-card";
 import {
-  slaughterhouseClient,
-  terminalDegenClient,
   degenExecutionChamberClient,
   nihilisticProphetSyndicateClient,
+  slaughterhouseClient,
+  terminalDegenClient,
 } from "@/lib/marketplaceClient";
+import type { GroupedMarket } from "@/types/markets";
 import { formatUnits } from "viem";
+import type { Database } from "../../../packages/common/src/lib/__generated__/database.types";
 
 export const revalidate = 60; // ISR every 60 seconds
 
+const marketplaceConfig = {
+  "slaughterhouse predictions": {
+    icon: <Icons.slaughterhousePredictions />,
+    color: "bg-rose-700",
+    client: slaughterhouseClient,
+  },
+  "terminal degeneracy labs": {
+    icon: <Icons.terminalDegeneracyLabs />,
+    color: "bg-amber-500",
+    client: terminalDegenClient,
+  },
+  "degen execution chamber": {
+    icon: <Icons.degenExecutionChamber />,
+    color: "bg-fuchsia-600",
+    client: degenExecutionChamberClient,
+  },
+  "nihilistic prophet syndicate": {
+    icon: <Icons.nihilisticProphetSyndicate />,
+    color: "bg-teal-600",
+    client: nihilisticProphetSyndicateClient,
+  },
+} as const;
+
+type SupportedMarketplaceName = keyof typeof marketplaceConfig;
+
 // Row types for Supabase tables we need
 type MarketRow = Database["public"]["Tables"]["markets"]["Row"];
-type ExternalMarketRow =
-  Database["public"]["Tables"]["external_markets"]["Row"];
 type MarketplaceRow = Database["public"]["Tables"]["marketplaces"]["Row"];
 
 // Reusable formatters – creating them once is more performant than instantiating
@@ -59,23 +81,6 @@ async function getSupabaseClient() {
 
 async function fetchMarkets(): Promise<GroupedMarket[]> {
   const supabase = await getSupabaseClient();
-
-  // Fetch markets that have at least one *active* external market.
-  // The query performs two inner joins:
-  //   1. markets  -> external_markets (parent_market FK)
-  //   2. external_markets -> marketplaces (marketplace_id FK)
-  // and filters for marketplaces.active === true. Thanks to the `!inner`
-  // modifier every join acts as an `EXISTS(...)` in SQL, mirroring the
-  // original requirement:
-  //   SELECT *
-  //   FROM markets
-  //   WHERE EXISTS (
-  //     SELECT 1
-  //     FROM external_markets
-  //     JOIN marketplaces ON marketplaces.id = external_markets.marketplace_id
-  //     WHERE external_markets.parent_market = markets.id
-  //       AND marketplaces.active = TRUE
-  //   );
   const { data: marketData, error: marketError } = await supabase
     .from("markets")
     .select(
@@ -84,9 +89,18 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
         external_markets!inner (
           id,
           marketplace_id,
+          price_lookup_params,
+          price_lookup_method,
+          question,
+          parent_market,
           marketplaces!inner (
             id,
-            active
+            active,
+            name,
+            chain_family,
+            marketplace_proxy,
+            address,
+            price_strategy
           )
         )
       `
@@ -96,110 +110,27 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
     .limit(200);
 
   if (marketError) throw new Error(marketError.message);
+  const { data: marketplacesData, error: marketplacesError } = await supabase
+    .from("marketplaces")
+    .select("*")
+    .eq("active", true);
+  if (marketplacesError) throw new Error(marketplacesError.message);
 
-  const markets = (marketData ?? []) as MarketRow[];
+  const markets = marketData ?? [];
 
   if (markets.length === 0) return [];
 
-  // Fetch all external markets that reference the above IDs in one round-trip
-  const { data: extData, error: extError } = await supabase
-    .from("external_markets")
-    .select(
-      `
-        *,
-        marketplaces!inner (
-          id,
-          active
-        )
-      `
-    )
-    // Only keep external markets whose linked marketplace is active
-    .eq("marketplaces.active", true)
-    .in(
-      "parent_market",
-      markets.map((m) => m.id)
-    );
-
-  if (extError) throw new Error(extError.message);
-
-  const externalMarkets = (extData ?? []) as ExternalMarketRow[];
-
-  // Collect all referenced marketplaceIds from price_lookup_params
-  const marketplaceIdSet = new Set<number>();
-  externalMarkets.forEach((ext) => {
-    const params = ext.price_lookup_params as
-      | { marketplaceId?: number | null }
-      | null
-      | undefined;
-    if (params && typeof params === "object" && params.marketplaceId != null) {
-      marketplaceIdSet.add(params.marketplaceId as number);
-    }
-  });
-
-  // Fetch metadata for referenced marketplaces
-  const marketplaceById = new Map<number, MarketplaceRow>();
-  if (marketplaceIdSet.size > 0) {
-    const { data: mpData, error: mpError } = await supabase
-      .from("marketplaces")
-      .select("*")
-      .in("id", Array.from(marketplaceIdSet));
-
-    if (mpError) throw new Error(mpError.message);
-
-    (mpData ?? []).forEach((row) =>
-      marketplaceById.set(row.id, row as MarketplaceRow)
-    );
-  }
-
-  // Helper maps for icons & colors derived from marketplace name (lowercased)
-  const iconMap: Record<string, React.ReactNode> = {
-    polymarket: <Icons.poly />,
-    limitless: <Icons.limitless />,
-    kalshi: <Icons.kalshi />,
-    "slaughterhouse predictions": <Icons.slaughterhousePredictions />,
-    "terminal degeneracy labs": <Icons.terminalDegeneracyLabs />,
-    "degen execution chamber": <Icons.degenExecutionChamber />,
-    "nihilistic prophet syndicate": <Icons.nihilisticProphetSyndicate />,
-  };
-
-  const colorMap: Record<string, string> = {
-    polymarket: "bg-purple-600",
-    limitless: "bg-emerald-600",
-    kalshi: "bg-indigo-600",
-    "slaughterhouse predictions": "bg-rose-700",
-    "terminal degeneracy labs": "bg-amber-500",
-    "degen execution chamber": "bg-fuchsia-600",
-    "nihilistic prophet syndicate": "bg-teal-600",
-  };
-
-  // Fallback platform map based on price_lookup_method when marketplace metadata missing
-  const methodFallbackMap: Record<string, Platform> = {
-    "polymarket-orderbook": {
-      name: "Polymarket",
-      icon: iconMap["polymarket"],
-      color: colorMap["polymarket"],
+  // All the data we need is in `markets`.
+  // We can derive `externalMarkets`, and `marketplaceById` from it
+  // without any more network requests.
+  const externalMarkets = markets.flatMap((m) => m.external_markets);
+  const marketplaceById = marketplacesData.reduce(
+    (acc, mp) => {
+      acc[mp.id] = mp;
+      return acc;
     },
-    "limitless-orderbook": {
-      name: "Limitless",
-      icon: iconMap["limitless"],
-      color: colorMap["limitless"],
-    },
-    "canibeton-lmsr": {
-      name: "CanIBetOn",
-      icon: iconMap["kalshi"],
-      color: colorMap["kalshi"],
-    },
-  };
-
-  // Map marketplace names to their respective price-adapter clients
-  const priceClientMap = {
-    "Slaughterhouse Predictions": slaughterhouseClient,
-    "Terminal Degeneracy Labs": terminalDegenClient,
-    "Degen Execution Chamber": degenExecutionChamberClient,
-    "Nihilistic Prophet Syndicate": nihilisticProphetSyndicateClient,
-  } as const;
-
-  type SupportedMarketplaceName = keyof typeof priceClientMap;
+    {} as Record<number, MarketplaceRow>
+  );
 
   // --- Fetch live prices for external markets in parallel ---
   const pricePromises = externalMarkets.map(async (ext) => {
@@ -218,12 +149,14 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
       return [ext.id, null] as const;
     }
 
-    const mpRow = marketplaceById.get(params.marketplaceId);
+    const mpRow = marketplaceById[params.marketplaceId];
     if (!mpRow) {
       return [ext.id, null] as const;
     }
 
-    const client = priceClientMap[mpRow.name as SupportedMarketplaceName];
+    const { client } =
+      marketplaceConfig[mpRow.name.toLowerCase() as SupportedMarketplaceName];
+
     if (!client) {
       return [ext.id, null] as const; // Unsupported marketplace – skip
     }
@@ -287,10 +220,10 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
 
   const volumePromises: Promise<VolumeResult>[] = externalMarkets.map(
     async (ext) => {
-      const params = ext.price_lookup_params as
-        | { marketplaceId?: number | null; marketId?: number | null }
-        | null
-        | undefined;
+      const params = ext.price_lookup_params as {
+        marketplaceId: number;
+        marketId: number;
+      };
 
       // Validate presence of pool id
       if (
@@ -322,41 +255,44 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
   // Debug logs can be re-enabled during development if needed
 
   const groupedMarkets: GroupedMarket[] = markets.map((marketRow) => {
-    const relatedExternal = externalMarkets.filter(
-      (ext) => ext.parent_market === marketRow.id
-    );
+    const relatedExternal = externalMarkets.filter((ext) => {
+      return ext.parent_market === marketRow.id;
+    });
 
     // Build Market[] list with each external market entry
-    const marketEntries: Market[] = [];
+    const marketEntries: MarketCardMarket[] = [];
 
     relatedExternal.forEach((ext) => {
       let platform: Platform | undefined;
 
       // Determine platform via marketplace metadata, else fallback
-      const params = ext.price_lookup_params as
-        | { marketplaceId?: number | null }
-        | null
-        | undefined;
+      const params = ext.price_lookup_params as {
+        marketplaceId?: number;
+        marketId?: number;
+      };
+
       if (
         params &&
         typeof params === "object" &&
         params.marketplaceId != null
       ) {
-        const mpRow = marketplaceById.get(params.marketplaceId);
+        const mpRow = marketplaceById[params.marketplaceId];
         if (mpRow) {
           const key = mpRow.name.toLowerCase();
-          platform = {
-            name: mpRow.name,
-            icon: iconMap[key] ?? <Icons.logo />,
-            color: colorMap[key] ?? "bg-gray-500",
-          };
+          const config = marketplaceConfig[key as SupportedMarketplaceName];
+          if (config) {
+            platform = {
+              name: mpRow.name,
+              icon: config.icon ?? <Icons.logo />,
+              color: config.color ?? "bg-gray-500",
+            };
+          }
         }
       }
 
       if (!platform) {
-        platform =
-          methodFallbackMap[ext.price_lookup_method ?? ""] ??
-          aggregatorPlatform;
+        throw new Error("Get fucked");
+        // platform = aggregatorPlatform;
       }
 
       // Determine probability using fetched prices if available
@@ -375,6 +311,7 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
         percentage: yesPercentage,
         volume: formatUsd(volumeNumeric),
         marketplaceId: params?.marketplaceId ?? 0,
+        theActualExternalMarketMarketId: params?.marketId ?? 0,
       });
     });
 
@@ -403,7 +340,7 @@ async function fetchMarkets(): Promise<GroupedMarket[]> {
         }, 0)
       ),
       category: "General", // TODO(fake): replace with real category once available
-      markets: marketEntries,
+      externalMarkets: marketEntries,
     } satisfies GroupedMarket;
   });
 

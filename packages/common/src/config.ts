@@ -1,6 +1,7 @@
 import type { MarketplaceConfig } from "./types";
 
-export const polybetsContractAddress = "0xd474F5ec5e1E7B14E0639F388A42637129D068Be";
+export const polybetsContractAddress =
+  "0xd474F5ec5e1E7B14E0639F388A42637129D068Be";
 
 export const marketplaceConfigs: MarketplaceConfig[] = [
   {
@@ -14,7 +15,9 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
       "~/.config/solana/canibeton-cannes.json",
     authorityKeypair:
       process.env.MIGRATE_KEYPAIR ?? "~/.config/solana/canibeton.json",
-    rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
+    rpcUrl:
+      process.env.SOLANA_RPC_URL ||
+      "https://devnet.helius-rpc.com/?api-key=6672305d-3add-4543-9713-6a0aa8d43af0",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||
       "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
@@ -34,7 +37,9 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
     keypair:
       process.env.VARIANT2_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
     authorityKeypair: "~/.config/solana/canibeton.json",
-    rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
+    rpcUrl:
+      process.env.SOLANA_RPC_URL ||
+      "https://devnet.helius-rpc.com/?api-key=6672305d-3add-4543-9713-6a0aa8d43af0",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||
       "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
@@ -54,7 +59,9 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
     keypair:
       process.env.VARIANT3_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
     authorityKeypair: "~/.config/solana/canibeton.json",
-    rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
+    rpcUrl:
+      process.env.SOLANA_RPC_URL ||
+      "https://devnet.helius-rpc.com/?api-key=6672305d-3add-4543-9713-6a0aa8d43af0",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||
       "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
@@ -74,7 +81,9 @@ export const marketplaceConfigs: MarketplaceConfig[] = [
     keypair:
       process.env.VARIANT4_KEYPAIR || "~/.config/solana/canibeton-cannes.json",
     authorityKeypair: "~/.config/solana/canibeton.json",
-    rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
+    rpcUrl:
+      process.env.SOLANA_RPC_URL ||
+      "https://devnet.helius-rpc.com/?api-key=6672305d-3add-4543-9713-6a0aa8d43af0",
     usdcMintAddress:
       process.env.USDC_MINT_ADDRESS ||
       "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",

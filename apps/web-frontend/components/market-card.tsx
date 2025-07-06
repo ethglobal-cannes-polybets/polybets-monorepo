@@ -1,41 +1,51 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ChevronDown } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ChevronDown } from "lucide-react";
+import Link from "next/link";
+import type React from "react";
 
 // Create formatters once per module – avoids re-creating on every render
 const percentFormatter = new Intl.NumberFormat("en-US", {
   style: "percent",
   maximumFractionDigits: 2,
   minimumFractionDigits: 2,
-})
+});
 
 export interface Platform {
-  name: string
-  icon: React.ReactNode
-  color: string
+  name: string;
+  icon: React.ReactNode;
+  color: string;
 }
 
-export interface Market {
-  platform: Platform
-  title: string
-  percentage: number
-  volume: string
-  marketplaceId: number
+export interface MarketCardMarket {
+  platform: Platform;
+  title: string;
+  percentage: number;
+  volume: string;
+  theActualExternalMarketMarketId: number;
+  marketplaceId: number;
 }
 
 interface MarketCardProps {
-  groupedTitle: string
-  icon?: React.ReactNode
-  aggregatedPercentage: number
-  totalVolume: string
-  markets: Market[]
-  onBuyYes?: (markets: Market[]) => void
-  onBuyNo?: (markets: Market[]) => void
+  groupedTitle: string;
+  icon?: React.ReactNode;
+  aggregatedPercentage: number;
+  totalVolume: string;
+  externalMarkets: MarketCardMarket[];
+  onBuyYes?: (markets: MarketCardMarket[]) => void;
+  onBuyNo?: (markets: MarketCardMarket[]) => void;
 }
 
 export default function MarketCard({
@@ -43,7 +53,7 @@ export default function MarketCard({
   icon,
   aggregatedPercentage,
   totalVolume,
-  markets,
+  externalMarkets,
   onBuyYes,
   onBuyNo,
 }: MarketCardProps) {
@@ -55,21 +65,21 @@ export default function MarketCard({
       .replace(/[^\w-]+/g, "")
       .replace(/--+/g, "-")
       .replace(/^-+/, "")
-      .replace(/-+$/, "")
+      .replace(/-+$/, "");
 
-  const slug = slugify(groupedTitle)
+  const slug = slugify(groupedTitle);
 
   const handleBuyYes = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    onBuyYes?.(markets)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    onBuyYes?.(externalMarkets);
+  };
 
   const handleBuyNo = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    onBuyNo?.(markets)
-  }
+    e.preventDefault();
+    e.stopPropagation();
+    onBuyNo?.(externalMarkets);
+  };
 
   return (
     <Card className="flex h-full w-full flex-col border border-foreground/10 bg-background transition-shadow hover:border-foreground/30 hover:shadow-lg">
@@ -77,7 +87,11 @@ export default function MarketCard({
         <CardHeader className="flex-shrink-0 p-4 pb-2 hover:bg-accent/50 transition-colors">
           <div className="flex items-start justify-between">
             <div className="flex min-w-0 flex-1 items-start gap-3">
-              {icon && <div className="flex-shrink-0 text-muted-foreground">{icon}</div>}
+              {icon && (
+                <div className="flex-shrink-0 text-muted-foreground">
+                  {icon}
+                </div>
+              )}
               <h3 className="line-clamp-2 text-sm font-medium leading-tight text-foreground font-sans">
                 {groupedTitle}
               </h3>
@@ -86,7 +100,9 @@ export default function MarketCard({
               <div className="text-2xl font-bold text-primary font-heading">
                 {percentFormatter.format(aggregatedPercentage / 100)}
               </div>
-              <div className="text-xs uppercase text-muted-foreground">chance</div>
+              <div className="text-xs uppercase text-muted-foreground">
+                chance
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -112,12 +128,12 @@ export default function MarketCard({
       <CardFooter className="flex-shrink-0 p-4 pt-2">
         <div className="flex w-full items-center justify-between text-xs text-muted-foreground">
           <span className="uppercase">{totalVolume} Vol.</span>
-          {markets.length > 1 ? (
+          {externalMarkets.length > 1 ? (
             <Popover>
               <PopoverTrigger asChild>
                 <button className="flex items-center gap-1 text-muted-foreground hover:bg-accent rounded p-1 -mr-1">
                   <div className="flex -space-x-2">
-                    {markets.map((market, index) => (
+                    {externalMarkets.map((market, index) => (
                       <div
                         key={index}
                         className={`flex h-5 w-5 items-center justify-center rounded-full text-xs text-white ${market.platform.color} ring-2 ring-background`}
@@ -129,13 +145,19 @@ export default function MarketCard({
                   <ChevronDown className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-80 border-foreground/20 bg-background">
+              <PopoverContent
+                align="end"
+                className="w-80 border-foreground/20 bg-background"
+              >
                 <div className="space-y-3">
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Related Markets
                   </h4>
-                  {markets.map((market, index) => (
-                    <div key={index} className="flex items-center justify-between gap-4 text-sm">
+                  {externalMarkets.map((market, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between gap-4 text-sm"
+                    >
                       <div className="flex min-w-0 flex-1 items-center gap-2">
                         <div
                           className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs text-white ${market.platform.color}`}
@@ -143,17 +165,24 @@ export default function MarketCard({
                           {market.platform.icon}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-foreground" title={market.title}>
+                          <p
+                            className="truncate text-foreground"
+                            title={market.title}
+                          >
                             {market.title}
                           </p>
-                          <p className="text-xs text-muted-foreground">{market.platform.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {market.platform.name}
+                          </p>
                         </div>
                       </div>
                       <div className="w-16 flex-shrink-0 text-right">
                         <p className="font-bold text-primary font-heading">
                           {percentFormatter.format(market.percentage / 100)}
                         </p>
-                        <p className="text-xs text-muted-foreground">{market.volume}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {market.volume}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -162,7 +191,7 @@ export default function MarketCard({
             </Popover>
           ) : (
             <div className="flex gap-1">
-              {markets.map((market, index) => (
+              {externalMarkets.map((market, index) => (
                 <div
                   key={index}
                   className={`flex h-5 w-5 items-center justify-center rounded-full text-xs text-white ${market.platform.color}`}
@@ -175,5 +204,5 @@ export default function MarketCard({
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

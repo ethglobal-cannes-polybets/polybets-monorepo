@@ -2,7 +2,7 @@ import { polyBetAbi } from "@/lib/abi/polyBet";
 import { wagmiAdapter } from "@/lib/wagmi";
 import { useMutation } from "@tanstack/react-query";
 import { polybetsContractAddress } from "polybets-common/src/config";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { toast } from "sonner";
 import { erc20Abi, Hex, pad, parseUnits } from "viem";
 import {
@@ -15,11 +15,11 @@ import {
   waitForTransactionReceipt,
   writeContract as writeContractAction,
 } from "wagmi/actions";
-import React from "react";
 
-export interface Market {
+export interface SidebarMarket {
   id: number;
   marketplaceId: string;
+  theActualExternalMarketMarketId: number;
   platform: string;
   title: string;
   yesPrice: number;
@@ -32,9 +32,8 @@ export interface PlaceBetParams {
   amount: number;
   outcomeIndex: 0 | 1;
   strategy: "maximize-shares" | "maximize-privacy";
-  markets: Market[];
-  marketplaceId: string;
-  marketId: string;
+  markets: SidebarMarket[];
+  parentMarketId: number;
   autoArbitrage: boolean;
 }
 
@@ -118,7 +117,9 @@ export function usePlaceBet({ onError, onSuccess }: UsePlaceBetOptions = {}) {
       console.error("Transaction Failed", txError);
       const errorMessage = txError.message || "Transaction failed";
       toast.error("Transaction Failed", {
-        description: errorMessage.includes("reverted") ? "Transaction was reverted by the contract" : errorMessage,
+        description: errorMessage.includes("reverted")
+          ? "Transaction was reverted by the contract"
+          : errorMessage,
       });
       onError?.(new Error(errorMessage));
     }
@@ -204,7 +205,8 @@ export function usePlaceBet({ onError, onSuccess }: UsePlaceBetOptions = {}) {
   // Derive granular loading states
   const isApproving = isActuallyApproving;
   const isSigning = isWaitingForSignature;
-  const isPlacingBet = isApproving || isSigning || isWritePending || isTxConfirming;
+  const isPlacingBet =
+    isApproving || isSigning || isWritePending || isTxConfirming;
 
   // Helper to encode number/string to bytes32 (left-padded)
   const toBytes32 = (value: number | bigint | string): Hex => {
@@ -234,7 +236,14 @@ export function usePlaceBet({ onError, onSuccess }: UsePlaceBetOptions = {}) {
   };
 
   const placeBet = async (betData: PlaceBetParams) => {
-    const { amount, strategy, markets, outcomeIndex } = betData;
+    const {
+      amount,
+      strategy,
+      markets,
+      outcomeIndex,
+      parentMarketId,
+      autoArbitrage,
+    } = betData;
 
     if (!amount || markets.length === 0) {
       const error = new Error(
@@ -256,7 +265,10 @@ export function usePlaceBet({ onError, onSuccess }: UsePlaceBetOptions = {}) {
       const marketplaceIds = markets.map((m) =>
         toBytes32(marketplaceIdToBigInt(m.marketplaceId))
       );
-      const marketIds = markets.map((m) => toBytes32(BigInt(m.id)));
+      //RIGHT HERE
+      const marketIds = markets.map((m) =>
+        toBytes32(BigInt(m.theActualExternalMarketMarketId))
+      );
 
       // Ensure allowance – will approve if needed
       await approveMutation.mutateAsync(totalCollateralAmount);
@@ -280,6 +292,8 @@ export function usePlaceBet({ onError, onSuccess }: UsePlaceBetOptions = {}) {
           BigInt(outcomeIndex),
           marketplaceIds,
           marketIds,
+          autoArbitrage,
+          parentMarketId,
         ],
       });
     } catch (error) {

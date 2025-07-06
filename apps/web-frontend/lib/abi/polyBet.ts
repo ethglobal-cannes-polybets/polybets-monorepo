@@ -11,6 +11,11 @@ export const polyBetAbi = [
   },
   {
     inputs: [],
+    name: "RoflOriginNotAuthorizedForApp",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "SiweAuth_AddressMismatch",
     type: "error",
   },
@@ -42,6 +47,11 @@ export const polyBetAbi = [
   {
     inputs: [],
     name: "SiweParser_InvalidNonce",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "SubcallError",
     type: "error",
   },
   {
@@ -79,6 +89,19 @@ export const polyBetAbi = [
       },
     ],
     name: "BetSlipCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "betId",
+        type: "uint256",
+      },
+    ],
+    name: "BetSlipSellingStateUpdate",
     type: "event",
   },
   {
@@ -159,6 +182,16 @@ export const polyBetAbi = [
         type: "uint256",
       },
       {
+        internalType: "uint256",
+        name: "parentId",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "instantArbitrage",
+        type: "bool",
+      },
+      {
         internalType: "enum PolyBet.BetSlipStatus",
         name: "status",
         type: "uint8",
@@ -216,6 +249,16 @@ export const polyBetAbi = [
             internalType: "uint256",
             name: "outcomeIndex",
             type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "parentId",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "instantArbitrage",
+            type: "bool",
           },
           {
             internalType: "enum PolyBet.BetSlipStatus",
@@ -487,29 +530,14 @@ export const polyBetAbi = [
   {
     inputs: [
       {
-        internalType: "enum PolyBet.BetSlipStrategy",
-        name: "",
-        type: "uint8",
-      },
-      {
         internalType: "uint256",
-        name: "",
+        name: "betSlipId",
         type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
       },
     ],
     name: "initiateSellProxiedBets",
     outputs: [],
-    stateMutability: "view",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -649,6 +677,16 @@ export const polyBetAbi = [
         internalType: "bytes32[]",
         name: "marketIds",
         type: "bytes32[]",
+      },
+      {
+        internalType: "bool",
+        name: "instantArbitrage",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "parentId",
+        type: "uint256",
       },
     ],
     name: "placeBet",
@@ -846,24 +884,24 @@ export const polyBetAbi = [
   {
     inputs: [
       {
+        internalType: "bytes32",
+        name: "proxiedBetId",
+        type: "bytes32",
+      },
+      {
         internalType: "uint256",
-        name: "",
+        name: "sharesSold",
         type: "uint256",
       },
       {
         internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "",
+        name: "sharesSoldCollateralValue",
         type: "uint256",
       },
     ],
     name: "recordProxiedBetSold",
     outputs: [],
-    stateMutability: "view",
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -871,6 +909,19 @@ export const polyBetAbi = [
     name: "renounceOwnership",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "roflAppId",
+    outputs: [
+      {
+        internalType: "bytes21",
+        name: "",
+        type: "bytes21",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -882,6 +933,19 @@ export const polyBetAbi = [
       },
     ],
     name: "setCollateralToken",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes21",
+        name: "appId",
+        type: "bytes21",
+      },
+    ],
+    name: "setRoflAppId",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
