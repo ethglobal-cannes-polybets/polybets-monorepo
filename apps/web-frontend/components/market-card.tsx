@@ -13,7 +13,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
-import Link from "next/link";
 import type React from "react";
 
 // Create formatters once per module – avoids re-creating on every render
@@ -57,18 +56,6 @@ export default function MarketCard({
   onBuyYes,
   onBuyNo,
 }: MarketCardProps) {
-  const slugify = (text: string) =>
-    text
-      .toString()
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]+/g, "")
-      .replace(/--+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
-
-  const slug = slugify(groupedTitle);
-
   const handleBuyYes = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -82,31 +69,27 @@ export default function MarketCard({
   };
 
   return (
-    <Card className="flex h-full w-full flex-col border border-foreground/10 bg-background transition-shadow hover:border-foreground/30 hover:shadow-lg">
-      <Link href={`/market/${slug}`} className="block">
-        <CardHeader className="flex-shrink-0 p-4 pb-2 hover:bg-accent/50 transition-colors">
-          <div className="flex items-start justify-between">
-            <div className="flex min-w-0 flex-1 items-start gap-3">
-              {icon && (
-                <div className="flex-shrink-0 text-muted-foreground">
-                  {icon}
-                </div>
-              )}
-              <h3 className="line-clamp-2 text-sm font-medium leading-tight text-foreground font-sans">
-                {groupedTitle}
-              </h3>
+    <Card className="flex h-full w-full flex-col border border-foreground/10 bg-background transition-shadow ">
+      <CardHeader className="flex-shrink-0 p-4 pb-2 hover:bg-accent/50 transition-colors">
+        <div className="flex items-start justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-3">
+            {icon && (
+              <div className="flex-shrink-0 text-muted-foreground">{icon}</div>
+            )}
+            <h3 className="line-clamp-2 text-sm font-medium leading-tight text-foreground font-sans">
+              {groupedTitle}
+            </h3>
+          </div>
+          <div className="ml-4 flex-shrink-0 text-right">
+            <div className="text-2xl font-bold text-primary font-heading">
+              {percentFormatter.format(aggregatedPercentage / 100)}
             </div>
-            <div className="ml-4 flex-shrink-0 text-right">
-              <div className="text-2xl font-bold text-primary font-heading">
-                {percentFormatter.format(aggregatedPercentage / 100)}
-              </div>
-              <div className="text-xs uppercase text-muted-foreground">
-                chance
-              </div>
+            <div className="text-xs uppercase text-muted-foreground">
+              chance
             </div>
           </div>
-        </CardHeader>
-      </Link>
+        </div>
+      </CardHeader>
       <CardContent className="flex flex-1 items-end p-4 py-2">
         <div className="flex w-full gap-2">
           <Button

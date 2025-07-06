@@ -1,0 +1,468 @@
+# PolyBets Knowledge Graph - Advanced GraphQL Queries
+# Space ID: 75c47467-a75b-4408-9c9e-d2b46b970931
+
+# 1. Complete Space Overview with Statistics
+query PolybetsSpaceOverview {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    name
+    personalAddress
+    spaceAddress
+    createdAtBlock
+    entitiesCount
+    relationsCount
+    propertiesCount
+    typesCount
+    
+    # Recent entities
+    recentEntities: entities(first: 5, orderBy: createdAtBlock, orderDirection: desc) {
+      id
+      name
+      createdAtBlock
+    }
+  }
+}
+
+# 2. All Entities with Complete Information
+query PolybetsAllEntities {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    entities(first: 100) {
+      id
+      name
+      description
+      createdAtBlock
+      updatedAtBlock
+      values {
+        property {
+          id
+          name
+        }
+        value
+      }
+      types {
+        id
+        name
+      }
+      relationsFrom {
+        id
+        property {
+          name
+        }
+        toEntity {
+          id
+          name
+        }
+      }
+      relationsTo {
+        id
+        property {
+          name
+        }
+        fromEntity {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+# 3. Entities Categorized by Type
+query PolybetsEntitiesByCategory {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    name
+    
+    # Core prediction markets
+    coreMarkets: entities(
+      where: { 
+        name_contains: "Market"
+        name_not_contains: "on"
+      }
+      orderBy: name
+    ) {
+      id
+      name
+      description
+      createdAtBlock
+    }
+    
+    # Marketplace platforms
+    marketplaces: entities(
+      where: {
+        OR: [
+          { name_contains: "PolyMarket" }
+          { name_contains: "Slaughterhouse" }
+          { name_contains: "Terminal" }
+          { name_contains: "Degen" }
+          { name_contains: "Nihilistic" }
+        ]
+      }
+      orderBy: name
+    ) {
+      id
+      name
+      description
+    }
+    
+    # External market instances
+    externalMarkets: entities(
+      where: { name_contains: "on" }
+      orderBy: name
+    ) {
+      id
+      name
+      description
+    }
+    
+    # Summary entities
+    summaries: entities(where: { name_contains: "Summary" }) {
+      id
+      name
+      description
+    }
+  }
+}
+
+# 4. Search Entities by Keyword (with variables)
+query SearchPolybetsEntities($searchTerm: String!) {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    entities(
+      first: 20
+      where: {
+        OR: [
+          { name_contains: $searchTerm }
+          { description_contains: $searchTerm }
+        ]
+      }
+    ) {
+      id
+      name
+      description
+      createdAtBlock
+      relationsFrom {
+        property {
+          name
+        }
+        toEntity {
+          name
+        }
+      }
+      relationsTo {
+        property {
+          name
+        }
+        fromEntity {
+          name
+        }
+      }
+    }
+  }
+}
+
+# Variables for the above query:
+# {
+#   "searchTerm": "Trump"
+# }
+
+# 5. Trump-related Entities with Relationships
+query TrumpRelatedEntities {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    trumpEntities: entities(
+      where: { 
+        OR: [
+          { name_contains: "Trump" }
+          { description_contains: "Trump" }
+          { description_contains: "Nobel" }
+        ]
+      }
+    ) {
+      id
+      name
+      description
+      
+      # Related entities (outgoing)
+      relatedTo: relationsFrom {
+        property {
+          name
+        }
+        toEntity {
+          id
+          name
+          description
+        }
+      }
+      
+      # Related entities (incoming)
+      relatedFrom: relationsTo {
+        property {
+          name
+        }
+        fromEntity {
+          id
+          name
+          description
+        }
+      }
+    }
+  }
+}
+
+# 6. Crypto-related Markets
+query CryptoMarkets {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    cryptoEntities: entities(
+      where: {
+        OR: [
+          { name_contains: "Ethereum" }
+          { name_contains: "Bitcoin" }
+          { name_contains: "ETH" }
+          { name_contains: "BTC" }
+          { description_contains: "crypto" }
+          { description_contains: "cryptocurrency" }
+        ]
+      }
+    ) {
+      id
+      name
+      description
+      createdAtBlock
+    }
+  }
+}
+
+# 7. Solana Marketplace Analysis
+query SolanaMarketplaces {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    solanaMarketplaces: entities(
+      where: {
+        AND: [
+          {
+            OR: [
+              { name_contains: "Slaughterhouse" }
+              { name_contains: "Terminal" }
+              { name_contains: "Degen" }
+              { name_contains: "Nihilistic" }
+            ]
+          }
+          { description_contains: "Solana" }
+        ]
+      }
+    ) {
+      id
+      name
+      description
+      
+      # Markets hosted on these platforms
+      hostedMarkets: relationsTo(where: { property: { name_contains: "hosted" } }) {
+        fromEntity {
+          id
+          name
+          description
+        }
+      }
+    }
+  }
+}
+
+# 8. Entity Relationships Network
+query PolybetsRelationshipNetwork {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    entities(first: 50) {
+      id
+      name
+      
+      # Outgoing relationships
+      outgoing: relationsFrom {
+        id
+        property {
+          name
+        }
+        toEntity {
+          id
+          name
+        }
+      }
+      
+      # Incoming relationships
+      incoming: relationsTo {
+        id
+        property {
+          name
+        }
+        fromEntity {
+          id
+          name
+        }
+      }
+    }
+  }
+}
+
+# 9. Analytics: Entity Count by Pattern
+query PolybetsAnalytics {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    name
+    totalEntities: entitiesCount
+    totalRelations: relationsCount
+    
+    # Count different entity types
+    markets: entities(where: { name_contains: "Market", name_not_contains: "on" }) {
+      id
+    }
+    
+    marketplaces: entities(where: { 
+      OR: [
+        { name_contains: "PolyMarket" }
+        { name_contains: "Predictions" }
+        { name_contains: "Labs" }
+        { name_contains: "Chamber" }
+        { name_contains: "Syndicate" }
+      ]
+    }) {
+      id
+    }
+    
+    externalMarkets: entities(where: { name_contains: "on" }) {
+      id
+    }
+    
+    summaries: entities(where: { name_contains: "Summary" }) {
+      id
+    }
+  }
+}
+
+# 10. Entity Details by ID (replace with actual entity ID)
+query GetEntityDetails($entityId: ID!) {
+  entity(id: $entityId) {
+    id
+    name
+    description
+    createdAtBlock
+    updatedAtBlock
+    
+    values {
+      property {
+        id
+        name
+      }
+      value
+    }
+    
+    types {
+      id
+      name
+    }
+    
+    relationsFrom {
+      id
+      property {
+        name
+      }
+      toEntity {
+        id
+        name
+        description
+      }
+    }
+    
+    relationsTo {
+      id
+      property {
+        name
+      }
+      fromEntity {
+        id
+        name
+        description
+      }
+    }
+  }
+}
+
+# Variables for the above query:
+# {
+#   "entityId": "your-entity-id-here"
+# }
+
+# 11. Recent Activity
+query RecentPolybetsActivity {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    id
+    
+    # Most recently created entities
+    recentEntities: entities(
+      first: 10
+      orderBy: createdAtBlock
+      orderDirection: desc
+    ) {
+      id
+      name
+      description
+      createdAtBlock
+    }
+    
+    # Most recently updated entities
+    recentlyUpdated: entities(
+      first: 10
+      orderBy: updatedAtBlock
+      orderDirection: desc
+      where: { updatedAtBlock_not: null }
+    ) {
+      id
+      name
+      description
+      updatedAtBlock
+    }
+  }
+}
+
+# 12. Full Text Search Across All Fields
+query FullTextSearch($query: String!) {
+  space(id: "75c47467-a75b-4408-9c9e-d2b46b970931") {
+    entities(
+      first: 50
+      where: {
+        OR: [
+          { name_contains: $query }
+          { description_contains: $query }
+        ]
+      }
+    ) {
+      id
+      name
+      description
+      
+      # Show relevance context
+      values {
+        property {
+          name
+        }
+        value
+      }
+      
+      # Show connections
+      relationsFrom {
+        property {
+          name
+        }
+        toEntity {
+          name
+        }
+      }
+    }
+  }
+}
+
+# Variables for the above query:
+# {
+#   "query": "prediction"
+# }

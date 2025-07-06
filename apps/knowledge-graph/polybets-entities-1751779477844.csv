@@ -1,0 +1,7 @@
+id,name,description,createdAtBlock,entityType,relationsCount,valuesCount,typesCount
+"dcc2e2e7-1923-40a8-9273-2497bf7d7a9d","PolyBets Betting Markets Knowledge Graph","","57123","Core Market","","",""
+"mock-trump-nobel","Trump Nobel Prize Market","Prediction market: Will Donald Trump win Nobel Peace Prize in 2025?","57122","Core Market","","",""
+"mock-ethereum-10k","Ethereum $10k Market","Prediction market: Will Ethereum reach $10,000 by end of 2025?","57122","Core Market","","",""
+"mock-bitcoin-150k","Bitcoin $150k Market","Prediction market: Will Bitcoin reach $150,000 by end of 2025?","57122","Core Market","","",""
+"mock-polymarket","PolyMarket","Popular prediction market platform on Polygon","57122","Core Market","","",""
+"mock-slaughterhouse","Slaughterhouse","Solana-based prediction market platform","57122","Marketplace","","",""

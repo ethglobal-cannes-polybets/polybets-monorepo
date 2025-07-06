@@ -1,0 +1,147 @@
+{
+  "metadata": {
+    "spaceId": "75c47467-a75b-4408-9c9e-d2b46b970931",
+    "network": "TESTNET",
+    "exportedAt": "2025-07-06T05:24:37.714Z",
+    "apiUrl": "https://hypergraph-v2-testnet.up.railway.app"
+  },
+  "overview": {
+    "id": "75c47467-a75b-4408-9c9e-d2b46b970931",
+    "personalAddress": "0xBD6179bCeC114e3C2149D6A3f99222f11156FDe2",
+    "spaceAddress": "0xA2498F3E0668baf14146d41db36C637965376928",
+    "daoAddress": "0xA486e82488b1b354C60fdBdDDAcCff84b416e400",
+    "type": "PERSONAL"
+  },
+  "entities": [
+    {
+      "id": "dcc2e2e7-1923-40a8-9273-2497bf7d7a9d",
+      "createdAtBlock": "57123",
+      "updatedAtBlock": "57123",
+      "name": "PolyBets Betting Markets Knowledge Graph",
+      "description": null
+    },
+    {
+      "id": "mock-trump-nobel",
+      "name": "Trump Nobel Prize Market",
+      "description": "Prediction market: Will Donald Trump win Nobel Peace Prize in 2025?",
+      "createdAtBlock": "57122",
+      "spaces": [
+        "75c47467-a75b-4408-9c9e-d2b46b970931"
+      ]
+    },
+    {
+      "id": "mock-ethereum-10k",
+      "name": "Ethereum $10k Market",
+      "description": "Prediction market: Will Ethereum reach $10,000 by end of 2025?",
+      "createdAtBlock": "57122",
+      "spaces": [
+        "75c47467-a75b-4408-9c9e-d2b46b970931"
+      ]
+    },
+    {
+      "id": "mock-bitcoin-150k",
+      "name": "Bitcoin $150k Market",
+      "description": "Prediction market: Will Bitcoin reach $150,000 by end of 2025?",
+      "createdAtBlock": "57122",
+      "spaces": [
+        "75c47467-a75b-4408-9c9e-d2b46b970931"
+      ]
+    },
+    {
+      "id": "mock-polymarket",
+      "name": "PolyMarket",
+      "description": "Popular prediction market platform on Polygon",
+      "createdAtBlock": "57122",
+      "spaces": [
+        "75c47467-a75b-4408-9c9e-d2b46b970931"
+      ]
+    },
+    {
+      "id": "mock-slaughterhouse",
+      "name": "Slaughterhouse",
+      "description": "Solana-based prediction market platform",
+      "createdAtBlock": "57122",
+      "spaces": [
+        "75c47467-a75b-4408-9c9e-d2b46b970931"
+      ]
+    }
+  ],
+  "categorized": {
+    "coreMarkets": [
+      {
+        "id": "dcc2e2e7-1923-40a8-9273-2497bf7d7a9d",
+        "createdAtBlock": "57123",
+        "updatedAtBlock": "57123",
+        "name": "PolyBets Betting Markets Knowledge Graph",
+        "description": null
+      },
+      {
+        "id": "mock-trump-nobel",
+        "name": "Trump Nobel Prize Market",
+        "description": "Prediction market: Will Donald Trump win Nobel Peace Prize in 2025?",
+        "createdAtBlock": "57122",
+        "spaces": [
+          "75c47467-a75b-4408-9c9e-d2b46b970931"
+        ]
+      },
+      {
+        "id": "mock-ethereum-10k",
+        "name": "Ethereum $10k Market",
+        "description": "Prediction market: Will Ethereum reach $10,000 by end of 2025?",
+        "createdAtBlock": "57122",
+        "spaces": [
+          "75c47467-a75b-4408-9c9e-d2b46b970931"
+        ]
+      },
+      {
+        "id": "mock-bitcoin-150k",
+        "name": "Bitcoin $150k Market",
+        "description": "Prediction market: Will Bitcoin reach $150,000 by end of 2025?",
+        "createdAtBlock": "57122",
+        "spaces": [
+          "75c47467-a75b-4408-9c9e-d2b46b970931"
+        ]
+      },
+      {
+        "id": "mock-polymarket",
+        "name": "PolyMarket",
+        "description": "Popular prediction market platform on Polygon",
+        "createdAtBlock": "57122",
+        "spaces": [
+          "75c47467-a75b-4408-9c9e-d2b46b970931"
+        ]
+      }
+    ],
+    "marketplaces": [
+      {
+        "id": "mock-polymarket",
+        "name": "PolyMarket",
+        "description": "Popular prediction market platform on Polygon",
+        "createdAtBlock": "57122",
+        "spaces": [
+          "75c47467-a75b-4408-9c9e-d2b46b970931"
+        ]
+      },
+      {
+        "id": "mock-slaughterhouse",
+        "name": "Slaughterhouse",
+        "description": "Solana-based prediction market platform",
+        "createdAtBlock": "57122",
+        "spaces": [
+          "75c47467-a75b-4408-9c9e-d2b46b970931"
+        ]
+      }
+    ],
+    "externalMarkets": [],
+    "summary": []
+  },
+  "statistics": {
+    "totalEntities": 6,
+    "entitiesByCategory": {
+      "coreMarkets": 5,
+      "marketplaces": 2,
+      "externalMarkets": 0,
+      "summary": 0
+    }
+  }
+}
